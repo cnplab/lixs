@@ -3,6 +3,9 @@
 APP	:=
 APP	+= $(patsubst %.cc, %, $(shell find app/ -name "*.cc"))
 
+TST	:=
+TST	+= $(patsubst %.cc, %, $(shell find test/ -name "*.cc"))
+
 LIB	:=
 LIB	+= $(patsubst %.cc, %.o, $(shell find lib/ -name "*.cc"))
 
@@ -15,9 +18,12 @@ CXXFLAGS	+= -Iinc -Wall
 LDFLAGS		+= -lxenctrl
 
 
-all: $(APP)
+all: $(APP) $(TST)
 
 $(APP): % : %.o $(LIB)
+	$(CXX) $(LDFLAGS) $^ -o $@
+
+$(TST): % : %.o $(LIB)
 	$(CXX) $(LDFLAGS) $^ -o $@
 
 %.o: $(INC)

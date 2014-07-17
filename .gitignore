@@ -1,4 +1,5 @@
 app/lixs
+test/nix
 
 *.o
 
