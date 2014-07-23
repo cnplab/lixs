@@ -11,11 +11,12 @@ class unix_client : public client {
 public:
     static void create(iomux& io, int fd);
 
-
 private:
     unix_client(iomux& io, int fd);
     ~unix_client();
 
+    bool read(char*& buff, int& bytes);
+    bool write(char*& buff, int& bytes);
 
 private:
     int fd;
