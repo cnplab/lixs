@@ -11,25 +11,34 @@ namespace lixs {
 
 class unix_server : public server {
 public:
-    unix_server(iomux& io, std::string path, std::string ro_path);
+    unix_server(iomux& io, std::string rw_path, std::string ro_path);
     ~unix_server();
 
 
 private:
-    static void handle_server(iomux::ptr* ptr);
-    static void handle_server_ro(iomux::ptr* ptr);
+    class sviok : public iokfd {
+    public:
+        sviok (unix_server& _server)
+            : server(_server), fd(-1)
+        { };
 
-    void handle(int fd);
+        void handle(const iokfd::ioev& events) { server.handle(fd); };
 
+        unix_server& server;
+        int fd;
+    };
 
 private:
-    int sock_fd;
-    std::string sock_path;
-    iomux::ptr iomux_ptr;
+    void handle(int fd);
 
-    int sock_ro_fd;
-    std::string sock_ro_path;
-    iomux::ptr iomux_ro_ptr;
+private:
+    iomux& io;
+
+    std::string rw_path;
+    sviok rw_iok;
+
+    std::string ro_path;
+    sviok ro_iok;
 };
 
 } /* namespace lixs */

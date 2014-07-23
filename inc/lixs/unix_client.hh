@@ -13,12 +13,8 @@ public:
 
 
 private:
-    static void handle(iomux::ptr* ptr);
-
     unix_client(iomux& io, int fd);
     ~unix_client();
-
-    void handle(void);
 
 
 private:
@@ -27,8 +23,7 @@ private:
 
     char buff[1024];
 
-    iomux::ptr iomux_ptr;
-    iomux::events iomux_events;
+    iokfd::ioev events;
 };
 
 } /* namespace lixs */

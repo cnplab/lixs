@@ -7,16 +7,6 @@
 namespace lixs {
 
 class server {
-public:
-    server(iomux& io)
-        : io(io)
-    { };
-
-    ~server()
-    { };
-
-protected:
-    iomux& io;
 };
 
 } /* namespace lixs */

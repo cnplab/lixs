@@ -4,31 +4,34 @@
 
 namespace lixs {
 
-class iomux {
+class iok {
 public:
-    struct events {
+    virtual void run(void) = 0;
+};
+
+class iokfd {
+public:
+    struct ioev {
         bool read;
         bool write;
 
-        events(bool _read, bool _write)
+        ioev(bool _read, bool _write)
             : read(_read), write(_write)
         { };
     };
 
-    struct ptr {
-        void (*fn)(struct ptr*);
-        void* data;
+    virtual void handle(const ioev& events) = 0;
+};
 
-        ptr(void (*_fn)(struct ptr*), void* _data)
-            : fn(_fn), data(_data)
-        { };
-    };
+class iomux {
+public:
+    virtual void once(iok& k) = 0;
 
-    virtual int add(int fd, const struct events& ev, struct ptr* ptr) = 0;
-    virtual int set(int fd, const struct events& ev, struct ptr* ptr) = 0;
-    virtual int remove(int fd) = 0;
+    virtual void add(iokfd& k, int fd, const iokfd::ioev& ev) = 0;
+    virtual void set(iokfd& k, int fd, const iokfd::ioev& ev) = 0;
+    virtual void remove(int fd) = 0;
 
-    virtual int handle(void) = 0;
+    virtual void handle(void) = 0;
 };
 
 } /* namespace lixs */

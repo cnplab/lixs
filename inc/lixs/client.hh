@@ -6,16 +6,16 @@
 
 namespace lixs {
 
-class client {
+class client : public iok, public iokfd {
 public:
-    client(iomux& io)
-        : io(io)
-    { };
+    void run(void);
+    void handle(const iokfd::ioev& events);
 
-    ~client()
-    { };
 
 protected:
+    client(iomux& io);
+    ~client();
+
     iomux& io;
 };
 
