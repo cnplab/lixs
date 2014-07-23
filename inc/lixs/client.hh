@@ -44,8 +44,11 @@ private:
     void process(void);
 
     client::state state;
-    struct xsd_sockmsg msg;
-    char* buff;
+
+    char buff[sizeof(xsd_sockmsg) + XENSTORE_PAYLOAD_MAX];
+
+    struct xsd_sockmsg& msg;
+    char* const body;
 };
 
 } /* namespace lixs */

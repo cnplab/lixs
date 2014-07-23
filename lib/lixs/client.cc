@@ -6,7 +6,7 @@
 
 
 lixs::client::client(iomux& io)
-    : io(io), alive(true), state(p_init)
+    : io(io), alive(true), state(p_init), msg(*((xsd_sockmsg*)buff)), body(buff + sizeof(xsd_sockmsg))
 {
     io.once(*this);
 }
@@ -59,9 +59,7 @@ void lixs::client::process(void)
                 printf("{ type = %d, req_id = %d, tx_id = %d, len = %d }\n",
                         msg.type, msg.req_id, msg.tx_id, msg.len);
 
-                buff = new char[msg.len];
-
-                read_buff = buff;
+                read_buff = body;
                 read_bytes = msg.len;
 
                 state = rx_body;
@@ -75,22 +73,16 @@ void lixs::client::process(void)
                     break;
                 }
 
-                fprintf(stdout, "msg = %s ", buff);
+                fprintf(stdout, "msg = %s ", body);
                 //fprintf(stdout, "%s\n", buff + strlen(buff) + 1);
                 fprintf(stdout, "\n");
 
                 msg.len = 4;
 
-                write_buff = buff;
-                write_bytes = 0;
+                memcpy(body, "lixs", 5);
 
-                memcpy(write_buff, &msg, sizeof(msg));
-                write_bytes += sizeof(msg);
-                write_buff += sizeof(msg);
-
-                memcpy(write_buff, "lixs", 5);
-                write_bytes += 5;
                 write_buff = buff;
+                write_bytes = sizeof(msg) + 4;
 
                 state = tx_resp;
                 break;
@@ -102,8 +94,6 @@ void lixs::client::process(void)
                     done = true;
                     break;
                 }
-
-                delete[] buff;
 
                 state = rx_hdr;
                 break;
