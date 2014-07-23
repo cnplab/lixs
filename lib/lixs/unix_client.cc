@@ -11,7 +11,7 @@
 
 
 lixs::unix_client::unix_client(iomux& io, int fd)
-    : client(io), fd(fd), alive(true), events(false, false)
+    : client(io), fd(fd), events(false, false)
 {
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
     io.add(*this, fd, events);

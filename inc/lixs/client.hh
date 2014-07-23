@@ -17,13 +17,16 @@ public:
 
 protected:
     client(iomux& io);
-    ~client();
+    virtual ~client();
 
     virtual void process_events(const iokfd::ioev& events);
     virtual bool read(char*& buff, int& bytes) = 0;
     virtual bool write(char*& buff, int& bytes) = 0;
 
     iomux& io;
+
+    bool alive;
+
     char* read_buff;
     char* write_buff;
     int read_bytes;

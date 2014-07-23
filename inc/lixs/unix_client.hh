@@ -20,7 +20,6 @@ private:
 
 private:
     int fd;
-    bool alive;
 
     char buff[1024];
 

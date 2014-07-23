@@ -6,7 +6,7 @@
 
 
 lixs::client::client(iomux& io)
-    : io(io), state(p_init)
+    : io(io), alive(true), state(p_init)
 {
     io.once(*this);
 }
@@ -25,6 +25,9 @@ void lixs::client::handle(const ioev& events)
 {
     process_events(events);
     process();
+
+    if (!alive)
+        delete this;
 }
 
 void lixs::client::process_events(const ioev& events)
