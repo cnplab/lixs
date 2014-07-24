@@ -2,6 +2,7 @@
 #define __LIXS_CLIENT_HH__
 
 #include <lixs/iomux.hh>
+#include <lixs/store.hh>
 
 #include <stdint.h>
 
@@ -19,7 +20,7 @@ public:
 
 
 protected:
-    client(iomux& io);
+    client(iomux& io, store& st);
     virtual ~client();
 
     virtual void process_events(const iokfd::ioev& events);
@@ -48,8 +49,9 @@ private:
 
     client::state state;
 
-    char buff[sizeof(xsd_sockmsg) + XENSTORE_PAYLOAD_MAX];
+    store& st;
 
+    char buff[sizeof(xsd_sockmsg) + XENSTORE_PAYLOAD_MAX];
     struct xsd_sockmsg& msg;
     char* const body;
 };

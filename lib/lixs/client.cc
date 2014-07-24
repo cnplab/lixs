@@ -1,12 +1,14 @@
 #include <lixs/client.hh>
+#include <lixs/store.hh>
 
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
 
 
-lixs::client::client(iomux& io)
-    : io(io), alive(true), state(p_init), msg(*((xsd_sockmsg*)buff)), body(buff + sizeof(xsd_sockmsg))
+lixs::client::client(iomux& io, store& st)
+    : io(io), alive(true), state(p_init), st(st),
+    msg(*((xsd_sockmsg*)buff)), body(buff + sizeof(xsd_sockmsg))
 {
     io.once(*this);
 }

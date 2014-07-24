@@ -3,6 +3,7 @@
 
 #include <lixs/iomux.hh>
 #include <lixs/server.hh>
+#include <lixs/store.hh>
 
 #include <string>
 
@@ -11,7 +12,7 @@ namespace lixs {
 
 class unix_server : public server {
 public:
-    unix_server(iomux& io, std::string rw_path, std::string ro_path);
+    unix_server(iomux& io, store& st, std::string rw_path, std::string ro_path);
     ~unix_server();
 
 
@@ -33,6 +34,7 @@ private:
 
 private:
     iomux& io;
+    store& st;
 
     std::string rw_path;
     sviok rw_iok;

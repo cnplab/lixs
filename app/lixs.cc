@@ -1,4 +1,5 @@
 #include <lixs/epoll.hh>
+#include <lixs/map_store.hh>
 #include <lixs/unix_server.hh>
 #include <lixs/xen_server.hh>
 
@@ -23,7 +24,9 @@ int main(int argc, char** argv)
     signal(SIGINT, signal_handler);
 
     lixs::epoll epoll;
-    lixs::unix_server nix(epoll, "/run/lixssock", "/run/lixssock_ro");
+    lixs::map_store store;
+
+    lixs::unix_server nix(epoll, store, "/run/lixssock", "/run/lixssock_ro");
     lixs::xen_server xen(epoll);
 
     server_stoped = false;
