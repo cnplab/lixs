@@ -37,6 +37,10 @@ bool lixs::unix_client::read(char*& buff, int& bytes)
         return false;
     }
 
+    if (bytes == 0) {
+        return true;
+    }
+
     done = false;
 
     len = recv(fd, buff, bytes, 0);
@@ -80,6 +84,10 @@ bool lixs::unix_client::write(char*& buff, int& bytes)
 
     if (!alive) {
         return false;
+    }
+
+    if (bytes == 0) {
+        return true;
     }
 
     done = false;
