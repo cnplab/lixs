@@ -95,7 +95,7 @@ void lixs::client::process(void)
                     break;
                 }
 
-                state = rx_hdr;
+                state = p_init;
                 break;
         }
     }
