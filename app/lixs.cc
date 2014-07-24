@@ -1,5 +1,6 @@
 #include <lixs/epoll.hh>
 #include <lixs/unix_server.hh>
+#include <lixs/xen_server.hh>
 
 #include <csignal>
 #include <cstdio>
@@ -23,6 +24,7 @@ int main(int argc, char** argv)
 
     lixs::epoll epoll;
     lixs::unix_server nix(epoll, "/run/lixssock", "/run/lixssock_ro");
+    lixs::xen_server xen(epoll);
 
     server_stoped = false;
     while(!server_stoped) {
