@@ -58,9 +58,6 @@ void lixs::client::process(void)
                     break;
                 }
 
-                printf("{ type = %d, req_id = %d, tx_id = %d, len = %d }\n",
-                        msg.type, msg.req_id, msg.tx_id, msg.len);
-
                 read_buff = body;
                 read_bytes = msg.len;
 
@@ -75,16 +72,7 @@ void lixs::client::process(void)
                     break;
                 }
 
-                fprintf(stdout, "msg = %s ", body);
-                //fprintf(stdout, "%s\n", buff + strlen(buff) + 1);
-                fprintf(stdout, "\n");
-
-                msg.len = 4;
-
-                memcpy(body, "lixs", 5);
-
-                write_buff = buff;
-                write_bytes = sizeof(msg) + 4;
+                handle_msg();
 
                 state = tx_resp;
                 break;
@@ -105,14 +93,26 @@ void lixs::client::process(void)
 
 void lixs::client::handle_msg(void)
 {
+    body[msg.len] = '\0';
+
+    if (strlen(body) < (msg.len - 1)) {
+        printf("{ type = %2d, req_id = %d, tx_id = %d, len = %d, msg = \"%s %s\" }\n",
+                msg.type, msg.req_id, msg.tx_id, msg.len, body, body + strlen(body) + 1);
+    } else {
+        printf("{ type = %2d, req_id = %d, tx_id = %d, len = %d, msg = \"%s\" }\n",
+                msg.type, msg.req_id, msg.tx_id, msg.len, body);
+    }
+
     switch (msg.type) {
         case XS_DIRECTORY:
         break;
 
         case XS_READ:
+            op_read();
         break;
 
         case XS_WRITE:
+            op_write();
         break;
 
         case XS_MKDIR:
@@ -166,5 +166,33 @@ void lixs::client::handle_msg(void)
         default:
         break;
     }
+}
+
+void lixs::client::op_read(void)
+{
+    const char* res = st.read(body);
+
+    if (res) {
+        msg.len = strlen(res);
+        memcpy(body, res, msg.len + 1);
+        write_buff = buff;
+        write_bytes = sizeof(msg) + msg.len + 1;
+    } else {
+        msg.len = 0;
+        body[0] = '\0';
+        write_buff = buff;
+        write_bytes = sizeof(msg);
+    }
+}
+
+void lixs::client::op_write(void)
+{
+    st.write(body, body + strlen(body) + 1);
+
+    msg.len = 2;
+    memcpy(body, "OK", strlen("OK") + 1);
+
+    write_buff = buff;
+    write_bytes = sizeof(msg) + 2;
 }
 

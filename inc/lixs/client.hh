@@ -47,6 +47,8 @@ private:
 
     void process(void);
     void handle_msg(void);
+    void op_read(void);
+    void op_write(void);
 
     client::state state;
 
