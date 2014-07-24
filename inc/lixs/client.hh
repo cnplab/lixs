@@ -4,7 +4,10 @@
 #include <lixs/iomux.hh>
 
 #include <stdint.h>
+
+extern "C" {
 #include <xen/io/xs_wire.h>
+}
 
 
 namespace lixs {
