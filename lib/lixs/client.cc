@@ -38,9 +38,9 @@ void lixs::client::process_events(const ioev& events)
 void lixs::client::process(void)
 {
     bool ret;
-    bool done = false;
+    bool yield = false;
 
-    while (!done) {
+    while (!yield && alive) {
         switch(state) {
             case p_init:
                 read_buff = reinterpret_cast<char*>(&msg);
@@ -52,7 +52,7 @@ void lixs::client::process(void)
             case rx_hdr:
                 ret = read(read_buff, read_bytes);
                 if (ret == false) {
-                    done = true;
+                    yield = true;
                     break;
                 }
 
@@ -69,7 +69,7 @@ void lixs::client::process(void)
                 ret = read(read_buff, read_bytes);
 
                 if (ret == false) {
-                    done = true;
+                    yield = true;
                     break;
                 }
 
@@ -91,7 +91,7 @@ void lixs::client::process(void)
                 ret = write(write_buff, write_bytes);
 
                 if (ret == false) {
-                    done = true;
+                    yield = true;
                     break;
                 }
 
