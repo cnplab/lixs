@@ -46,6 +46,7 @@ private:
     };
 
     void process(void);
+    void handle_msg(void);
 
     client::state state;
 

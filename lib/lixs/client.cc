@@ -103,3 +103,68 @@ void lixs::client::process(void)
     }
 }
 
+void lixs::client::handle_msg(void)
+{
+    switch (msg.type) {
+        case XS_DIRECTORY:
+        break;
+
+        case XS_READ:
+        break;
+
+        case XS_WRITE:
+        break;
+
+        case XS_MKDIR:
+        break;
+
+        case XS_RM:
+        break;
+
+        case XS_GET_PERMS:
+        break;
+
+        case XS_SET_PERMS:
+        break;
+
+        case XS_DEBUG:
+        break;
+
+        case XS_WATCH:
+        break;
+
+        case XS_UNWATCH:
+        break;
+
+        case XS_TRANSACTION_START:
+        break;
+
+        case XS_TRANSACTION_END:
+        break;
+
+        case XS_INTRODUCE:
+        break;
+
+        case XS_IS_DOMAIN_INTRODUCED:
+        break;
+
+        case XS_RELEASE:
+        break;
+
+        case XS_GET_DOMAIN_PATH:
+        break;
+
+        case XS_RESUME:
+        break;
+
+        case XS_SET_TARGET:
+        break;
+
+        case XS_RESET_WATCHES:
+        break;
+
+        default:
+        break;
+    }
+}
+
