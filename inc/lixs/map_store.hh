@@ -16,6 +16,11 @@ public:
     void write(std::string key, std::string val);
     void del(std::string key);
 
+    void branch(int id);
+    bool merge(int id);
+    const char* read(int id, std::string key);
+    void write(int id, std::string key, std::string val);
+
 private:
     class record {
     public:

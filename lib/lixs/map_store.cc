@@ -29,3 +29,21 @@ void lixs::map_store::del(std::string key)
     data.erase(key);
 }
 
+void lixs::map_store::branch(int id)
+{
+}
+
+bool lixs::map_store::merge(int id)
+{
+    return false;
+}
+
+const char* lixs::map_store::read(int id, std::string key)
+{
+    return NULL;
+}
+
+void lixs::map_store::write(int id, std::string key, std::string val)
+{
+}
+
