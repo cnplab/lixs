@@ -174,9 +174,9 @@ void lixs::client::op_read(void)
 
     if (res) {
         msg.len = strlen(res);
-        memcpy(body, res, msg.len + 1);
+        memcpy(body, res, msg.len);
         write_buff = buff;
-        write_bytes = sizeof(msg) + msg.len + 1;
+        write_bytes = sizeof(msg) + msg.len;
     } else {
         msg.len = 0;
         body[0] = '\0';
