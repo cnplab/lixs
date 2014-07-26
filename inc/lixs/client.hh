@@ -50,6 +50,8 @@ private:
     void op_read(void);
     void op_write(void);
 
+    void ack(void);
+
     client::state state;
 
     store& st;

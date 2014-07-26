@@ -188,9 +188,13 @@ void lixs::client::op_read(void)
 void lixs::client::op_write(void)
 {
     st.write(body, body + strlen(body) + 1);
+    ack();
+}
 
+void lixs::client::ack(void)
+{
     msg.len = 2;
-    memcpy(body, "OK", strlen("OK") + 1);
+    memcpy(body, "OK", 2);
 
     write_buff = buff;
     write_bytes = sizeof(msg) + 2;
