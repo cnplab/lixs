@@ -20,6 +20,7 @@ lixs::unix_client::unix_client(iomux& io, store& st, int fd)
 
 lixs::unix_client::~unix_client()
 {
+    io.remove(fd);
     close(fd);
 }
 
