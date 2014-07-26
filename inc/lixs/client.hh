@@ -49,6 +49,7 @@ private:
     void handle_msg(void);
     void op_read(void);
     void op_write(void);
+    void op_mkdir(void);
 
     void ack(void);
 

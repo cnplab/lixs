@@ -116,6 +116,7 @@ void lixs::client::handle_msg(void)
         break;
 
         case XS_MKDIR:
+            op_mkdir();
         break;
 
         case XS_RM:
@@ -188,6 +189,15 @@ void lixs::client::op_read(void)
 void lixs::client::op_write(void)
 {
     st.write(body, body + strlen(body) + 1);
+    ack();
+}
+
+void lixs::client::op_mkdir(void)
+{
+    if (!st.read(body)) {
+        st.write(body, "");
+    }
+
     ack();
 }
 
