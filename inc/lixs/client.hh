@@ -50,6 +50,7 @@ private:
     void op_read(void);
     void op_write(void);
     void op_mkdir(void);
+    void op_rm(void);
 
     void ack(void);
 

@@ -120,6 +120,7 @@ void lixs::client::handle_msg(void)
         break;
 
         case XS_RM:
+            op_rm();
         break;
 
         case XS_GET_PERMS:
@@ -197,6 +198,13 @@ void lixs::client::op_mkdir(void)
     if (!st.read(body)) {
         st.write(body, "");
     }
+
+    ack();
+}
+
+void lixs::client::op_rm(void)
+{
+    st.del(body);
 
     ack();
 }
