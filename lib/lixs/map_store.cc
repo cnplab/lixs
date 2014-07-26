@@ -24,3 +24,8 @@ void lixs::map_store::write(std::string key, std::string val)
     data[key].write(val);
 }
 
+void lixs::map_store::del(std::string key)
+{
+    data.erase(key);
+}
+
