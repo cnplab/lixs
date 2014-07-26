@@ -28,8 +28,9 @@ void lixs::client::handle(const ioev& events)
     process_events(events);
     process();
 
-    if (!alive)
+    if (!alive) {
         delete this;
+    }
 }
 
 void lixs::client::process_events(const ioev& events)
