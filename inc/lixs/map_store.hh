@@ -50,7 +50,6 @@ private:
             w_time = get_time();
         }
 
-    private:
         std::string val;
         long int r_time;
         long int w_time;
