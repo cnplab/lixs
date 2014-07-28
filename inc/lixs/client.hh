@@ -5,6 +5,8 @@
 #include <lixs/store.hh>
 
 #include <stdint.h>
+/* Must include errno before xs_wire.h, otherwise xsd_errors doesn't get defined */
+#include <errno.h>
 
 extern "C" {
 #include <xen/io/xs_wire.h>
