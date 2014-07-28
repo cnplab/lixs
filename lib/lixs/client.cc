@@ -183,7 +183,7 @@ void lixs::client::op_read(void)
     if (res) {
         build_resp(res);
     } else {
-        build_resp("");
+        build_err(ENOENT);
     }
 }
 
