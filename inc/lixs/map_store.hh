@@ -22,6 +22,12 @@ public:
     void write(int id, std::string key, std::string val);
 
 private:
+    static long int get_time(void) {
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+        return (long int) tv.tv_sec * 1000 + tv.tv_usec / 1000;
+    }
+
     class record {
     public:
         record(void)
@@ -45,12 +51,6 @@ private:
         }
 
     private:
-        long int get_time(void) {
-            struct timeval tv;
-            gettimeofday(&tv, NULL);
-            return (long int) tv.tv_sec * 1000 + tv.tv_usec / 1000;
-        }
-
         std::string val;
         long int r_time;
         long int w_time;
