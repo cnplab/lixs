@@ -31,11 +31,11 @@ private:
     class record {
     public:
         record(void)
-            : val(""), r_time(get_time()), w_time(r_time)
+            : val(""), r_time(0), w_time(0)
         { };
 
         record(std::string val)
-            : val(val), r_time(get_time()), w_time(r_time)
+            : val(val), r_time(0), w_time(0)
         { };
 
         const char* read(void)
