@@ -54,7 +54,9 @@ private:
     void op_mkdir(void);
     void op_rm(void);
 
-    void ack(void);
+    void inline build_resp(const char* resp);
+    void inline build_err(int err);
+    void inline build_ack(void);
 
     client::state state;
 

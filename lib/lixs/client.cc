@@ -4,6 +4,11 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <errno.h>
+
+extern "C" {
+#include <xen/io/xs_wire.h>
+}
 
 
 lixs::client::client(iomux& io, store& st)
@@ -176,22 +181,17 @@ void lixs::client::op_read(void)
     const char* res = st.read(body);
 
     if (res) {
-        msg.len = strlen(res);
-        memcpy(body, res, msg.len);
-        write_buff = buff;
-        write_bytes = sizeof(msg) + msg.len;
+        build_resp(res);
     } else {
-        msg.len = 0;
-        body[0] = '\0';
-        write_buff = buff;
-        write_bytes = sizeof(msg);
+        build_resp("");
     }
 }
 
 void lixs::client::op_write(void)
 {
     st.write(body, body + strlen(body) + 1);
-    ack();
+
+    build_ack();
 }
 
 void lixs::client::op_mkdir(void)
@@ -200,17 +200,48 @@ void lixs::client::op_mkdir(void)
         st.write(body, "");
     }
 
-    ack();
+    build_ack();
 }
 
 void lixs::client::op_rm(void)
 {
     st.del(body);
 
-    ack();
+    build_ack();
 }
 
-void lixs::client::ack(void)
+void inline lixs::client::build_resp(const char* resp)
+{
+    msg.len = strlen(resp);
+    memcpy(body, resp, msg.len);
+
+    write_buff = buff;
+    write_bytes = sizeof(msg) + msg.len;
+}
+
+void inline lixs::client::build_err(int err)
+{
+    const char* resp;
+
+    /* FIXME: What if err is not in xsd_error */
+    resp = (char*) "EINVAL";
+
+    for (unsigned int i = 0; i < (sizeof(xsd_errors) / sizeof(xsd_errors[0])); i++) {
+        if (err == xsd_errors[i].errnum) {
+            resp = xsd_errors[i].errstring;
+            break;
+        }
+    }
+
+    msg.len = strlen(resp);
+    msg.type = XS_ERROR;
+    memcpy(body, resp, msg.len);
+
+    write_buff = buff;
+    write_bytes = sizeof(msg) + msg.len;
+}
+
+void inline lixs::client::build_ack(void)
 {
     msg.len = 2;
     memcpy(body, "OK", 2);
