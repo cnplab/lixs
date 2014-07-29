@@ -61,6 +61,8 @@ private:
     void op_set_perms(void);
 
     void inline build_resp(const char* resp);
+    void inline append_resp(const char* resp);
+    void inline append_sep(void);
     void inline build_err(int err);
     void inline build_ack(void);
 

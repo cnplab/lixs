@@ -304,6 +304,25 @@ void inline lixs::client::build_resp(const char* resp)
     write_bytes = sizeof(msg) + msg.len;
 }
 
+void inline lixs::client::append_resp(const char* resp)
+{
+    int len = strlen(resp);
+
+    memcpy(body + msg.len, resp, len);
+    msg.len += len;
+
+    write_buff = buff;
+    write_bytes = sizeof(msg) + msg.len;
+}
+
+void inline lixs::client::append_sep(void)
+{
+    body[msg.len++] = '\0';
+
+    write_buff = buff;
+    write_bytes = sizeof(msg) + msg.len;
+}
+
 void inline lixs::client::build_err(int err)
 {
     const char* resp;
