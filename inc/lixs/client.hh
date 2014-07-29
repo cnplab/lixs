@@ -56,6 +56,7 @@ private:
     void op_rm(void);
     void op_transaction_start(void);
     void op_transaction_end(void);
+    void op_get_domain_path(void);
 
     void inline build_resp(const char* resp);
     void inline build_err(int err);

@@ -162,6 +162,7 @@ void lixs::client::handle_msg(void)
         break;
 
         case XS_GET_DOMAIN_PATH:
+            op_get_domain_path();
         break;
 
         case XS_RESUME:
@@ -271,6 +272,15 @@ void lixs::client::op_transaction_end(void)
         st.abort(msg.tx_id);
         build_ack();
     }
+}
+
+void lixs::client::op_get_domain_path(void)
+{
+    char buff[32];
+
+    sprintf(buff, "/local/domain/%s", body);
+
+    build_resp(buff);
 }
 
 void inline lixs::client::build_resp(const char* resp)
