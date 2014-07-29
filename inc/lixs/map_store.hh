@@ -15,6 +15,7 @@ public:
     const char* read(std::string key);
     void write(std::string key, std::string val);
     void del(std::string key);
+    void ensure(std::string key);
 
     void branch(int id);
     bool merge(int id);

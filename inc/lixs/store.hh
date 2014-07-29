@@ -11,6 +11,7 @@ public:
     virtual const char* read(std::string key) = 0;
     virtual void write(std::string key, std::string val) = 0;
     virtual void del(std::string key) = 0;
+    virtual void ensure(std::string key) = 0;
 
     virtual void branch(int id) = 0;
     virtual bool merge(int id) = 0;

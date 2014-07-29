@@ -35,6 +35,17 @@ void lixs::map_store::del(std::string key)
     }
 }
 
+void lixs::map_store::ensure(std::string key)
+{
+    std::map<std::string, record>::iterator it;
+
+    it = data.find(key);
+
+    if (it == data.end()) {
+        data[key].write(std::string(""));
+    }
+}
+
 void lixs::map_store::branch(int id)
 {
     ltrans[id];
