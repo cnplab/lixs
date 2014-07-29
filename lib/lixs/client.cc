@@ -337,14 +337,20 @@ void inline lixs::client::build_ack(void)
 
 void inline lixs::client::print_msg(char* pre)
 {
+    unsigned int i;
+    char c;
+
     body[msg.len] = '\0';
 
-    if (msg.len > strlen(body)) {
-        printf("%s { type = %2d, req_id = %d, tx_id = %d, len = %d, msg = \"%s %s\" }\n",
-                pre, msg.type, msg.req_id, msg.tx_id, msg.len, body, body + strlen(body) + 1);
-    } else {
-        printf("%s { type = %2d, req_id = %d, tx_id = %d, len = %d, msg = \"%s\" }\n",
-                pre, msg.type, msg.req_id, msg.tx_id, msg.len, body);
+    printf("%s { type = %2d, req_id = %d, tx_id = %d, len = %d, msg = ",
+            pre, msg.type, msg.req_id, msg.tx_id, msg.len);
+
+    c = '"';
+    for (i = 0; i < msg.len; i += strlen(body + i) + 1) {
+        printf("%c%s", c, body + i);
+        c = ' ';
     }
+
+    printf("%s%s\" }\n", i == 0 ? "\"" : "", i > 0 && i == msg.len ? " " : "");
 }
 
