@@ -59,6 +59,7 @@ private:
     void op_get_domain_path(void);
     void op_get_perms(void);
     void op_set_perms(void);
+    void op_directory(void);
 
     void inline build_resp(const char* resp);
     void inline append_resp(const char* resp);

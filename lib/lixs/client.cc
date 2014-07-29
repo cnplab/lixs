@@ -111,6 +111,7 @@ void lixs::client::handle_msg(void)
 {
     switch (msg.type) {
         case XS_DIRECTORY:
+            op_directory();
         break;
 
         case XS_READ:
@@ -293,6 +294,21 @@ void lixs::client::op_get_perms(void)
 void lixs::client::op_set_perms(void)
 {
     build_ack();
+}
+
+void lixs::client::op_directory(void)
+{
+    int nresp;
+    const char* resp[1024];
+
+    nresp = st.get_childs(body, resp, 1024);
+
+    build_resp("");
+
+    for (int i = 0; i < nresp; i++) {
+        append_resp(resp[i]);
+        append_sep();
+    }
 }
 
 void inline lixs::client::build_resp(const char* resp)
