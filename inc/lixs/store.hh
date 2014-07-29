@@ -14,8 +14,10 @@ public:
 
     virtual void branch(int id) = 0;
     virtual bool merge(int id) = 0;
+    virtual void abort(int id) = 0;
     virtual const char* read(int id, std::string key) = 0;
     virtual void write(int id, std::string key, std::string val) = 0;
+    virtual void del(int id, std::string key) = 0;
 };
 
 } /* namespace lixs */

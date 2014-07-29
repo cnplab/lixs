@@ -18,8 +18,10 @@ public:
 
     void branch(int id);
     bool merge(int id);
+    void abort(int id);
     const char* read(int id, std::string key);
     void write(int id, std::string key, std::string val);
+    void del(int id, std::string key);
 
 private:
     static long int get_time(void) {
@@ -84,7 +86,18 @@ private:
         long int w_time;
     };
 
+    class transaction {
+    public:
+        transaction(void)
+            : time(get_time())
+        { };
+
+        long int time;
+        std::map<std::string, record> data;
+    };
+
     std::map<std::string, record> data;
+    std::map<int, transaction> ltrans;
 };
 
 } /* namespace lixs */
