@@ -197,6 +197,21 @@ void lixs::client::op_read(void)
 
 void lixs::client::op_write(void)
 {
+    unsigned int i;
+    unsigned int len = strlen(body);
+
+    i = 1;
+    do {
+        i += strcspn(body + i, "/");
+        if (i < len) {
+            body[i] = '\0';
+            st.ensure(body);
+            body[i] = '/';
+        }
+
+        i++;
+    } while(i < len);
+
     if (msg.tx_id) {
         st.write(msg.tx_id, body, body + strlen(body) + 1);
     } else {
