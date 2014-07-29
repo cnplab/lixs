@@ -25,9 +25,8 @@ public:
 
 private:
     static long int get_time(void) {
-        struct timeval tv;
-        gettimeofday(&tv, NULL);
-        return (long int) tv.tv_sec * 1000 + tv.tv_usec / 1000;
+        static long int curr_time = 1;
+        return curr_time++;
     }
 
     class record {
