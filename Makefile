@@ -15,7 +15,7 @@ INC	+= $(shell find inc/ -name "*.hh")
 
 CFLAGS		+= -Iinc -Wall
 CXXFLAGS	+= -Iinc -Wall
-LDFLAGS		+= -lxenctrl
+LDFLAGS		+= -lxenctrl -lxenstore
 
 
 all: $(APP) $(TST)
