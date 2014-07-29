@@ -53,10 +53,14 @@ private:
     void op_write(void);
     void op_mkdir(void);
     void op_rm(void);
+    void op_transaction_start(void);
+    void op_transaction_end(void);
 
     void inline build_resp(const char* resp);
     void inline build_err(int err);
     void inline build_ack(void);
+
+    static unsigned int trans_id;
 
     client::state state;
 

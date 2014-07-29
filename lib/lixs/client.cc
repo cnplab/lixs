@@ -11,6 +11,8 @@ extern "C" {
 }
 
 
+unsigned int lixs::client::trans_id = 1;
+
 lixs::client::client(iomux& io, store& st)
     : io(io), alive(true), state(p_init), st(st),
     msg(*((xsd_sockmsg*)buff)), body(buff + sizeof(xsd_sockmsg))
@@ -145,9 +147,11 @@ void lixs::client::handle_msg(void)
         break;
 
         case XS_TRANSACTION_START:
+            op_transaction_start();
         break;
 
         case XS_TRANSACTION_END:
+            op_transaction_end();
         break;
 
         case XS_INTRODUCE:
@@ -178,7 +182,13 @@ void lixs::client::handle_msg(void)
 
 void lixs::client::op_read(void)
 {
-    const char* res = st.read(body);
+    const char* res;
+
+    if (msg.tx_id) {
+        res = st.read(msg.tx_id, body);
+    } else {
+        res = st.read(body);
+    }
 
     if (res) {
         build_resp(res);
@@ -189,15 +199,25 @@ void lixs::client::op_read(void)
 
 void lixs::client::op_write(void)
 {
-    st.write(body, body + strlen(body) + 1);
+    if (msg.tx_id) {
+        st.write(msg.tx_id, body, body + strlen(body) + 1);
+    } else {
+        st.write(body, body + strlen(body) + 1);
+    }
 
     build_ack();
 }
 
 void lixs::client::op_mkdir(void)
 {
-    if (!st.read(body)) {
-        st.write(body, "");
+    if (msg.tx_id) {
+        if (!st.read(msg.tx_id, body)) {
+            st.write(msg.tx_id, body, "");
+        }
+    } else {
+        if (!st.read(body)) {
+            st.write(body, "");
+        }
     }
 
     build_ack();
@@ -205,9 +225,39 @@ void lixs::client::op_mkdir(void)
 
 void lixs::client::op_rm(void)
 {
-    st.del(body);
+    if (msg.tx_id) {
+        st.del(body);
+    } else {
+        st.del(msg.tx_id, body);
+    }
 
     build_ack();
+}
+
+void lixs::client::op_transaction_start(void)
+{
+    unsigned int id;
+    char id_str[32];
+
+    id = trans_id++;
+
+    st.branch(id);
+    snprintf(id_str, 32, "%u", id);
+    build_resp(id_str);
+}
+
+void lixs::client::op_transaction_end(void)
+{
+    if (strcmp(body, "T") == 0) {
+        if (st.merge(msg.tx_id)) {
+            build_ack();
+        } else {
+            build_err(EAGAIN);
+        }
+    } else {
+        st.abort(msg.tx_id);
+        build_ack();
+    }
 }
 
 void inline lixs::client::build_resp(const char* resp)
