@@ -23,6 +23,7 @@ int main(int argc, char** argv)
     printf("========== LightWeIght XenStore ==========\n");
 
     signal(SIGINT, signal_handler);
+    signal(SIGPIPE, SIG_IGN);
 
     lixs::epoll epoll;
     lixs::map_store store;
