@@ -41,3 +41,6 @@ clean:
 distclean: clean
 	rm -rf $(APP)
 
+
+.PHONY: all clean distclean
+
