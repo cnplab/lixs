@@ -1,3 +1,4 @@
+#include <lixs/client.hh>
 #include <lixs/epoll.hh>
 #include <lixs/map_store.hh>
 #include <lixs/unix_server.hh>
@@ -25,6 +26,8 @@ int main(int argc, char** argv)
 
     lixs::epoll epoll;
     lixs::map_store store;
+
+    lixs::client::init_store(store);
 
     lixs::unix_server nix(epoll, store, "/run/lixssock", "/run/lixssock_ro");
     lixs::xen_server xen(epoll);

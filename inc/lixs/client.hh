@@ -20,6 +20,7 @@ public:
     void run(void);
     void handle(const iokfd::ioev& events);
 
+    static void init_store(store& st);
 
 protected:
     client(iomux& io, store& st);

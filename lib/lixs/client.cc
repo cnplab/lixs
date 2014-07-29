@@ -25,6 +25,12 @@ lixs::client::~client()
 }
 
 
+void lixs::client::init_store(store& st)
+{
+    st.ensure("/");
+}
+
+
 void lixs::client::run(void)
 {
     process();
