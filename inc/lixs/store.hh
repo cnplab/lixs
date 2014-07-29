@@ -12,6 +12,7 @@ public:
     virtual void write(std::string key, std::string val) = 0;
     virtual void del(std::string key) = 0;
     virtual void ensure(std::string key) = 0;
+    virtual int get_childs(std::string key, const char* resp[], int nresp) = 0;
 
     virtual void branch(int id) = 0;
     virtual bool merge(int id) = 0;

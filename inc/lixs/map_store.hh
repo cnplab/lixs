@@ -16,6 +16,7 @@ public:
     void write(std::string key, std::string val);
     void del(std::string key);
     void ensure(std::string key);
+    int get_childs(std::string key, const char* resp[], int nresp);
 
     void branch(int id);
     bool merge(int id);

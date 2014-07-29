@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdio>
+#include <cstring>
 #include <map>
 #include <string>
 
@@ -44,6 +45,31 @@ void lixs::map_store::ensure(std::string key)
     if (it == data.end()) {
         data[key].write(std::string(""));
     }
+}
+
+int lixs::map_store::get_childs(std::string key, const char* resp[], int nresp)
+{
+    int i;
+    std::map<std::string, record>::iterator it;
+
+    for (it = data.begin(), i = 0; it != data.end() && i < nresp; it++) {
+        if (it->first.find(key) == 0 && it->first != key) {
+
+            const char *r = it->first.c_str();
+
+            r += key.length();
+            if (*key.rbegin() != '/') {
+                r++;
+            }
+
+            if (strchr(r, '/'))
+                continue;
+
+            resp[i++] = r;
+        }
+    }
+
+    return i;
 }
 
 void lixs::map_store::branch(int id)
