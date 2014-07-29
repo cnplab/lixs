@@ -26,12 +26,10 @@ $(APP): % : %.o $(LIB)
 $(TST): % : %.o $(LIB)
 	$(CXX) $(LDFLAGS) $^ -o $@
 
-%.o: $(INC)
-
-%.o: %.cc
+%.o: %.cc $(INC)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-%.o: %.c
+%.o: %.c $(INC)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
