@@ -130,9 +130,11 @@ void lixs::client::handle_msg(void)
         break;
 
         case XS_GET_PERMS:
+            op_get_perms();
         break;
 
         case XS_SET_PERMS:
+            op_set_perms();
         break;
 
         case XS_DEBUG:
@@ -281,6 +283,16 @@ void lixs::client::op_get_domain_path(void)
     sprintf(buff, "/local/domain/%s", body);
 
     build_resp(buff);
+}
+
+void lixs::client::op_get_perms(void)
+{
+    build_resp("b0");
+}
+
+void lixs::client::op_set_perms(void)
+{
+    build_ack();
 }
 
 void inline lixs::client::build_resp(const char* resp)
