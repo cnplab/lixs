@@ -61,6 +61,8 @@ private:
     void inline build_err(int err);
     void inline build_ack(void);
 
+    void inline print_msg(char* pre);
+
     static unsigned int trans_id;
 
     client::state state;

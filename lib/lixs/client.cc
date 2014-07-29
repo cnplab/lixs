@@ -86,7 +86,9 @@ void lixs::client::process(void)
                     break;
                 }
 
+                print_msg((char*)"<");
                 handle_msg();
+                print_msg((char*)">");
 
                 state = tx_resp;
                 break;
@@ -107,16 +109,6 @@ void lixs::client::process(void)
 
 void lixs::client::handle_msg(void)
 {
-    body[msg.len] = '\0';
-
-    if (strlen(body) < (msg.len - 1)) {
-        printf("{ type = %2d, req_id = %d, tx_id = %d, len = %d, msg = \"%s %s\" }\n",
-                msg.type, msg.req_id, msg.tx_id, msg.len, body, body + strlen(body) + 1);
-    } else {
-        printf("{ type = %2d, req_id = %d, tx_id = %d, len = %d, msg = \"%s\" }\n",
-                msg.type, msg.req_id, msg.tx_id, msg.len, body);
-    }
-
     switch (msg.type) {
         case XS_DIRECTORY:
         break;
@@ -304,5 +296,18 @@ void inline lixs::client::build_ack(void)
 
     write_buff = buff;
     write_bytes = sizeof(msg) + 2;
+}
+
+void inline lixs::client::print_msg(char* pre)
+{
+    body[msg.len] = '\0';
+
+    if (msg.len > strlen(body)) {
+        printf("%s { type = %2d, req_id = %d, tx_id = %d, len = %d, msg = \"%s %s\" }\n",
+                pre, msg.type, msg.req_id, msg.tx_id, msg.len, body, body + strlen(body) + 1);
+    } else {
+        printf("%s { type = %2d, req_id = %d, tx_id = %d, len = %d, msg = \"%s\" }\n",
+                pre, msg.type, msg.req_id, msg.tx_id, msg.len, body);
+    }
 }
 
