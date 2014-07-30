@@ -126,11 +126,16 @@ void lixs::map_store::abort(int id)
 
 const char* lixs::map_store::read(int id, std::string key)
 {
-    const char* ret = read(key);
+    std::map<std::string, record>::iterator it;
 
     ltrans[id].data[key].read();
 
-    return ret;
+    it = data.find(key);
+    if (it == data.end()) {
+        return NULL;
+    } else {
+        return it->second.val.c_str();
+    }
 }
 
 void lixs::map_store::write(int id, std::string key, std::string val)
