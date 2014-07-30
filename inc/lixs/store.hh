@@ -20,6 +20,7 @@ public:
     virtual const char* read(int id, std::string key) = 0;
     virtual void write(int id, std::string key, std::string val) = 0;
     virtual void del(int id, std::string key) = 0;
+    virtual void ensure(int id, std::string key) = 0;
 };
 
 } /* namespace lixs */

@@ -148,3 +148,13 @@ void lixs::map_store::del(int id, std::string key)
     ltrans[id].data[key].erase();
 }
 
+void lixs::map_store::ensure(int id, std::string key)
+{
+    std::map<std::string, record>::iterator it;
+
+    it = data.find(key);
+
+    if (it == data.end()) {
+        ltrans[id].data[key].write(std::string(""));
+    }
+}

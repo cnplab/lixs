@@ -24,6 +24,7 @@ public:
     const char* read(int id, std::string key);
     void write(int id, std::string key, std::string val);
     void del(int id, std::string key);
+    void ensure(int id, std::string key);
 
 private:
     static long int get_time(void) {

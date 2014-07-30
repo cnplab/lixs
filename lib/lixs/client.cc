@@ -209,7 +209,11 @@ void lixs::client::op_write(void)
         i += strcspn(body + i, "/");
         if (i < len) {
             body[i] = '\0';
-            st.ensure(body);
+            if (msg.tx_id) {
+                st.ensure(msg.tx_id, body);
+            } else {
+                st.ensure(body);
+            }
             body[i] = '/';
         }
 
