@@ -247,9 +247,9 @@ void lixs::client::op_mkdir(void)
 void lixs::client::op_rm(void)
 {
     if (msg.tx_id) {
-        st.del(body);
-    } else {
         st.del(msg.tx_id, body);
+    } else {
+        st.del(body);
     }
 
     build_ack();
