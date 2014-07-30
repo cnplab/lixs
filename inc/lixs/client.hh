@@ -2,7 +2,7 @@
 #define __LIXS_CLIENT_HH__
 
 #include <lixs/iomux.hh>
-#include <lixs/store.hh>
+#include <lixs/xenstore.hh>
 
 #include <stdint.h>
 /* Must include errno before xs_wire.h, otherwise xsd_errors doesn't get defined */
@@ -20,10 +20,8 @@ public:
     void run(void);
     void handle(const iokfd::ioev& events);
 
-    static void init_store(store& st);
-
 protected:
-    client(iomux& io, store& st);
+    client(iomux& io, xenstore& xs);
     virtual ~client();
 
     virtual void process_events(const iokfd::ioev& events);
@@ -69,11 +67,9 @@ private:
 
     void inline print_msg(char* pre);
 
-    static unsigned int trans_id;
-
     client::state state;
 
-    store& st;
+    xenstore& xs;
 
     char buff[sizeof(xsd_sockmsg) + XENSTORE_PAYLOAD_MAX];
     struct xsd_sockmsg& msg;

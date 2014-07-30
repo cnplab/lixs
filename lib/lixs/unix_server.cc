@@ -1,6 +1,7 @@
 #include <lixs/iomux.hh>
 #include <lixs/unix_server.hh>
 #include <lixs/unix_client.hh>
+#include <lixs/xenstore.hh>
 
 #include <string>
 #include <cstddef>
@@ -11,8 +12,8 @@
 #include <unistd.h>
 
 
-lixs::unix_server::unix_server(iomux& io, store& st, std::string rw_path, std::string ro_path)
-    : io(io), st(st), rw_path(rw_path), rw_iok(*this), ro_path(ro_path), ro_iok(*this)
+lixs::unix_server::unix_server(iomux& io, xenstore& xs, std::string rw_path, std::string ro_path)
+    : io(io), xs(xs), rw_path(rw_path), rw_iok(*this), ro_path(ro_path), ro_iok(*this)
 {
     struct sockaddr_un sock_addr = { 0 };
     sock_addr.sun_family = AF_UNIX;
@@ -46,6 +47,6 @@ lixs::unix_server::~unix_server(void)
 
 void lixs::unix_server::handle(int fd)
 {
-    unix_client::create(io, st, accept(fd, NULL, NULL));
+    unix_client::create(io, xs, accept(fd, NULL, NULL));
 }
 

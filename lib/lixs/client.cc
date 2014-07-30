@@ -1,5 +1,5 @@
 #include <lixs/client.hh>
-#include <lixs/store.hh>
+#include <lixs/xenstore.hh>
 
 #include <cstddef>
 #include <cstdio>
@@ -11,10 +11,8 @@ extern "C" {
 }
 
 
-unsigned int lixs::client::trans_id = 1;
-
-lixs::client::client(iomux& io, store& st)
-    : io(io), alive(true), state(p_init), st(st),
+lixs::client::client(iomux& io, xenstore& xs)
+    : io(io), alive(true), state(p_init), xs(xs),
     msg(*((xsd_sockmsg*)buff)), body(buff + sizeof(xsd_sockmsg))
 {
     io.once(*this);
@@ -22,12 +20,6 @@ lixs::client::client(iomux& io, store& st)
 
 lixs::client::~client()
 {
-}
-
-
-void lixs::client::init_store(store& st)
-{
-    st.ensure("/");
 }
 
 
@@ -184,100 +176,78 @@ void lixs::client::handle_msg(void)
 
 void lixs::client::op_read(void)
 {
+    int ret;
     const char* res;
 
-    if (msg.tx_id) {
-        res = st.read(msg.tx_id, body);
-    } else {
-        res = st.read(body);
-    }
+    ret = xs.read(msg.tx_id, body, &res);
 
-    if (res) {
+    if (ret == 0) {
         build_resp(res);
     } else {
-        build_err(ENOENT);
+        build_err(ret);
     }
 }
 
 void lixs::client::op_write(void)
 {
-    unsigned int i;
-    unsigned int len = strlen(body);
+    int ret;
 
-    i = 1;
-    do {
-        i += strcspn(body + i, "/");
-        if (i < len) {
-            body[i] = '\0';
-            if (msg.tx_id) {
-                st.ensure(msg.tx_id, body);
-            } else {
-                st.ensure(body);
-            }
-            body[i] = '/';
-        }
+    ret = xs.write(msg.tx_id, body, body + strlen(body) + 1);
 
-        i++;
-    } while(i < len);
-
-    if (msg.tx_id) {
-        st.write(msg.tx_id, body, body + strlen(body) + 1);
+    if (ret == 0) {
+        build_ack();
     } else {
-        st.write(body, body + strlen(body) + 1);
+        build_err(ret);
     }
-
-    build_ack();
 }
 
 void lixs::client::op_mkdir(void)
 {
-    if (msg.tx_id) {
-        if (!st.read(msg.tx_id, body)) {
-            st.write(msg.tx_id, body, "");
-        }
-    } else {
-        if (!st.read(body)) {
-            st.write(body, "");
-        }
-    }
+    int ret;
 
-    build_ack();
+    ret = xs.mkdir(msg.tx_id, body);
+
+    if (ret == 0) {
+        build_ack();
+    } else {
+        build_err(ret);
+    }
 }
 
 void lixs::client::op_rm(void)
 {
-    if (msg.tx_id) {
-        st.del(msg.tx_id, body);
-    } else {
-        st.del(body);
-    }
+    int ret;
 
-    build_ack();
+    ret = xs.rm(msg.tx_id, body);
+
+    if (ret == 0) {
+        build_ack();
+    } else {
+        build_err(ret);
+    }
 }
 
 void lixs::client::op_transaction_start(void)
 {
-    unsigned int id;
+    unsigned int tid;
     char id_str[32];
 
-    id = trans_id++;
+    xs.transaction_start(&tid);
 
-    st.branch(id);
-    snprintf(id_str, 32, "%u", id);
+    snprintf(id_str, 32, "%u", tid);
     build_resp(id_str);
 }
 
 void lixs::client::op_transaction_end(void)
 {
-    if (strcmp(body, "T") == 0) {
-        if (st.merge(msg.tx_id)) {
-            build_ack();
-        } else {
-            build_err(EAGAIN);
-        }
-    } else {
-        st.abort(msg.tx_id);
+    int ret;
+
+    ret = xs.transaction_end(msg.tx_id, strcmp(body, "T") == 0);
+
+    if (ret == 0) {
         build_ack();
+    } else {
+        build_err(ret);
     }
 }
 
@@ -285,7 +255,7 @@ void lixs::client::op_get_domain_path(void)
 {
     char buff[32];
 
-    sprintf(buff, "/local/domain/%s", body);
+    xs.get_domain_path(body, buff);
 
     build_resp(buff);
 }
@@ -302,10 +272,10 @@ void lixs::client::op_set_perms(void)
 
 void lixs::client::op_directory(void)
 {
-    int nresp;
+    int nresp = 1024;
     const char* resp[1024];
 
-    nresp = st.get_childs(body, resp, 1024);
+    xs.directory(msg.tx_id, body, resp, &nresp);
 
     build_resp("");
 

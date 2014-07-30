@@ -3,17 +3,17 @@
 
 #include <lixs/client.hh>
 #include <lixs/iomux.hh>
-#include <lixs/store.hh>
+#include <lixs/xenstore.hh>
 
 
 namespace lixs {
 
 class unix_client : public client {
 public:
-    static void create(iomux& io, store& st, int fd);
+    static void create(iomux& io, xenstore& xs, int fd);
 
 private:
-    unix_client(iomux& io, store& st, int fd);
+    unix_client(iomux& io, xenstore& xs, int fd);
     ~unix_client();
 
     bool read(char*& buff, int& bytes);

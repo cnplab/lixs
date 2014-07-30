@@ -1,6 +1,6 @@
 #include <lixs/unix_client.hh>
 #include <lixs/iomux.hh>
-#include <lixs/store.hh>
+#include <lixs/xenstore.hh>
 
 #include <cstdio>
 #include <cstring>
@@ -11,8 +11,8 @@
 #include <unistd.h>
 
 
-lixs::unix_client::unix_client(iomux& io, store& st, int fd)
-    : client(io, st), fd(fd), events(false, false)
+lixs::unix_client::unix_client(iomux& io, xenstore& xs, int fd)
+    : client(io, xs), fd(fd), events(false, false)
 {
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
     io.add(*this, fd, events);
@@ -24,9 +24,9 @@ lixs::unix_client::~unix_client()
     close(fd);
 }
 
-void lixs::unix_client::create(iomux& io, store& st, int fd)
+void lixs::unix_client::create(iomux& io, xenstore& xs, int fd)
 {
-    new unix_client(io, st, fd);
+    new unix_client(io, xs, fd);
 }
 
 
