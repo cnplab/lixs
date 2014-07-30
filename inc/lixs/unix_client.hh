@@ -22,8 +22,6 @@ private:
 private:
     int fd;
 
-    char buff[1024];
-
     iokfd::ioev events;
 };
 
