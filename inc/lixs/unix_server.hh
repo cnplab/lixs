@@ -17,13 +17,13 @@ public:
 
 
 private:
-    class sviok : public iokfd {
+    class sviok : public fd_cb {
     public:
         sviok (unix_server& _server)
             : server(_server), fd(-1)
         { };
 
-        void handle(const iokfd::ioev& events) { server.handle(fd); };
+        void handle(const fd_cb::fd_ev& events) { server.handle(fd); };
 
         unix_server& server;
         int fd;

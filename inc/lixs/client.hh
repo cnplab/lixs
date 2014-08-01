@@ -15,16 +15,16 @@ extern "C" {
 
 namespace lixs {
 
-class client : public iok, public iokfd {
+class client : public ev_cb, public fd_cb {
 public:
     void run(void);
-    void handle(const iokfd::ioev& events);
+    void handle(const fd_cb::fd_ev& events);
 
 protected:
     client(iomux& io, xenstore& xs);
     virtual ~client();
 
-    virtual void process_events(const iokfd::ioev& events);
+    virtual void process_events(const fd_cb::fd_ev& events);
     virtual bool read(char*& buff, int& bytes) = 0;
     virtual bool write(char*& buff, int& bytes) = 0;
 

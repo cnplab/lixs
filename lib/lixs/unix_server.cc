@@ -24,7 +24,7 @@ lixs::unix_server::unix_server(iomux& io, xenstore& xs, std::string rw_path, std
     unlink(sock_addr.sun_path);
     bind(rw_iok.fd, (struct sockaddr *) &sock_addr, sizeof(struct sockaddr_un));
     listen(rw_iok.fd, 1);
-    io.add(rw_iok, rw_iok.fd, iokfd::ioev(true, false));
+    io.add(rw_iok, rw_iok.fd, fd_cb::fd_ev(true, false));
 
     /* ro socket */
     ro_iok.fd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -32,7 +32,7 @@ lixs::unix_server::unix_server(iomux& io, xenstore& xs, std::string rw_path, std
     unlink(sock_addr.sun_path);
     bind(ro_iok.fd, (struct sockaddr *) &sock_addr, sizeof(struct sockaddr_un));
     listen(ro_iok.fd, 1);
-    io.add(ro_iok, ro_iok.fd, iokfd::ioev(true, false));
+    io.add(ro_iok, ro_iok.fd, fd_cb::fd_ev(true, false));
 }
 
 lixs::unix_server::~unix_server(void)

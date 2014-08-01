@@ -22,7 +22,7 @@ private:
 private:
     int fd;
 
-    iokfd::ioev events;
+    fd_cb::fd_ev events;
 };
 
 } /* namespace lixs */

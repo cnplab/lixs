@@ -15,7 +15,7 @@ extern "C" {
 
 namespace lixs {
 
-class xen_server : public server, public iokfd {
+class xen_server : public server, public fd_cb {
 public:
     xen_server(iomux& io);
     ~xen_server(void);
@@ -27,7 +27,7 @@ private:
     evtchn_port_t xenbus_evtchn(void);
     struct xenstore_domain_interface* xenbus_map(void);
 
-    void handle(const ioev& events);
+    void handle(const fd_ev& events);
 
     iomux& io;
 

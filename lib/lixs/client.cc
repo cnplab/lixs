@@ -28,7 +28,7 @@ void lixs::client::run(void)
     process();
 }
 
-void lixs::client::handle(const ioev& events)
+void lixs::client::handle(const fd_ev& events)
 {
     process_events(events);
     process();
@@ -38,7 +38,7 @@ void lixs::client::handle(const ioev& events)
     }
 }
 
-void lixs::client::process_events(const ioev& events)
+void lixs::client::process_events(const fd_ev& events)
 {
     /* Provide empty implementation */
 }

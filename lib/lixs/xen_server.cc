@@ -34,7 +34,7 @@ lixs::xen_server::xen_server(iomux& io)
     xc_evtchn_notify(xce_handle, port);
     virq_port = xc_evtchn_bind_virq(xce_handle, VIRQ_DOM_EXC);
 
-    io.add(*this, xc_evtchn_fd(xce_handle), iokfd::ioev(true, false));
+    io.add(*this, xc_evtchn_fd(xce_handle), fd_cb::fd_ev(true, false));
 }
 
 lixs::xen_server::~xen_server(void)
@@ -43,7 +43,7 @@ lixs::xen_server::~xen_server(void)
     xc_gnttab_close(xcg_handle);
 }
 
-void lixs::xen_server::handle(const iokfd::ioev& events)
+void lixs::xen_server::handle(const fd_cb::fd_ev& events)
 {
     char buff[1024];
 

@@ -14,18 +14,18 @@ public:
     epoll(void);
     ~epoll();
 
-    void once(iok& k);
+    void once(ev_cb& k);
 
-    void add(iokfd& k, int fd, const iokfd::ioev& ev);
-    void set(iokfd& k, int fd, const iokfd::ioev& ev);
+    void add(fd_cb& k, int fd, const fd_cb::fd_ev& ev);
+    void set(fd_cb& k, int fd, const fd_cb::fd_ev& ev);
     void remove(int fd);
 
     void handle(void);
 
 
 private:
-    uint32_t inline get_events(const iokfd::ioev& ev);
-    iokfd::ioev inline get_events(uint32_t ev);
+    uint32_t inline get_events(const fd_cb::fd_ev& ev);
+    fd_cb::fd_ev inline get_events(uint32_t ev);
 
 
 private:
@@ -36,7 +36,7 @@ private:
     int epfd;
     struct epoll_event epev[epoll_max_events];
 
-    std::list<iok*> once_lst;
+    std::list<ev_cb*> once_lst;
 };
 
 } /* namespace lixs */

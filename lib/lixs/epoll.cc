@@ -15,19 +15,19 @@ lixs::epoll::~epoll()
 {
 }
 
-void lixs::epoll::once(iok& k)
+void lixs::epoll::once(ev_cb& k)
 {
     once_lst.push_front(&k);
 }
 
-void lixs::epoll::add(iokfd& k, int fd, const iokfd::ioev& ev)
+void lixs::epoll::add(fd_cb& k, int fd, const fd_cb::fd_ev& ev)
 {
     struct epoll_event event = { get_events(ev), { reinterpret_cast<void*>(&k) } };
 
     epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &event);
 }
 
-void lixs::epoll::set(iokfd& k, int fd, const iokfd::ioev& ev)
+void lixs::epoll::set(fd_cb& k, int fd, const fd_cb::fd_ev& ev)
 {
     struct epoll_event event = { get_events(ev), { reinterpret_cast<void*>(&k) } };
 
@@ -45,7 +45,7 @@ void lixs::epoll::handle(void)
     int n_events;
 
     /* Run once events */
-    for(std::list<iok*>::iterator i = once_lst.begin(); i != once_lst.end(); i++) {
+    for(std::list<ev_cb*>::iterator i = once_lst.begin(); i != once_lst.end(); i++) {
         (*i)->run();
     }
     once_lst.clear();
@@ -53,21 +53,21 @@ void lixs::epoll::handle(void)
     /* Run IO events */
     n_events = epoll_wait(epfd, epev, epoll_max_events, timeout);
     for (int i = 0; i < n_events; i++) {
-        iokfd::ioev ev = get_events(epev[i].events);
-        iokfd* k = reinterpret_cast<iokfd*>(epev[i].data.ptr);
+        fd_cb::fd_ev ev = get_events(epev[i].events);
+        fd_cb* k = reinterpret_cast<fd_cb*>(epev[i].data.ptr);
 
         k->handle(ev);
     }
 
 }
 
-uint32_t inline lixs::epoll::get_events(const struct iokfd::ioev& ev)
+uint32_t inline lixs::epoll::get_events(const struct fd_cb::fd_ev& ev)
 {
     return (ev.read ? EPOLLIN : 0) | (ev.write ? EPOLLOUT : 0);
 }
 
-lixs::iokfd::ioev inline lixs::epoll::get_events(uint32_t ev)
+lixs::fd_cb::fd_ev inline lixs::epoll::get_events(uint32_t ev)
 {
-    return iokfd::ioev(ev && EPOLLIN != 0, ev && EPOLLOUT != 0);
+    return fd_cb::fd_ev(ev && EPOLLIN != 0, ev && EPOLLOUT != 0);
 }
 
