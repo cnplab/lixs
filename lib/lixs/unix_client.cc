@@ -1,5 +1,4 @@
 #include <lixs/unix_client.hh>
-#include <lixs/iomux.hh>
 #include <lixs/xenstore.hh>
 
 #include <cstdio>
@@ -11,22 +10,22 @@
 #include <unistd.h>
 
 
-lixs::unix_client::unix_client(iomux& io, xenstore& xs, int fd)
-    : client(io, xs), fd(fd), events(false, false)
+lixs::unix_client::unix_client(xenstore& xs, int fd)
+    : client(xs), fd(fd), events(false, false)
 {
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
-    io.add(*this, fd, events);
+    xs.add(*this, fd, events);
 }
 
 lixs::unix_client::~unix_client()
 {
-    io.remove(fd);
+    xs.remove(fd);
     close(fd);
 }
 
-void lixs::unix_client::create(iomux& io, xenstore& xs, int fd)
+void lixs::unix_client::create(xenstore& xs, int fd)
 {
-    new unix_client(io, xs, fd);
+    new unix_client(xs, fd);
 }
 
 
@@ -55,7 +54,7 @@ bool lixs::unix_client::read(char*& buff, int& bytes)
             /* need to wait */
             if (!events.read) {
                 events.read = true;
-                io.set(*this, fd, events);
+                xs.set(*this, fd, events);
             }
         } else {
             /* error condition */
@@ -71,7 +70,7 @@ bool lixs::unix_client::read(char*& buff, int& bytes)
 
             if (events.read) {
                 events.read = false;
-                io.set(*this, fd, events);
+                xs.set(*this, fd, events);
             }
         }
     }
@@ -104,7 +103,7 @@ bool lixs::unix_client::write(char*& buff, int& bytes)
             /* need to wait */
             if (!events.write) {
                 events.write = true;
-                io.set(*this, fd, events);
+                xs.set(*this, fd, events);
             }
         } else {
             /* error condition */
@@ -120,7 +119,7 @@ bool lixs::unix_client::write(char*& buff, int& bytes)
 
             if (events.write) {
                 events.write = false;
-                io.set(*this, fd, events);
+                xs.set(*this, fd, events);
             }
         }
     }

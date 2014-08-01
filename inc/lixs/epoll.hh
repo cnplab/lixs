@@ -3,7 +3,6 @@
 
 #include <lixs/iomux.hh>
 
-#include <list>
 #include <sys/epoll.h>
 
 
@@ -13,8 +12,6 @@ class epoll : public iomux {
 public:
     epoll(void);
     ~epoll();
-
-    void once(ev_cb& k);
 
     void add(fd_cb& k, int fd, const fd_cb::fd_ev& ev);
     void set(fd_cb& k, int fd, const fd_cb::fd_ev& ev);
@@ -35,8 +32,6 @@ private:
 
     int epfd;
     struct epoll_event epev[epoll_max_events];
-
-    std::list<ev_cb*> once_lst;
 };
 
 } /* namespace lixs */

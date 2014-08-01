@@ -7,14 +7,25 @@
 
 unsigned int lixs::xenstore::next_tid = 1;
 
-lixs::xenstore::xenstore(store& st)
-    : st(st)
+lixs::xenstore::xenstore(store& st, iomux& io)
+    : st(st), io(io)
 {
     st.ensure("/");
 }
 
 lixs::xenstore::~xenstore()
 {
+}
+
+void lixs::xenstore::run(void)
+{
+    /* Run once events */
+    for(std::list<ev_cb*>::iterator i = once_lst.begin(); i != once_lst.end(); i++) {
+        (*i)->run();
+    }
+    once_lst.clear();
+
+    io.handle();
 }
 
 int lixs::xenstore::read(unsigned int tid, const char* path, const char** res)
@@ -91,5 +102,25 @@ int lixs::xenstore::transaction_end(unsigned int tid, bool commit)
 void lixs::xenstore::get_domain_path(char* domid, char (&buff)[32])
 {
     sprintf(buff, "/local/domain/%s", domid);
+}
+
+void lixs::xenstore::once(ev_cb& k)
+{
+    once_lst.push_front(&k);
+}
+
+void lixs::xenstore::add(fd_cb& k, int fd, const fd_cb::fd_ev& ev)
+{
+    io.add(k, fd, ev);
+}
+
+void lixs::xenstore::set(fd_cb& k, int fd, const fd_cb::fd_ev& ev)
+{
+    io.set(k, fd, ev);
+}
+
+void lixs::xenstore::remove(int fd)
+{
+    io.remove(fd);
 }
 

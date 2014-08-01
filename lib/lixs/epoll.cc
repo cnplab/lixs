@@ -15,11 +15,6 @@ lixs::epoll::~epoll()
 {
 }
 
-void lixs::epoll::once(ev_cb& k)
-{
-    once_lst.push_front(&k);
-}
-
 void lixs::epoll::add(fd_cb& k, int fd, const fd_cb::fd_ev& ev)
 {
     struct epoll_event event = { get_events(ev), { reinterpret_cast<void*>(&k) } };
@@ -44,12 +39,6 @@ void lixs::epoll::handle(void)
 {
     int n_events;
 
-    /* Run once events */
-    for(std::list<ev_cb*>::iterator i = once_lst.begin(); i != once_lst.end(); i++) {
-        (*i)->run();
-    }
-    once_lst.clear();
-
     /* Run IO events */
     n_events = epoll_wait(epfd, epev, epoll_max_events, timeout);
     for (int i = 0; i < n_events; i++) {
@@ -58,7 +47,6 @@ void lixs::epoll::handle(void)
 
         k->handle(ev);
     }
-
 }
 
 uint32_t inline lixs::epoll::get_events(const struct fd_cb::fd_ev& ev)

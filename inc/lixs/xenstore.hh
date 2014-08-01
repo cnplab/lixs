@@ -1,15 +1,25 @@
 #ifndef __LIXS_XENSTORE_HH__
 #define __LIXS_XENSTORE_HH__
 
+#include <lixs/iomux.hh>
 #include <lixs/store.hh>
+
+#include <list>
 
 
 namespace lixs {
 
+class ev_cb {
+public:
+    virtual void run(void) = 0;
+};
+
 class xenstore {
 public:
-    xenstore(store& st);
+    xenstore(store& st, iomux& io);
     ~xenstore();
+
+    void run(void);
 
     int read(unsigned int tid, const char* path, const char** res);
     int write(unsigned int tid, char* path, const char* val);
@@ -22,9 +32,18 @@ public:
 
     void get_domain_path(char* domid, char (&buff)[32]);
 
+    void once(ev_cb& k);
+
+    void add(fd_cb& k, int fd, const fd_cb::fd_ev& ev);
+    void set(fd_cb& k, int fd, const fd_cb::fd_ev& ev);
+    void remove(int fd);
+
 private:
     static unsigned int next_tid;
     store& st;
+
+    iomux& io;
+    std::list<ev_cb*> once_lst;
 };
 
 } /* namespace lixs */

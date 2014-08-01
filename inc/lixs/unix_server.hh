@@ -1,7 +1,6 @@
 #ifndef __LIXS_UNIX_SERVER_HH__
 #define __LIXS_UNIX_SERVER_HH__
 
-#include <lixs/iomux.hh>
 #include <lixs/server.hh>
 #include <lixs/xenstore.hh>
 
@@ -12,7 +11,7 @@ namespace lixs {
 
 class unix_server : public server {
 public:
-    unix_server(iomux& io, xenstore& xs, std::string rw_path, std::string ro_path);
+    unix_server(xenstore& xs, std::string rw_path, std::string ro_path);
     ~unix_server();
 
 
@@ -33,7 +32,6 @@ private:
     void handle(int fd);
 
 private:
-    iomux& io;
     xenstore& xs;
 
     std::string rw_path;

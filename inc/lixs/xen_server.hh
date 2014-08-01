@@ -2,6 +2,7 @@
 #define __LIXS_XEN_SERVER_HH__
 
 #include <lixs/server.hh>
+#include <lixs/xenstore.hh>
 
 /* Someone forgot this on xen headers */
 #include <inttypes.h>
@@ -17,7 +18,7 @@ namespace lixs {
 
 class xen_server : public server, public fd_cb {
 public:
-    xen_server(iomux& io);
+    xen_server(xenstore& xs);
     ~xen_server(void);
 
     static const std::string xsd_kva_path;
@@ -29,7 +30,7 @@ private:
 
     void handle(const fd_ev& events);
 
-    iomux& io;
+    xenstore& xs;
 
     xc_interface *xc_handle;
     xc_gnttab *xcg_handle;

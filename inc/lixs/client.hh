@@ -1,7 +1,6 @@
 #ifndef __LIXS_CLIENT_HH__
 #define __LIXS_CLIENT_HH__
 
-#include <lixs/iomux.hh>
 #include <lixs/xenstore.hh>
 
 #include <stdint.h>
@@ -21,14 +20,14 @@ public:
     void handle(const fd_cb::fd_ev& events);
 
 protected:
-    client(iomux& io, xenstore& xs);
+    client(xenstore& xs);
     virtual ~client();
 
     virtual void process_events(const fd_cb::fd_ev& events);
     virtual bool read(char*& buff, int& bytes) = 0;
     virtual bool write(char*& buff, int& bytes) = 0;
 
-    iomux& io;
+    xenstore& xs;
 
     bool alive;
 
@@ -68,8 +67,6 @@ private:
     void inline print_msg(char* pre);
 
     client::state state;
-
-    xenstore& xs;
 
     char buff[sizeof(xsd_sockmsg) + XENSTORE_PAYLOAD_MAX];
     struct xsd_sockmsg& msg;

@@ -11,11 +11,11 @@ extern "C" {
 }
 
 
-lixs::client::client(iomux& io, xenstore& xs)
-    : io(io), alive(true), state(p_init), xs(xs),
+lixs::client::client(xenstore& xs)
+    : xs(xs), alive(true), state(p_init),
     msg(*((xsd_sockmsg*)buff)), body(buff + sizeof(xsd_sockmsg))
 {
-    io.once(*this);
+    xs.once(*this);
 }
 
 lixs::client::~client()

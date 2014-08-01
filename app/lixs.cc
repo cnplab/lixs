@@ -46,14 +46,14 @@ int main(int argc, char** argv)
 
     lixs::epoll epoll;
     lixs::map_store store;
-    lixs::xenstore xs(store);
+    lixs::xenstore xs(store, epoll);
 
-    lixs::unix_server nix(epoll, xs, "/run/lixssock", "/run/lixssock_ro");
-    lixs::xen_server xen(epoll);
+    lixs::unix_server nix(xs, "/run/lixssock", "/run/lixssock_ro");
+    lixs::xen_server xen(xs);
 
     server_stoped = false;
     while(!server_stoped) {
-        epoll.handle();
+        xs.run();
     }
 
     return 0;

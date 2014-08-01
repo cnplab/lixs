@@ -21,8 +21,8 @@ extern "C" {
 const std::string lixs::xen_server::xsd_kva_path = "/proc/xen/xsd_kva";
 const std::string lixs::xen_server::xsd_port_path = "/proc/xen/xsd_port";
 
-lixs::xen_server::xen_server(iomux& io)
-    : io(io)
+lixs::xen_server::xen_server(xenstore& xs)
+    : xs(xs)
 {
     xc_handle = xc_interface_open(NULL, NULL, 0);
     xcg_handle = xc_gnttab_open(NULL, 0);
@@ -34,7 +34,7 @@ lixs::xen_server::xen_server(iomux& io)
     xc_evtchn_notify(xce_handle, port);
     virq_port = xc_evtchn_bind_virq(xce_handle, VIRQ_DOM_EXC);
 
-    io.add(*this, xc_evtchn_fd(xce_handle), fd_cb::fd_ev(true, false));
+    xs.add(*this, xc_evtchn_fd(xce_handle), fd_cb::fd_ev(true, false));
 }
 
 lixs::xen_server::~xen_server(void)
