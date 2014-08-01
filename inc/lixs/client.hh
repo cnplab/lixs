@@ -1,6 +1,7 @@
 #ifndef __LIXS_CLIENT_HH__
 #define __LIXS_CLIENT_HH__
 
+#include <lixs/events.hh>
 #include <lixs/xenstore.hh>
 
 #include <stdint.h>

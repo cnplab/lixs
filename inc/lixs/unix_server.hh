@@ -1,6 +1,7 @@
 #ifndef __LIXS_UNIX_SERVER_HH__
 #define __LIXS_UNIX_SERVER_HH__
 
+#include <lixs/events.hh>
 #include <lixs/server.hh>
 #include <lixs/xenstore.hh>
 

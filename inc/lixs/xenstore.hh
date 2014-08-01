@@ -1,6 +1,7 @@
 #ifndef __LIXS_XENSTORE_HH__
 #define __LIXS_XENSTORE_HH__
 
+#include <lixs/events.hh>
 #include <lixs/iomux.hh>
 #include <lixs/store.hh>
 
@@ -8,11 +9,6 @@
 
 
 namespace lixs {
-
-class ev_cb_k {
-public:
-    virtual void operator()(void) = 0;
-};
 
 class xenstore {
 public:
