@@ -12,7 +12,7 @@ extern "C" {
 
 
 lixs::client::client(xenstore& xs)
-    : xs(xs), alive(true), state(p_init),
+    : xs(xs), fd_cb(*this), alive(true), state(p_init),
     msg(*((xsd_sockmsg*)buff)), body(buff + sizeof(xsd_sockmsg))
 {
     xs.once(*this);
@@ -28,17 +28,17 @@ void lixs::client::run(void)
     process();
 }
 
-void lixs::client::handle(const fd_ev& events)
+void lixs::client::fd_cb_k::operator()(bool read, bool write)
 {
-    process_events(events);
-    process();
+    _client.process_events(read, write);
+    _client.process();
 
-    if (!alive) {
-        delete this;
+    if (!_client.alive) {
+        delete &_client;
     }
 }
 
-void lixs::client::process_events(const fd_ev& events)
+void lixs::client::process_events(bool read, bool write)
 {
     /* Provide empty implementation */
 }

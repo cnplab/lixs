@@ -13,16 +13,17 @@ public:
     epoll(void);
     ~epoll();
 
-    void add(fd_cb& k, int fd, const fd_cb::fd_ev& ev);
-    void set(fd_cb& k, int fd, const fd_cb::fd_ev& ev);
-    void remove(int fd);
+    void add(fd_cb_k& cb);
+    void set(fd_cb_k& cb);
+    void remove(fd_cb_k& cb);
 
     void handle(void);
 
 
 private:
-    uint32_t inline get_events(const fd_cb::fd_ev& ev);
-    fd_cb::fd_ev inline get_events(uint32_t ev);
+    uint32_t inline get_events(const fd_cb_k& cb);
+    bool inline is_read(const uint32_t ev);
+    bool inline is_write(const uint32_t ev);
 
 
 private:

@@ -16,7 +16,7 @@ extern "C" {
 
 namespace lixs {
 
-class xen_server : public server, public fd_cb {
+class xen_server : public server {
 public:
     xen_server(xenstore& xs);
     ~xen_server(void);
@@ -25,12 +25,22 @@ public:
     static const std::string xsd_port_path;
 
 private:
+    class fd_cb_k : public lixs::fd_cb_k {
+    public:
+        fd_cb_k(xen_server& server)
+            : server(server)
+        { };
+
+        void operator() (bool ev_read, bool ev_write);
+
+        xen_server& server;
+    };
+
     evtchn_port_t xenbus_evtchn(void);
     struct xenstore_domain_interface* xenbus_map(void);
 
-    void handle(const fd_ev& events);
-
     xenstore& xs;
+    fd_cb_k fd_cb;
 
     xc_interface *xc_handle;
     xc_gnttab *xcg_handle;

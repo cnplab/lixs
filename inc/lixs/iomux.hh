@@ -4,25 +4,24 @@
 
 namespace lixs {
 
-class fd_cb {
+class fd_cb_k {
 public:
-    struct fd_ev {
-        bool read;
-        bool write;
+    fd_cb_k(void)
+        : fd(-1), ev_read(false), ev_write(false)
+    { };
 
-        fd_ev(bool _read, bool _write)
-            : read(_read), write(_write)
-        { };
-    };
+    virtual void operator() (bool ev_read, bool ev_write) = 0;
 
-    virtual void handle(const fd_ev& events) = 0;
+    int fd;
+    bool ev_read;
+    bool ev_write;
 };
 
 class iomux {
 public:
-    virtual void add(fd_cb& k, int fd, const fd_cb::fd_ev& ev) = 0;
-    virtual void set(fd_cb& k, int fd, const fd_cb::fd_ev& ev) = 0;
-    virtual void remove(int fd) = 0;
+    virtual void add(fd_cb_k& cb) = 0;
+    virtual void set(fd_cb_k& cb) = 0;
+    virtual void remove(fd_cb_k& cb) = 0;
 
     virtual void handle(void) = 0;
 };

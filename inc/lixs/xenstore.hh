@@ -34,9 +34,9 @@ public:
 
     void once(ev_cb& k);
 
-    void add(fd_cb& k, int fd, const fd_cb::fd_ev& ev);
-    void set(fd_cb& k, int fd, const fd_cb::fd_ev& ev);
-    void remove(int fd);
+    void add(fd_cb_k& cd);
+    void set(fd_cb_k& cb);
+    void remove(fd_cb_k& cb);
 
 private:
     static unsigned int next_tid;

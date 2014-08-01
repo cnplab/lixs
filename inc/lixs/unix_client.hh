@@ -17,11 +17,6 @@ private:
 
     bool read(char*& buff, int& bytes);
     bool write(char*& buff, int& bytes);
-
-private:
-    int fd;
-
-    fd_cb::fd_ev events;
 };
 
 } /* namespace lixs */

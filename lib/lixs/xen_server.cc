@@ -22,7 +22,7 @@ const std::string lixs::xen_server::xsd_kva_path = "/proc/xen/xsd_kva";
 const std::string lixs::xen_server::xsd_port_path = "/proc/xen/xsd_port";
 
 lixs::xen_server::xen_server(xenstore& xs)
-    : xs(xs)
+    : xs(xs), fd_cb(*this)
 {
     xc_handle = xc_interface_open(NULL, NULL, 0);
     xcg_handle = xc_gnttab_open(NULL, 0);
@@ -34,7 +34,11 @@ lixs::xen_server::xen_server(xenstore& xs)
     xc_evtchn_notify(xce_handle, port);
     virq_port = xc_evtchn_bind_virq(xce_handle, VIRQ_DOM_EXC);
 
-    xs.add(*this, xc_evtchn_fd(xce_handle), fd_cb::fd_ev(true, false));
+    fd_cb.fd = xc_evtchn_fd(xce_handle);
+    fd_cb.ev_read = true;
+    fd_cb.ev_write = false;
+
+    xs.add(fd_cb);
 }
 
 lixs::xen_server::~xen_server(void)
@@ -43,11 +47,11 @@ lixs::xen_server::~xen_server(void)
     xc_gnttab_close(xcg_handle);
 }
 
-void lixs::xen_server::handle(const fd_cb::fd_ev& events)
+void lixs::xen_server::fd_cb_k::operator()(bool ev_read, bool ev_write)
 {
     char buff[1024];
 
-    read(xc_evtchn_fd(xce_handle), buff, 1024);
+    read(fd, buff, 1024);
 
     printf("lixs::xen_server::handle\n");
 }

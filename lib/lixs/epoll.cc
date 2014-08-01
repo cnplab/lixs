@@ -15,47 +15,51 @@ lixs::epoll::~epoll()
 {
 }
 
-void lixs::epoll::add(fd_cb& k, int fd, const fd_cb::fd_ev& ev)
+void lixs::epoll::add(fd_cb_k& cb)
 {
-    struct epoll_event event = { get_events(ev), { reinterpret_cast<void*>(&k) } };
+    struct epoll_event event = { get_events(cb), { reinterpret_cast<void*>(&cb) } };
 
-    epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &event);
+    epoll_ctl(epfd, EPOLL_CTL_ADD, cb.fd, &event);
 }
 
-void lixs::epoll::set(fd_cb& k, int fd, const fd_cb::fd_ev& ev)
+void lixs::epoll::set(fd_cb_k& cb)
 {
-    struct epoll_event event = { get_events(ev), { reinterpret_cast<void*>(&k) } };
+    struct epoll_event event = { get_events(cb), { reinterpret_cast<void*>(&cb) } };
 
-    epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &event);
+    epoll_ctl(epfd, EPOLL_CTL_MOD, cb.fd, &event);
 }
 
-void lixs::epoll::remove(int fd)
+void lixs::epoll::remove(fd_cb_k& cb)
 {
     /* Passing event == NULL requires linux > 2.6.9, see BUGS */
-    epoll_ctl(epfd, EPOLL_CTL_DEL, fd, NULL);
+    epoll_ctl(epfd, EPOLL_CTL_DEL, cb.fd, NULL);
 }
 
 void lixs::epoll::handle(void)
 {
+    fd_cb_k* cb;
     int n_events;
 
-    /* Run IO events */
     n_events = epoll_wait(epfd, epev, epoll_max_events, timeout);
-    for (int i = 0; i < n_events; i++) {
-        fd_cb::fd_ev ev = get_events(epev[i].events);
-        fd_cb* k = reinterpret_cast<fd_cb*>(epev[i].data.ptr);
 
-        k->handle(ev);
+    for (int i = 0; i < n_events; i++) {
+        cb = reinterpret_cast<fd_cb_k*>(epev[i].data.ptr);
+        cb->operator()(is_read(epev[i].events), is_write(epev[i].events));
     }
 }
 
-uint32_t inline lixs::epoll::get_events(const struct fd_cb::fd_ev& ev)
+uint32_t inline lixs::epoll::get_events(const fd_cb_k& cb)
 {
-    return (ev.read ? EPOLLIN : 0) | (ev.write ? EPOLLOUT : 0);
+    return (cb.ev_read ? EPOLLIN : 0) | (cb.ev_write ? EPOLLOUT : 0);
 }
 
-lixs::fd_cb::fd_ev inline lixs::epoll::get_events(uint32_t ev)
+bool inline lixs::epoll::is_read(const uint32_t ev)
 {
-    return fd_cb::fd_ev(ev && EPOLLIN != 0, ev && EPOLLOUT != 0);
+    return (ev && EPOLLIN != 0);
+}
+
+bool inline lixs::epoll::is_write(const uint32_t ev)
+{
+    return (ev && EPOLLOUT != 0);
 }
 

@@ -109,18 +109,18 @@ void lixs::xenstore::once(ev_cb& k)
     once_lst.push_front(&k);
 }
 
-void lixs::xenstore::add(fd_cb& k, int fd, const fd_cb::fd_ev& ev)
+void lixs::xenstore::add(fd_cb_k& cb)
 {
-    io.add(k, fd, ev);
+    io.add(cb);
 }
 
-void lixs::xenstore::set(fd_cb& k, int fd, const fd_cb::fd_ev& ev)
+void lixs::xenstore::set(fd_cb_k& cb)
 {
-    io.set(k, fd, ev);
+    io.set(cb);
 }
 
-void lixs::xenstore::remove(int fd)
+void lixs::xenstore::remove(fd_cb_k& cb)
 {
-    io.remove(fd);
+    io.remove(cb);
 }
 

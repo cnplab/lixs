@@ -16,29 +16,24 @@ public:
 
 
 private:
-    class sviok : public fd_cb {
+    class fd_cb_k : public lixs::fd_cb_k {
     public:
-        sviok (unix_server& _server)
-            : server(_server), fd(-1)
+        fd_cb_k (unix_server& server)
+            : server(server)
         { };
 
-        void handle(const fd_cb::fd_ev& events) { server.handle(fd); };
+        void operator()(bool read, bool write);
 
         unix_server& server;
-        int fd;
     };
 
-private:
-    void handle(int fd);
-
-private:
     xenstore& xs;
 
     std::string rw_path;
-    sviok rw_iok;
+    fd_cb_k rw_cb;
 
     std::string ro_path;
-    sviok ro_iok;
+    fd_cb_k ro_cb;
 };
 
 } /* namespace lixs */

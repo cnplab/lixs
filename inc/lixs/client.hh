@@ -14,20 +14,30 @@ extern "C" {
 
 namespace lixs {
 
-class client : public ev_cb, public fd_cb {
-public:
-    void run(void);
-    void handle(const fd_cb::fd_ev& events);
-
+class client : public ev_cb {
 protected:
+    class fd_cb_k : public lixs::fd_cb_k {
+    public:
+        fd_cb_k (client& client)
+            : _client(client)
+        { };
+
+        void operator()(bool read, bool write);
+
+        client& _client;
+    };
+
     client(xenstore& xs);
     virtual ~client();
 
-    virtual void process_events(const fd_cb::fd_ev& events);
+    virtual void process_events(bool read, bool write);
     virtual bool read(char*& buff, int& bytes) = 0;
     virtual bool write(char*& buff, int& bytes) = 0;
 
+    void run(void);
+
     xenstore& xs;
+    fd_cb_k fd_cb;
 
     bool alive;
 

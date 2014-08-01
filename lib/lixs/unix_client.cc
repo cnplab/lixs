@@ -11,16 +11,20 @@
 
 
 lixs::unix_client::unix_client(xenstore& xs, int fd)
-    : client(xs), fd(fd), events(false, false)
+    : client(xs)
 {
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
-    xs.add(*this, fd, events);
+
+    fd_cb.fd = fd;
+    fd_cb.ev_read = false;
+    fd_cb.ev_write = false;
+    xs.add(fd_cb);
 }
 
 lixs::unix_client::~unix_client()
 {
-    xs.remove(fd);
-    close(fd);
+    xs.remove(fd_cb);
+    close(fd_cb.fd);
 }
 
 void lixs::unix_client::create(xenstore& xs, int fd)
@@ -44,7 +48,7 @@ bool lixs::unix_client::read(char*& buff, int& bytes)
 
     done = false;
 
-    len = recv(fd, buff, bytes, 0);
+    len = recv(fd_cb.fd, buff, bytes, 0);
 
     if (len == 0) {
         /* socket is closed */
@@ -52,9 +56,9 @@ bool lixs::unix_client::read(char*& buff, int& bytes)
     } else if (len < 0) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             /* need to wait */
-            if (!events.read) {
-                events.read = true;
-                xs.set(*this, fd, events);
+            if (!fd_cb.ev_read) {
+                fd_cb.ev_read = true;
+                xs.set(fd_cb);
             }
         } else {
             /* error condition */
@@ -68,9 +72,9 @@ bool lixs::unix_client::read(char*& buff, int& bytes)
         if (bytes  == 0) {
             done = true;
 
-            if (events.read) {
-                events.read = false;
-                xs.set(*this, fd, events);
+            if (fd_cb.ev_read) {
+                fd_cb.ev_read = false;
+                xs.set(fd_cb);
             }
         }
     }
@@ -93,7 +97,7 @@ bool lixs::unix_client::write(char*& buff, int& bytes)
 
     done = false;
 
-    len = send(fd, buff, bytes, 0);
+    len = send(fd_cb.fd, buff, bytes, 0);
 
     if (len == 0) {
         /* socket is closed */
@@ -101,9 +105,9 @@ bool lixs::unix_client::write(char*& buff, int& bytes)
     } else if (len < 0) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             /* need to wait */
-            if (!events.write) {
-                events.write = true;
-                xs.set(*this, fd, events);
+            if (!fd_cb.ev_write) {
+                fd_cb.ev_write = true;
+                xs.set(fd_cb);
             }
         } else {
             /* error condition */
@@ -117,9 +121,9 @@ bool lixs::unix_client::write(char*& buff, int& bytes)
         if (bytes == 0) {
             done = true;
 
-            if (events.write) {
-                events.write = false;
-                xs.set(*this, fd, events);
+            if (fd_cb.ev_write) {
+                fd_cb.ev_write = false;
+                xs.set(fd_cb);
             }
         }
     }
