@@ -20,8 +20,8 @@ lixs::xenstore::~xenstore()
 void lixs::xenstore::run(void)
 {
     /* Run once events */
-    for(std::list<ev_cb*>::iterator i = once_lst.begin(); i != once_lst.end(); i++) {
-        (*i)->run();
+    for(std::list<ev_cb_k*>::iterator i = once_lst.begin(); i != once_lst.end(); i++) {
+        (*i)->operator()();
     }
     once_lst.clear();
 
@@ -104,9 +104,9 @@ void lixs::xenstore::get_domain_path(char* domid, char (&buff)[32])
     sprintf(buff, "/local/domain/%s", domid);
 }
 
-void lixs::xenstore::once(ev_cb& k)
+void lixs::xenstore::once(ev_cb_k& cb)
 {
-    once_lst.push_front(&k);
+    once_lst.push_front(&cb);
 }
 
 void lixs::xenstore::add(fd_cb_k& cb)

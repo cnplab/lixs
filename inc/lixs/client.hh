@@ -14,7 +14,7 @@ extern "C" {
 
 namespace lixs {
 
-class client : public ev_cb {
+class client {
 protected:
     class fd_cb_k : public lixs::fd_cb_k {
     public:
@@ -27,6 +27,17 @@ protected:
         client& _client;
     };
 
+    class ev_cb_k : public lixs::ev_cb_k {
+    public:
+        ev_cb_k(client& client)
+            : _client(client)
+        { };
+
+        void operator()(void);
+
+        client& _client;
+    };
+
     client(xenstore& xs);
     virtual ~client();
 
@@ -34,10 +45,9 @@ protected:
     virtual bool read(char*& buff, int& bytes) = 0;
     virtual bool write(char*& buff, int& bytes) = 0;
 
-    void run(void);
-
     xenstore& xs;
     fd_cb_k fd_cb;
+    ev_cb_k ev_cb;
 
     bool alive;
 

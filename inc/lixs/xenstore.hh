@@ -9,9 +9,9 @@
 
 namespace lixs {
 
-class ev_cb {
+class ev_cb_k {
 public:
-    virtual void run(void) = 0;
+    virtual void operator()(void) = 0;
 };
 
 class xenstore {
@@ -32,7 +32,7 @@ public:
 
     void get_domain_path(char* domid, char (&buff)[32]);
 
-    void once(ev_cb& k);
+    void once(ev_cb_k& cb);
 
     void add(fd_cb_k& cd);
     void set(fd_cb_k& cb);
@@ -43,7 +43,7 @@ private:
     store& st;
 
     iomux& io;
-    std::list<ev_cb*> once_lst;
+    std::list<ev_cb_k*> once_lst;
 };
 
 } /* namespace lixs */
