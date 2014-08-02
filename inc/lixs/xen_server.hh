@@ -8,6 +8,7 @@
 /* Someone forgot this on xen headers */
 #include <inttypes.h>
 #include <string>
+#include <errno.h>
 
 extern "C" {
 #include <xenctrl.h>
