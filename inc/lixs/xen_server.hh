@@ -18,6 +18,8 @@ extern "C" {
 
 namespace lixs {
 
+class xenstore;
+
 class xen_server : public server {
 public:
     xen_server(xenstore& xs);

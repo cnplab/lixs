@@ -4,11 +4,16 @@
 #include <lixs/events.hh>
 #include <lixs/iomux.hh>
 #include <lixs/store.hh>
+#include <lixs/unix_server.hh>
+#include <lixs/xen_server.hh>
 
 #include <list>
 
 
 namespace lixs {
+
+class unix_server;
+class xen_server;
 
 class xenstore {
 public:
@@ -34,12 +39,18 @@ public:
     void set(fd_cb_k& cb);
     void remove(fd_cb_k& cb);
 
+    void set_xen_server(xen_server* server);
+    void set_unix_server(unix_server* server);
+
 private:
     static unsigned int next_tid;
     store& st;
 
     iomux& io;
     std::list<ev_cb_k*> once_lst;
+
+    unix_server* nix;
+    xen_server* xen;
 };
 
 } /* namespace lixs */

@@ -24,6 +24,8 @@ const std::string lixs::xen_server::xsd_port_path = "/proc/xen/xsd_port";
 lixs::xen_server::xen_server(xenstore& xs)
     : xs(xs), fd_cb(*this)
 {
+    xs.set_xen_server(this);
+
     xc_handle = xc_interface_open(NULL, NULL, 0);
     xcg_handle = xc_gnttab_open(NULL, 0);
     xce_handle = xc_evtchn_open(NULL, 0);
