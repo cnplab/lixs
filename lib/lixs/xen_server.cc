@@ -43,8 +43,10 @@ lixs::xen_server::xen_server(xenstore& xs)
 
 lixs::xen_server::~xen_server(void)
 {
-    xc_interface_close(xc_handle);
+    xc_evtchn_close(xce_handle);
     xc_gnttab_close(xcg_handle);
+
+    xc_interface_close(xc_handle);
 }
 
 void lixs::xen_server::fd_cb_k::operator()(bool ev_read, bool ev_write)
