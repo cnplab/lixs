@@ -5,10 +5,8 @@
 #include <errno.h>
 
 
-unsigned int lixs::xenstore::next_tid = 1;
-
 lixs::xenstore::xenstore(store& st, iomux& io)
-    : st(st), io(io), nix(NULL), xen(NULL)
+    : next_tid(1), st(st), io(io), nix(NULL), xen(NULL)
 {
     st.ensure("/");
 }

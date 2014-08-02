@@ -43,7 +43,8 @@ public:
     void set_unix_server(unix_server* server);
 
 private:
-    static unsigned int next_tid;
+    unsigned int next_tid;
+
     store& st;
 
     iomux& io;
