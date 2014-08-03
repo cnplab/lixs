@@ -97,6 +97,12 @@ void lixs::xenstore::get_domain_path(char* domid, char (&buff)[32])
     sprintf(buff, "/local/domain/%s", domid);
 }
 
+void lixs::xenstore::introduce_domain(int domid, int mfn , int port)
+{
+    xen->create_domain(domid, port);
+    enqueue_watch((char*)"@introduceDomain");
+}
+
 void lixs::xenstore::once(ev_cb_k& cb)
 {
     once_lst.push_front(&cb);

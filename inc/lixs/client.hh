@@ -96,6 +96,7 @@ private:
     void op_directory(void);
     void op_watch(void);
     void op_unwatch(void);
+    void op_introduce_domain(void);
 
     void inline build_resp(const char* resp);
     void inline append_resp(const char* resp);

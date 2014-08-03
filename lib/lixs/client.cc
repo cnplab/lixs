@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <errno.h>
 #include <map>
@@ -197,6 +198,7 @@ void lixs::client::handle_msg(void)
         break;
 
         case XS_INTRODUCE:
+            op_introduce_domain();
         break;
 
         case XS_IS_DOMAIN_INTRODUCED:
@@ -361,6 +363,16 @@ void lixs::client::op_unwatch(void)
     } else {
         build_err(ENOENT);
     }
+}
+
+void lixs::client::op_introduce_domain(void)
+{
+    char* arg2 = body + strlen(body) + 1;
+    char* arg3 = arg2 + strlen(arg2) + 1;
+
+    xs.introduce_domain(atoi(body), atoi(arg2), atoi(arg3));
+
+    build_ack();
 }
 
 void inline lixs::client::build_resp(const char* resp)
