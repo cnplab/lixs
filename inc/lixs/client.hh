@@ -4,9 +4,12 @@
 #include <lixs/events.hh>
 #include <lixs/xenstore.hh>
 
-#include <stdint.h>
 /* Must include errno before xs_wire.h, otherwise xsd_errors doesn't get defined */
 #include <errno.h>
+#include <map>
+#include <stdint.h>
+#include <string>
+#include <utility>
 
 extern "C" {
 #include <xen/io/xs_wire.h>
@@ -39,6 +42,17 @@ protected:
         client& _client;
     };
 
+    class watch_cb_k : public lixs::watch_cb_k {
+    public:
+        watch_cb_k(client& client, char* path, char* token)
+            : lixs::watch_cb_k(path, token), _client(client)
+        { };
+
+        void operator()(const std::string& path);
+
+        client& _client;
+    };
+
     client(xenstore& xs);
     virtual ~client();
 
@@ -49,6 +63,7 @@ protected:
     xenstore& xs;
     fd_cb_k fd_cb;
     ev_cb_k ev_cb;
+    std::map<std::string, watch_cb_k> watches;
 
     bool alive;
 
@@ -64,6 +79,7 @@ private:
         rx_hdr,
         rx_body,
         tx_resp,
+        tx_watches,
     };
 
     void process(void);
@@ -78,16 +94,21 @@ private:
     void op_get_perms(void);
     void op_set_perms(void);
     void op_directory(void);
+    void op_watch(void);
+    void op_unwatch(void);
 
     void inline build_resp(const char* resp);
     void inline append_resp(const char* resp);
     void inline append_sep(void);
+    void inline build_watch(const char* path, const char* token);
     void inline build_err(int err);
     void inline build_ack(void);
 
     void inline print_msg(char* pre);
 
     client::state state;
+    bool watch_on_the_fly;
+    std::list<std::pair<std::string, watch_cb_k&> > fire_lst;
 
     char buff[sizeof(xsd_sockmsg) + XENSTORE_PAYLOAD_MAX];
     struct xsd_sockmsg& msg;

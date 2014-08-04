@@ -5,6 +5,9 @@
 #include <cstdio>
 #include <cstring>
 #include <errno.h>
+#include <map>
+#include <string>
+#include <utility>
 
 extern "C" {
 #include <xen/io/xs_wire.h>
@@ -12,7 +15,8 @@ extern "C" {
 
 
 lixs::client::client(xenstore& xs)
-    : xs(xs), fd_cb(*this), ev_cb(*this), alive(true), state(p_init),
+    : xs(xs), fd_cb(*this), ev_cb(*this),
+    alive(true), state(p_init), watch_on_the_fly(false),
     msg(*((xsd_sockmsg*)buff)), body(buff + sizeof(xsd_sockmsg))
 {
     xs.once(ev_cb);
@@ -38,6 +42,26 @@ void lixs::client::fd_cb_k::operator()(bool read, bool write)
     }
 }
 
+void lixs::client::watch_cb_k::operator()(const std::string& _path)
+{
+    static int i = 0;
+    if (i++ > 0)
+        return;
+
+    if (_client.state == rx_hdr) {
+        _client.build_watch(_path.c_str(), token.c_str());
+        _client.print_msg((char*)">");
+
+        if (!_client.write(_client.write_buff, _client.write_bytes)) {
+            _client.watch_on_the_fly = true;
+            _client.state = tx_watches;
+        }
+    } else {
+        _client.fire_lst.push_back(
+                std::make_pair<std::string, watch_cb_k&>(path, *this));
+    }
+}
+
 void lixs::client::process_events(bool read, bool write)
 {
     /* Provide empty implementation */
@@ -47,6 +71,7 @@ void lixs::client::process(void)
 {
     bool ret;
     bool yield = false;
+    std::list<std::pair<std::string, watch_cb_k&> >::iterator it;
 
     while (!yield && alive) {
         switch(state) {
@@ -93,6 +118,33 @@ void lixs::client::process(void)
                     break;
                 }
 
+                state = tx_watches;
+                break;
+            case tx_watches:
+                if (watch_on_the_fly) {
+                    ret = write(write_buff, write_bytes);
+
+                    if (ret == false) {
+                        yield = true;
+                        break;
+                    } else {
+                        watch_on_the_fly = false;
+                    }
+                }
+
+                it = fire_lst.begin();
+                while (it != fire_lst.end()) {
+                    build_watch(it->first.c_str(), it->second.token.c_str());
+                    print_msg((char*)">");
+                    fire_lst.erase(it++);
+                    ret = write(write_buff, write_bytes);
+                    if (ret == false) {
+                        watch_on_the_fly = true;
+                        yield = true;
+                        break;
+                    }
+                }
+
                 state = p_init;
                 break;
         }
@@ -134,9 +186,11 @@ void lixs::client::handle_msg(void)
         break;
 
         case XS_WATCH:
+            op_watch();
         break;
 
         case XS_UNWATCH:
+            op_unwatch();
         break;
 
         case XS_TRANSACTION_START:
@@ -285,6 +339,35 @@ void lixs::client::op_directory(void)
     }
 }
 
+void lixs::client::op_watch(void)
+{
+    std::map<std::string, watch_cb_k>::iterator it;
+
+    it = watches.find(body);
+    if (it == watches.end()) {
+        it = watches.insert(
+                std::make_pair<std::string, watch_cb_k>(
+                    body, watch_cb_k(*this, body, body + strlen(body) + 1))).first;
+        xs.watch(it->second);
+    }
+
+    build_ack();
+}
+
+void lixs::client::op_unwatch(void)
+{
+    std::map<std::string, watch_cb_k>::iterator it;
+    it = watches.find(body);
+
+    if (it != watches.end()) {
+        xs.unwatch(it->second);
+        watches.erase(it);
+        build_ack();
+    } else {
+        build_err(ENOENT);
+    }
+}
+
 void inline lixs::client::build_resp(const char* resp)
 {
     msg.len = strlen(resp);
@@ -308,6 +391,24 @@ void inline lixs::client::append_resp(const char* resp)
 void inline lixs::client::append_sep(void)
 {
     body[msg.len++] = '\0';
+
+    write_buff = buff;
+    write_bytes = sizeof(msg) + msg.len;
+}
+
+void inline lixs::client::build_watch(const char* path, const char* token)
+{
+    int path_len = strlen(path);
+    int token_len = strlen(token);
+
+    msg.type = XS_WATCH_EVENT;
+
+    memcpy(body, path, path_len);
+    body[path_len] = '\0';
+    memcpy(body + path_len + 1, token, token_len);
+    body[path_len + 1 + token_len] = '\0';
+
+    msg.len = path_len + token_len + 2;
 
     write_buff = buff;
     write_bytes = sizeof(msg) + msg.len;
