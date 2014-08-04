@@ -35,23 +35,7 @@ int lixs::xenstore::read(unsigned int tid, const char* path, const char** res)
 
 int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
 {
-    unsigned int i;
-    unsigned int len;
-
-    i = 1;
-    len = strlen(path);
-
-    do {
-        i += strcspn(path + i, "/");
-        if (i < len) {
-            path[i] = '\0';
-            st.ensure(tid, path);
-            path[i] = '/';
-        }
-
-        i++;
-    } while(i < len);
-
+    ensure_directory(tid, path);
     st.write(tid, path, val);
 
     return 0;
@@ -59,6 +43,7 @@ int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
 
 int lixs::xenstore::mkdir(unsigned int tid, const char* path)
 {
+    ensure_directory(tid, path);
     st.ensure(tid, path);
 
     return 0;
@@ -130,5 +115,25 @@ void lixs::xenstore::set_unix_server(unix_server* server)
 void lixs::xenstore::set_xen_server(xen_server* server)
 {
     xen = server;
+}
+
+void lixs::xenstore::ensure_directory(int tid, char* path)
+{
+    unsigned int i;
+    unsigned int len;
+
+    i = 1;
+    len = strlen(path);
+
+    do {
+        i += strcspn(path + i, "/");
+        if (i < len) {
+            path[i] = '\0';
+            st.ensure(tid, path);
+            path[i] = '/';
+        }
+
+        i++;
+    } while(i < len);
 }
 
