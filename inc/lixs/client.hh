@@ -63,7 +63,6 @@ protected:
     xenstore& xs;
     fd_cb_k fd_cb;
     ev_cb_k ev_cb;
-    std::map<std::string, watch_cb_k> watches;
 
     bool alive;
 
@@ -79,7 +78,8 @@ private:
         rx_hdr,
         rx_body,
         tx_resp,
-        tx_watches,
+        p_watch,
+        tx_watch,
     };
 
     void process(void);
@@ -107,7 +107,7 @@ private:
     void inline print_msg(char* pre);
 
     client::state state;
-    bool watch_on_the_fly;
+    std::map<std::string, watch_cb_k> watches;
     std::list<std::pair<std::string, watch_cb_k&> > fire_lst;
 
     char buff[sizeof(xsd_sockmsg) + XENSTORE_PAYLOAD_MAX];

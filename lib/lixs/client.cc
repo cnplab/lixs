@@ -15,8 +15,7 @@ extern "C" {
 
 
 lixs::client::client(xenstore& xs)
-    : xs(xs), fd_cb(*this), ev_cb(*this),
-    alive(true), state(p_init), watch_on_the_fly(false),
+    : xs(xs), fd_cb(*this), ev_cb(*this), alive(true), state(p_init),
     msg(*((xsd_sockmsg*)buff)), body(buff + sizeof(xsd_sockmsg))
 {
     xs.once(ev_cb);
@@ -53,8 +52,7 @@ void lixs::client::watch_cb_k::operator()(const std::string& _path)
         _client.print_msg((char*)">");
 
         if (!_client.write(_client.write_buff, _client.write_bytes)) {
-            _client.watch_on_the_fly = true;
-            _client.state = tx_watches;
+            _client.state = tx_watch;
         }
     } else {
         _client.fire_lst.push_back(
@@ -71,7 +69,6 @@ void lixs::client::process(void)
 {
     bool ret;
     bool yield = false;
-    std::list<std::pair<std::string, watch_cb_k&> >::iterator it;
 
     while (!yield && alive) {
         switch(state) {
@@ -118,34 +115,32 @@ void lixs::client::process(void)
                     break;
                 }
 
-                state = tx_watches;
+                state = p_watch;
                 break;
-            case tx_watches:
-                if (watch_on_the_fly) {
-                    ret = write(write_buff, write_bytes);
 
-                    if (ret == false) {
-                        yield = true;
-                        break;
-                    } else {
-                        watch_on_the_fly = false;
-                    }
-                }
+            case p_watch:
+                if (fire_lst.empty()) {
+                    state = p_init;
+                } else {
+                    std::pair<std::string, watch_cb_k&>& e = fire_lst.front();
 
-                it = fire_lst.begin();
-                while (it != fire_lst.end()) {
-                    build_watch(it->first.c_str(), it->second.token.c_str());
+                    build_watch(e.first.c_str(), e.second.token.c_str());
                     print_msg((char*)">");
-                    fire_lst.erase(it++);
-                    ret = write(write_buff, write_bytes);
-                    if (ret == false) {
-                        watch_on_the_fly = true;
-                        yield = true;
-                        break;
-                    }
+
+                    fire_lst.pop_front();
+                    state = tx_watch;
+                }
+                break;
+
+            case tx_watch:
+                ret = write(write_buff, write_bytes);
+
+                if (ret == false) {
+                    yield = true;
+                    break;
                 }
 
-                state = p_init;
+                state = p_watch;
                 break;
         }
     }
