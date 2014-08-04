@@ -149,6 +149,7 @@ void lixs::map_store::write(int id, std::string key, std::string val)
 {
     if (id == 0) {
         write(key, val);
+        return;
     }
 
     ltrans[id].data[key].write(val);
@@ -158,6 +159,7 @@ void lixs::map_store::del(int id, std::string key)
 {
     if (id == 0) {
         del(key);
+        return;
     }
 
     ltrans[id].data[key].erase();
