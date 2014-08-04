@@ -8,6 +8,8 @@
 #include <lixs/xen_server.hh>
 
 #include <list>
+#include <map>
+#include <set>
 
 
 namespace lixs {
@@ -31,6 +33,9 @@ public:
     int transaction_start(unsigned int* tid);
     int transaction_end(unsigned int tid, bool commit);
 
+    void watch(watch_cb_k& cb);
+    void unwatch(watch_cb_k& cb);
+
     void get_domain_path(char* domid, char (&buff)[32]);
 
     void once(ev_cb_k& cb);
@@ -47,12 +52,17 @@ private:
 
     void ensure_directory(int tid, char* path);
 
+    void fire_watches(void);
+    void enqueue_watch(char* path);
+
     unsigned int next_tid;
 
     store& st;
 
     iomux& io;
     std::list<ev_cb_k*> once_lst;
+    std::map<std::string, std::set<watch_cb_k*> > watch_lst;
+    std::map<watch_cb_k*, std::set<std::string> > fire_lst;
 
     unix_server* nix;
     xen_server* xen;

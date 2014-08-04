@@ -1,6 +1,8 @@
 #ifndef __LIXS_EVENTS_HH__
 #define __LIXS_EVENTS_HH__
 
+#include <string>
+
 
 namespace lixs {
 
@@ -20,6 +22,26 @@ public:
     int fd;
     bool ev_read;
     bool ev_write;
+};
+
+class watch_cb_k {
+public:
+    watch_cb_k(void)
+        : path("/"), token("")
+    { };
+
+    watch_cb_k(const char* path, const char* token)
+        : path(path), token(token)
+    { };
+
+    watch_cb_k(const std::string& path, const std::string& token)
+        : path(path), token(token)
+    { };
+
+    virtual void operator()(const std::string& path) = 0;
+
+    std::string path;
+    std::string token;
 };
 
 } /* namespace lixs */

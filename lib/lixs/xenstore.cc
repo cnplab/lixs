@@ -19,6 +19,7 @@ void lixs::xenstore::run(void)
 {
     run_once_ev();
     io.handle();
+    fire_watches();
 }
 
 int lixs::xenstore::read(unsigned int tid, const char* path, const char** res)
@@ -32,6 +33,7 @@ int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
 {
     ensure_directory(tid, path);
     st.write(tid, path, val);
+    enqueue_watch(path);
 
     return 0;
 }
@@ -39,7 +41,9 @@ int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
 int lixs::xenstore::mkdir(unsigned int tid, char* path)
 {
     ensure_directory(tid, path);
-    st.ensure(tid, path);
+    if (st.ensure(tid, path)) {
+        enqueue_watch(path);
+    }
 
     return 0;
 }
@@ -48,6 +52,7 @@ int lixs::xenstore::rm(unsigned int tid, char* path)
 {
     /* FIXME: ensure this deleted all the descendents? */
     st.del(tid, path);
+    enqueue_watch(path);
 
     return 0;
 }
@@ -75,6 +80,16 @@ int lixs::xenstore::transaction_end(unsigned int tid, bool commit)
         st.abort(tid);
         return 0;
     }
+}
+
+void lixs::xenstore::watch(watch_cb_k& cb)
+{
+    watch_lst[cb.path].insert(&cb);
+}
+
+void lixs::xenstore::unwatch(watch_cb_k& cb)
+{
+    watch_lst[cb.path].erase(&cb);
 }
 
 void lixs::xenstore::get_domain_path(char* domid, char (&buff)[32])
@@ -120,6 +135,19 @@ void lixs::xenstore::run_once_ev(void)
     once_lst.clear();
 }
 
+void lixs::xenstore::fire_watches(void)
+{
+    std::map<watch_cb_k*, std::set<std::string> >::iterator i;
+    std::set<std::string>::iterator j;
+
+    for (i = fire_lst.begin(); i != fire_lst.end(); i++) {
+        for (j = i->second.begin(); j != i->second.end();) {
+            i->first->operator()(*j);
+            i->second.erase(j++);
+        }
+    }
+}
+
 void lixs::xenstore::ensure_directory(int tid, char* path)
 {
     unsigned int i;
@@ -138,5 +166,36 @@ void lixs::xenstore::ensure_directory(int tid, char* path)
 
         i++;
     } while(i < len);
+}
+
+void lixs::xenstore::enqueue_watch(char* path)
+{
+    unsigned int i;
+    unsigned int len;
+    std::set<watch_cb_k*>::iterator it;
+
+    i = 1;
+    len = strlen(path);
+
+    do {
+        i += strcspn(path + i, "/");
+        if (i < len) {
+            path[i] = '\0';
+
+            std::set<watch_cb_k*> lst = watch_lst[path];
+            for (it = lst.begin(); it != lst.end(); it++) {
+                fire_lst[(*it)].insert(path);
+            }
+
+            path[i] = '/';
+        }
+
+        i++;
+    } while(i < len);
+
+    std::set<watch_cb_k*> lst = watch_lst[path];
+    for (it = lst.begin(); it != lst.end(); it++) {
+        fire_lst[(*it)].insert(path);
+    }
 }
 
