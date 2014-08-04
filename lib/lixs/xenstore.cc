@@ -8,7 +8,7 @@
 lixs::xenstore::xenstore(store& st, iomux& io)
     : next_tid(1), st(st), io(io), nix(NULL), xen(NULL)
 {
-    st.ensure("/");
+    st.ensure(0, "/");
 }
 
 lixs::xenstore::~xenstore()
