@@ -43,6 +43,8 @@ public:
     void set_unix_server(unix_server* server);
 
 private:
+    void run_once_ev(void);
+
     void ensure_directory(int tid, char* path);
 
     unsigned int next_tid;

@@ -17,12 +17,7 @@ lixs::xenstore::~xenstore()
 
 void lixs::xenstore::run(void)
 {
-    /* Run once events */
-    for(std::list<ev_cb_k*>::iterator i = once_lst.begin(); i != once_lst.end(); i++) {
-        (*i)->operator()();
-    }
-    once_lst.clear();
-
+    run_once_ev();
     io.handle();
 }
 
@@ -115,6 +110,14 @@ void lixs::xenstore::set_unix_server(unix_server* server)
 void lixs::xenstore::set_xen_server(xen_server* server)
 {
     xen = server;
+}
+
+void lixs::xenstore::run_once_ev(void)
+{
+    for(std::list<ev_cb_k*>::iterator i = once_lst.begin(); i != once_lst.end(); i++) {
+        (*i)->operator()();
+    }
+    once_lst.clear();
 }
 
 void lixs::xenstore::ensure_directory(int tid, char* path)
