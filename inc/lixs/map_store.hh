@@ -15,7 +15,7 @@ public:
     const char* read(std::string key);
     void write(std::string key, std::string val);
     void del(std::string key);
-    void ensure(std::string key);
+    bool ensure(std::string key);
     int get_childs(std::string key, const char* resp[], int nresp);
 
     void branch(int id);
@@ -24,7 +24,7 @@ public:
     const char* read(int id, std::string key);
     void write(int id, std::string key, std::string val);
     void del(int id, std::string key);
-    void ensure(int id, std::string key);
+    bool ensure(int id, std::string key);
 
 private:
     static long int get_time(void) {
