@@ -24,8 +24,8 @@ public:
 
     int read(unsigned int tid, const char* path, const char** res);
     int write(unsigned int tid, char* path, const char* val);
-    int mkdir(unsigned int tid, const char* path);
-    int rm(unsigned int tid, const char* path);
+    int mkdir(unsigned int tid, char* path);
+    int rm(unsigned int tid, char* path);
     int directory(unsigned int tid, const char* path, const char* list[], int* nelems);
 
     int transaction_start(unsigned int* tid);

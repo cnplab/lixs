@@ -36,7 +36,7 @@ int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
     return 0;
 }
 
-int lixs::xenstore::mkdir(unsigned int tid, const char* path)
+int lixs::xenstore::mkdir(unsigned int tid, char* path)
 {
     ensure_directory(tid, path);
     st.ensure(tid, path);
@@ -44,7 +44,7 @@ int lixs::xenstore::mkdir(unsigned int tid, const char* path)
     return 0;
 }
 
-int lixs::xenstore::rm(unsigned int tid, const char* path)
+int lixs::xenstore::rm(unsigned int tid, char* path)
 {
     /* FIXME: ensure this deleted all the descendents? */
     st.del(tid, path);
