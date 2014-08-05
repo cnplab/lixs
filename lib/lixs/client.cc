@@ -44,10 +44,6 @@ void lixs::client::fd_cb_k::operator()(bool read, bool write)
 
 void lixs::client::watch_cb_k::operator()(const std::string& _path)
 {
-    static int i = 0;
-    if (i++ > 0)
-        return;
-
     if (_client.state == rx_hdr) {
         _client.build_watch(_path.c_str(), token.c_str());
         _client.print_msg((char*)">");
