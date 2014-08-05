@@ -85,6 +85,7 @@ int lixs::xenstore::transaction_end(unsigned int tid, bool commit)
 void lixs::xenstore::watch(watch_cb_k& cb)
 {
     watch_lst[cb.path].insert(&cb);
+    enqueue_watch(const_cast<char*>(cb.path.c_str()));
 }
 
 void lixs::xenstore::unwatch(watch_cb_k& cb)
