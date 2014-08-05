@@ -2,6 +2,7 @@
 #include <lixs/xenstore.hh>
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <errno.h>
 #include <fcntl.h>
@@ -13,6 +14,9 @@
 lixs::unix_client::unix_client(xenstore& xs, int fd)
     : client(xs)
 {
+    asprintf(&cid, "C%d", fd);
+    printf("%4s = new conn\n", cid);
+
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 
     fd_cb.fd = fd;
@@ -25,6 +29,9 @@ lixs::unix_client::~unix_client()
 {
     xs.remove(fd_cb);
     close(fd_cb.fd);
+
+    printf("%4s = closed conn\n", cid);
+    free(cid);
 }
 
 void lixs::unix_client::create(xenstore& xs, int fd)

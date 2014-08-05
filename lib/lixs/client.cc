@@ -16,7 +16,7 @@ extern "C" {
 
 
 lixs::client::client(xenstore& xs)
-    : xs(xs), fd_cb(*this), ev_cb(*this), alive(true), state(p_init),
+    : cid((char*)"X"), xs(xs), fd_cb(*this), ev_cb(*this), alive(true), state(p_init),
     msg(*((xsd_sockmsg*)buff)), body(buff + sizeof(xsd_sockmsg))
 {
     xs.once(ev_cb);
@@ -455,8 +455,8 @@ void inline lixs::client::print_msg(char* pre)
 
     body[msg.len] = '\0';
 
-    printf("%s { type = %2d, req_id = %d, tx_id = %d, len = %d, msg = ",
-            pre, msg.type, msg.req_id, msg.tx_id, msg.len);
+    printf("%4s %s { type = %2d, req_id = %d, tx_id = %d, len = %d, msg = ",
+            cid, pre, msg.type, msg.req_id, msg.tx_id, msg.len);
 
     c = '"';
     for (i = 0; i < msg.len; i += strlen(body + i) + 1) {

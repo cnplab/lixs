@@ -60,6 +60,8 @@ protected:
     virtual bool read(char*& buff, int& bytes) = 0;
     virtual bool write(char*& buff, int& bytes) = 0;
 
+    char* cid;
+
     xenstore& xs;
     fd_cb_k fd_cb;
     ev_cb_k ev_cb;

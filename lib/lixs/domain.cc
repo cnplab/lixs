@@ -1,5 +1,7 @@
 #include <lixs/domain.hh>
 
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <errno.h>
 #include <fcntl.h>
@@ -15,6 +17,9 @@ extern "C" {
 lixs::domain::domain(xenstore& xs, int domid)
     : client(xs), domid(domid)
 {
+    asprintf(&cid, "D%d", domid);
+    printf("%4s = new conn\n", cid);
+
     xcg_handle = xc_gnttab_open(NULL, 0);
     xce_handle = xc_evtchn_open(NULL, 0);
 
@@ -26,6 +31,9 @@ lixs::domain::~domain()
 {
     xc_gnttab_close(xcg_handle);
     xc_evtchn_close(xce_handle);
+
+    printf("%4s = closed conn\n", cid);
+    free(cid);
 }
 
 bool lixs::domain::read(char*& buff, int& bytes)
