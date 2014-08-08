@@ -86,8 +86,8 @@ bool lixs::domain::write(char*& buff, int& bytes)
 	XENSTORE_RING_IDX cons;
 	XENSTORE_RING_IDX prod;
 
-	cons = interface->req_cons;
-	prod = interface->req_prod;
+	cons = interface->rsp_cons;
+	prod = interface->rsp_prod;
 	xen_mb();
 
     len = XENSTORE_RING_SIZE - MASK_XENSTORE_IDX(prod);
