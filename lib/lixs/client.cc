@@ -16,7 +16,7 @@ extern "C" {
 
 
 lixs::client::client(xenstore& xs)
-    : cid((char*)"X"), xs(xs), fd_cb(*this), ev_cb(*this), alive(true), state(p_init),
+    : cid((char*)"X"), xs(xs), fd_cb(*this), ev_cb(*this), alive(true), state(p_rx),
     msg(*((xsd_sockmsg*)buff)), body(buff + sizeof(xsd_sockmsg))
 {
     xs.once(ev_cb);
@@ -48,8 +48,16 @@ void lixs::client::watch_cb_k::operator()(const std::string& _path)
         _client.build_watch(_path.c_str(), token.c_str());
         _client.print_msg((char*)">");
 
+        _client.write_buff = reinterpret_cast<char*>(&_client.msg);
+        _client.write_bytes = sizeof(_client.msg);
         if (!_client.write(_client.write_buff, _client.write_bytes)) {
-            _client.state = tx_watch;
+            _client.state = tx_hdr;
+        }
+
+        _client.write_buff = _client.body;
+        _client.write_bytes = _client.msg.len;
+        if (!_client.write(_client.write_buff, _client.write_bytes)) {
+            _client.state = tx_body;
         }
     } else {
         _client.fire_lst.push_back(
@@ -69,7 +77,7 @@ void lixs::client::process(void)
 
     while (!yield && alive) {
         switch(state) {
-            case p_init:
+            case p_rx:
                 read_buff = reinterpret_cast<char*>(&msg);
                 read_bytes = sizeof(msg);
 
@@ -101,10 +109,31 @@ void lixs::client::process(void)
                 handle_msg();
                 print_msg((char*)">");
 
-                state = tx_resp;
+                state = p_tx;
                 break;
 
-            case tx_resp:
+            case p_tx:
+                write_buff = reinterpret_cast<char*>(&msg);
+                write_bytes = sizeof(msg);
+
+                state = tx_hdr;
+                break;
+
+            case tx_hdr:
+                ret = write(write_buff, write_bytes);
+
+                if (ret == false) {
+                    yield = true;
+                    break;
+                }
+
+                write_buff = body;
+                write_bytes = msg.len;
+
+                state = tx_body;
+                break;
+
+            case tx_body:
                 ret = write(write_buff, write_bytes);
 
                 if (ret == false) {
@@ -117,7 +146,7 @@ void lixs::client::process(void)
 
             case p_watch:
                 if (fire_lst.empty()) {
-                    state = p_init;
+                    state = p_rx;
                 } else {
                     std::pair<std::string, watch_cb_k&>& e = fire_lst.front();
 
@@ -125,19 +154,8 @@ void lixs::client::process(void)
                     print_msg((char*)">");
 
                     fire_lst.pop_front();
-                    state = tx_watch;
+                    state = tx_hdr;
                 }
-                break;
-
-            case tx_watch:
-                ret = write(write_buff, write_bytes);
-
-                if (ret == false) {
-                    yield = true;
-                    break;
-                }
-
-                state = p_watch;
                 break;
         }
     }
@@ -375,9 +393,6 @@ void inline lixs::client::build_resp(const char* resp)
 {
     msg.len = strlen(resp);
     memcpy(body, resp, msg.len);
-
-    write_buff = buff;
-    write_bytes = sizeof(msg) + msg.len;
 }
 
 void inline lixs::client::append_resp(const char* resp)
@@ -386,17 +401,11 @@ void inline lixs::client::append_resp(const char* resp)
 
     memcpy(body + msg.len, resp, len);
     msg.len += len;
-
-    write_buff = buff;
-    write_bytes = sizeof(msg) + msg.len;
 }
 
 void inline lixs::client::append_sep(void)
 {
     body[msg.len++] = '\0';
-
-    write_buff = buff;
-    write_bytes = sizeof(msg) + msg.len;
 }
 
 void inline lixs::client::build_watch(const char* path, const char* token)
@@ -412,9 +421,6 @@ void inline lixs::client::build_watch(const char* path, const char* token)
     body[path_len + 1 + token_len] = '\0';
 
     msg.len = path_len + token_len + 2;
-
-    write_buff = buff;
-    write_bytes = sizeof(msg) + msg.len;
 }
 
 void inline lixs::client::build_err(int err)
@@ -434,18 +440,12 @@ void inline lixs::client::build_err(int err)
     msg.len = strlen(resp);
     msg.type = XS_ERROR;
     memcpy(body, resp, msg.len);
-
-    write_buff = buff;
-    write_bytes = sizeof(msg) + msg.len;
 }
 
 void inline lixs::client::build_ack(void)
 {
     msg.len = 2;
     memcpy(body, "OK", 2);
-
-    write_buff = buff;
-    write_bytes = sizeof(msg) + 2;
 }
 
 void inline lixs::client::print_msg(char* pre)

@@ -76,12 +76,13 @@ protected:
 
 private:
     enum state {
-        p_init,
+        p_rx,
         rx_hdr,
         rx_body,
-        tx_resp,
+        p_tx,
+        tx_hdr,
+        tx_body,
         p_watch,
-        tx_watch,
     };
 
     void process(void);
