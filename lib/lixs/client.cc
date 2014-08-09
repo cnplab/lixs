@@ -218,9 +218,13 @@ void lixs::client::handle_msg(void)
         break;
 
         case XS_IS_DOMAIN_INTRODUCED:
+            printf("client: XS_IS_DOMAIN_INTRODUCED\n");
+            build_err(ENOSYS);
         break;
 
         case XS_RELEASE:
+            printf("XS_RELEASE\n");
+            build_err(ENOSYS);
         break;
 
         case XS_GET_DOMAIN_PATH:
@@ -228,12 +232,18 @@ void lixs::client::handle_msg(void)
         break;
 
         case XS_RESUME:
+            printf("client: XS_RESUME\n");
+            build_err(ENOSYS);
         break;
 
         case XS_SET_TARGET:
+            printf("client: XS_SET_TARGET\n");
+            build_err(ENOSYS);
         break;
 
         case XS_RESET_WATCHES:
+            printf("client: XS_RESET_WATCHES\n");
+            build_err(ENOSYS);
         break;
 
         default:
