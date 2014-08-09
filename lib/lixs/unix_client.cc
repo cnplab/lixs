@@ -17,6 +17,8 @@ lixs::unix_client::unix_client(xenstore& xs, int fd)
     asprintf(&cid, "C%d", fd);
     printf("%4s = new conn\n", cid);
 
+    body = abs_path;
+
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 
     fd_cb.fd = fd;

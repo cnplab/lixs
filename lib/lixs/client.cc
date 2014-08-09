@@ -16,8 +16,8 @@ extern "C" {
 
 
 lixs::client::client(xenstore& xs)
-    : cid((char*)"X"), xs(xs), fd_cb(*this), ev_cb(*this), alive(true), state(p_rx),
-    msg(*((xsd_sockmsg*)buff)), body(buff + sizeof(xsd_sockmsg))
+    : cid((char*)"X"), xs(xs), fd_cb(*this), ev_cb(*this), alive(true),
+    abs_path(buff + sizeof(xsd_sockmsg)), state(p_rx), msg(*((xsd_sockmsg*)buff))
 {
     xs.once(ev_cb);
 }
@@ -45,7 +45,7 @@ void lixs::client::fd_cb_k::operator()(bool read, bool write)
 void lixs::client::watch_cb_k::operator()(const std::string& _path)
 {
     if (_client.state == rx_hdr) {
-        _client.build_watch(_path.c_str(), token.c_str());
+        _client.build_watch(_path.c_str() + (rel ? _client.body - _client.abs_path : 0), token.c_str());
         _client.print_msg((char*)">");
 
         _client.write_buff = reinterpret_cast<char*>(&_client.msg);
@@ -150,7 +150,7 @@ void lixs::client::process(void)
                 } else {
                     std::pair<std::string, watch_cb_k&>& e = fire_lst.front();
 
-                    build_watch(e.first.c_str(), e.second.token.c_str());
+                    build_watch(e.first.c_str() + (e.second.rel ? body - abs_path : 0), e.second.token.c_str());
                     print_msg((char*)">");
 
                     fire_lst.pop_front();
@@ -244,7 +244,7 @@ void lixs::client::op_read(void)
     int ret;
     const char* res;
 
-    ret = xs.read(msg.tx_id, body, &res);
+    ret = xs.read(msg.tx_id, get_path(), &res);
 
     if (ret == 0) {
         build_resp(res);
@@ -257,7 +257,7 @@ void lixs::client::op_write(void)
 {
     int ret;
 
-    ret = xs.write(msg.tx_id, body, body + strlen(body) + 1);
+    ret = xs.write(msg.tx_id, get_path(), body + strlen(body) + 1);
 
     if (ret == 0) {
         build_ack();
@@ -270,7 +270,7 @@ void lixs::client::op_mkdir(void)
 {
     int ret;
 
-    ret = xs.mkdir(msg.tx_id, body);
+    ret = xs.mkdir(msg.tx_id, get_path());
 
     if (ret == 0) {
         build_ack();
@@ -283,7 +283,7 @@ void lixs::client::op_rm(void)
 {
     int ret;
 
-    ret = xs.rm(msg.tx_id, body);
+    ret = xs.rm(msg.tx_id, get_path());
 
     if (ret == 0) {
         build_ack();
@@ -340,7 +340,7 @@ void lixs::client::op_directory(void)
     int nresp = 1024;
     const char* resp[1024];
 
-    xs.directory(msg.tx_id, body, resp, &nresp);
+    xs.directory(msg.tx_id, get_path(), resp, &nresp);
 
     build_resp("");
 
@@ -354,11 +354,13 @@ void lixs::client::op_watch(void)
 {
     std::map<std::string, watch_cb_k>::iterator it;
 
-    it = watches.find(body);
+    char* path = get_path();
+
+    it = watches.find(path);
     if (it == watches.end()) {
         it = watches.insert(
                 std::make_pair<std::string, watch_cb_k>(
-                    body, watch_cb_k(*this, body, body + strlen(body) + 1))).first;
+                    path, watch_cb_k(*this, path, body + strlen(body) + 1, path != body))).first;
         xs.watch(it->second);
     }
 
@@ -368,7 +370,7 @@ void lixs::client::op_watch(void)
 void lixs::client::op_unwatch(void)
 {
     std::map<std::string, watch_cb_k>::iterator it;
-    it = watches.find(body);
+    it = watches.find(get_path());
 
     if (it != watches.end()) {
         xs.unwatch(it->second);
@@ -387,6 +389,15 @@ void lixs::client::op_introduce_domain(void)
     xs.introduce_domain(atoi(body), atoi(arg2), atoi(arg3));
 
     build_ack();
+}
+
+char* lixs::client::get_path()
+{
+    if (body[0] == '/') {
+        return body;
+    } else {
+        return abs_path;
+    }
 }
 
 void inline lixs::client::build_resp(const char* resp)

@@ -1,4 +1,5 @@
 #include <lixs/domain.hh>
+#include <lixs/xenstore.hh>
 
 #include <cstdio>
 #include <cstdlib>
@@ -19,6 +20,10 @@ lixs::domain::domain(xenstore& xs, int domid)
 {
     asprintf(&cid, "D%d", domid);
     printf("%4s = new conn\n", cid);
+
+    xs.get_domain_path(domid, abs_path);
+    body = abs_path + strlen(abs_path);
+    *body++ = '/';
 
     xcg_handle = xc_gnttab_open(NULL, 0);
     xce_handle = xc_evtchn_open(NULL, 0);

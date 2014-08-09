@@ -44,13 +44,14 @@ protected:
 
     class watch_cb_k : public lixs::watch_cb_k {
     public:
-        watch_cb_k(client& client, char* path, char* token)
-            : lixs::watch_cb_k(path, token), _client(client)
+        watch_cb_k(client& client, char* path, char* token, bool rel)
+            : lixs::watch_cb_k(path, token), _client(client), rel(rel)
         { };
 
         void operator()(const std::string& path);
 
         client& _client;
+        bool rel;
     };
 
     client(xenstore& xs);
@@ -73,6 +74,8 @@ protected:
     int read_bytes;
     int write_bytes;
 
+    char* const abs_path;
+    char* body;
 
 private:
     enum state {
@@ -101,6 +104,8 @@ private:
     void op_unwatch(void);
     void op_introduce_domain(void);
 
+    char* get_path(void);
+
     void inline build_resp(const char* resp);
     void inline append_resp(const char* resp);
     void inline append_sep(void);
@@ -114,9 +119,8 @@ private:
     std::map<std::string, watch_cb_k> watches;
     std::list<std::pair<std::string, watch_cb_k&> > fire_lst;
 
-    char buff[sizeof(xsd_sockmsg) + XENSTORE_PAYLOAD_MAX];
+    char buff[sizeof(xsd_sockmsg) + 64 + XENSTORE_PAYLOAD_MAX];
     struct xsd_sockmsg& msg;
-    char* const body;
 };
 
 } /* namespace lixs */
