@@ -13,8 +13,8 @@ INC	:=
 INC	+= $(shell find inc/ -name "*.hh")
 
 
-CFLAGS		+= -Iinc -Wall
-CXXFLAGS	+= -Iinc -Wall
+CFLAGS		+= -Iinc -Wall -g -O0
+CXXFLAGS	+= -Iinc -Wall -g -O0
 LDFLAGS		+= -lxenctrl -lxenstore
 
 
