@@ -20,8 +20,6 @@ lixs::unix_client::unix_client(xenstore& xs, int fd)
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 
     fd_cb.fd = fd;
-    fd_cb.ev_read = false;
-    fd_cb.ev_write = false;
     xs.add(fd_cb);
 }
 
