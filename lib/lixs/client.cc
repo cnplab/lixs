@@ -193,6 +193,8 @@ void lixs::client::handle_msg(void)
         break;
 
         case XS_DEBUG:
+            printf("XS_DEBUG\n");
+            build_ack();
         break;
 
         case XS_WATCH:
