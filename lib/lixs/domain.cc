@@ -29,6 +29,8 @@ lixs::domain::domain(xenstore& xs, int domid)
 
 lixs::domain::~domain()
 {
+    xs.remove(fd_cb);
+
     xc_gnttab_close(xcg_handle);
     xc_evtchn_close(xce_handle);
 
