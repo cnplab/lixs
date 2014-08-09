@@ -48,7 +48,7 @@ int main(int argc, char** argv)
     lixs::map_store store;
     lixs::xenstore xs(store, epoll);
 
-    lixs::unix_server nix(xs, "/run/lixssock", "/run/lixssock_ro");
+    lixs::unix_server nix(xs, "/run/xenstored/socket", "/run/xenstored/socket_ro");
     lixs::xen_server xen(xs);
 
     server_stoped = false;
