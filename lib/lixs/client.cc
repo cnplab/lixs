@@ -235,6 +235,7 @@ void lixs::client::handle_msg(void)
         break;
 
         default:
+            build_err(EINVAL);
         break;
     }
 }
