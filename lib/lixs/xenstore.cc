@@ -93,6 +93,11 @@ void lixs::xenstore::unwatch(watch_cb_k& cb)
     watch_lst[cb.path].erase(&cb);
 }
 
+void lixs::xenstore::get_domain_path(int domid, char *buff)
+{
+    sprintf(buff, "/local/domain/%d", domid);
+}
+
 void lixs::xenstore::get_domain_path(char* domid, char (&buff)[32])
 {
     sprintf(buff, "/local/domain/%s", domid);

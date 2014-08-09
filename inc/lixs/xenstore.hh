@@ -36,6 +36,7 @@ public:
     void watch(watch_cb_k& cb);
     void unwatch(watch_cb_k& cb);
 
+    void get_domain_path(int domid, char* buff);
     void get_domain_path(char* domid, char (&buff)[32]);
     void introduce_domain(int domid, int mfn, int port);
 
