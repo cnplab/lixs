@@ -2,10 +2,10 @@
 #define __LIXS_CLIENT_HH__
 
 #include <lixs/events.hh>
-#include <lixs/xenstore.hh>
 
 /* Must include errno before xs_wire.h, otherwise xsd_errors doesn't get defined */
 #include <errno.h>
+#include <list>
 #include <map>
 #include <stdint.h>
 #include <string>
@@ -17,6 +17,8 @@ extern "C" {
 
 
 namespace lixs {
+
+class xenstore;
 
 class client {
 protected:
