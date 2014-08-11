@@ -83,6 +83,12 @@ bool lixs::unix_client::read(char*& buff, int& bytes)
                 fd_cb.ev_read = false;
                 xs.set(fd_cb);
             }
+        } else {
+            /* need to wait */
+            if (!fd_cb.ev_read) {
+                fd_cb.ev_read = true;
+                xs.set(fd_cb);
+            }
         }
     }
 
@@ -130,6 +136,12 @@ bool lixs::unix_client::write(char*& buff, int& bytes)
 
             if (fd_cb.ev_write) {
                 fd_cb.ev_write = false;
+                xs.set(fd_cb);
+            }
+        } else {
+            /* need to wait */
+            if (!fd_cb.ev_write) {
+                fd_cb.ev_write = true;
                 xs.set(fd_cb);
             }
         }
