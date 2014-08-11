@@ -113,6 +113,12 @@ void lixs::xenstore::introduce_domain(int domid, int mfn , int port)
     enqueue_watch((char*)"@introduceDomain");
 }
 
+void lixs::xenstore::release_domain(int domid)
+{
+    xen->destroy_domain(domid);
+    enqueue_watch((char*)"@releaseDomain");
+}
+
 void lixs::xenstore::once(ev_cb_k& cb)
 {
     once_lst.push_front(&cb);

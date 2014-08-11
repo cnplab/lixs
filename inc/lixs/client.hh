@@ -105,6 +105,7 @@ private:
     void op_watch(void);
     void op_unwatch(void);
     void op_introduce_domain(void);
+    void op_release_domain(void);
 
     char* get_path(void);
 

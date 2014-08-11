@@ -19,6 +19,7 @@ public:
     ~xen_server(void);
 
     void create_domain(int domid, int port);
+    void destroy_domain(int domid);
 
 private:
     xenstore& xs;

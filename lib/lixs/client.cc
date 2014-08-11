@@ -224,8 +224,7 @@ void lixs::client::handle_msg(void)
         break;
 
         case XS_RELEASE:
-            printf("XS_RELEASE\n");
-            build_err(ENOSYS);
+            op_release_domain();
         break;
 
         case XS_GET_DOMAIN_PATH:
@@ -401,6 +400,13 @@ void lixs::client::op_introduce_domain(void)
     char* arg3 = arg2 + strlen(arg2) + 1;
 
     xs.introduce_domain(atoi(body), atoi(arg2), atoi(arg3));
+
+    build_ack();
+}
+
+void lixs::client::op_release_domain(void)
+{
+    xs.release_domain(atoi(body));
 
     build_ack();
 }
