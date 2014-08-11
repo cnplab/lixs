@@ -76,7 +76,7 @@ bool lixs::unix_client::read(char*& buff, int& bytes)
         buff += len;
         bytes -= len;
 
-        if (bytes  == 0) {
+        if (bytes == 0) {
             done = true;
 
             if (fd_cb.ev_read) {
