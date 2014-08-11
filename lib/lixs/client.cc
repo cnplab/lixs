@@ -24,6 +24,7 @@ lixs::client::client(xenstore& xs)
 
 lixs::client::~client()
 {
+    /* TODO: remove watches */
 }
 
 
@@ -415,6 +416,8 @@ char* lixs::client::get_path()
 
 void inline lixs::client::build_resp(const char* resp)
 {
+    /* FIXME: buffer will overflow if resp to big */
+
     msg.len = strlen(resp);
     memcpy(body, resp, msg.len);
 }

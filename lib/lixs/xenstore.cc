@@ -33,6 +33,7 @@ int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
 {
     ensure_directory(tid, path);
     st.write(tid, path, val);
+    /* FIXME: don't enqueue watch if tid != 0 */
     enqueue_watch(path);
 
     return 0;
@@ -50,7 +51,8 @@ int lixs::xenstore::mkdir(unsigned int tid, char* path)
 
 int lixs::xenstore::rm(unsigned int tid, char* path)
 {
-    /* FIXME: ensure this deleted all the descendents? */
+    /* FIXME: delete all the descendents */
+
     st.del(tid, path);
     enqueue_watch(path);
 
@@ -90,6 +92,8 @@ void lixs::xenstore::watch(watch_cb_k& cb)
 
 void lixs::xenstore::unwatch(watch_cb_k& cb)
 {
+    /* FIXME: must remove watches from fire list */
+
     watch_lst[cb.path].erase(&cb);
 }
 
