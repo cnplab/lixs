@@ -39,6 +39,7 @@ void lixs::client::fd_cb_k::operator()(bool read, bool write)
     _client.process();
 
     if (!_client.alive) {
+        /* TODO: destroy without suicide */
         delete &_client;
     }
 }
