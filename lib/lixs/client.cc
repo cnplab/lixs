@@ -24,7 +24,11 @@ lixs::client::client(xenstore& xs)
 
 lixs::client::~client()
 {
-    /* TODO: remove watches */
+    std::map<std::string, watch_cb_k>::iterator it;
+
+    for (it = watches.begin(); it != watches.end(); it++) {
+        xs.unwatch(it->second);
+    }
 }
 
 
