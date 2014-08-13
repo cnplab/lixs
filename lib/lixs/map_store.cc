@@ -135,8 +135,14 @@ const char* lixs::map_store::read(int id, std::string key)
     }
 
     std::map<std::string, record>::iterator it;
+    transaction& trans = ltrans[id];
 
-    ltrans[id].data[key].read();
+    it = trans.data.find(key);
+    if (it != trans.data.end() && it->second.w_time > 0) {
+        return it->second.read();
+    }
+
+    trans.data[key].read();
 
     it = data.find(key);
     if (it == data.end()) {
