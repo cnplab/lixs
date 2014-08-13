@@ -114,13 +114,13 @@ bool lixs::domain::write(char*& buff, int& bytes)
     bytes -= len;
     buff += len;
 
-    if (bytes > 0 && !fd_cb.ev_read) {
-        fd_cb.ev_read = true;
+    if (bytes > 0 && !fd_cb.ev_write) {
+        fd_cb.ev_write = true;
         xs.set(fd_cb);
     }
 
-    if (bytes == 0 && fd_cb.ev_read) {
-        fd_cb.ev_read = false;
+    if (bytes == 0 && fd_cb.ev_write) {
+        fd_cb.ev_write = false;
         xs.set(fd_cb);
     }
 
