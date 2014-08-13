@@ -23,6 +23,8 @@ lixs::domainU::domainU(xenstore& xs, int domid, int port)
 
     remote_port = port;
     local_port = xc_evtchn_bind_interdomain(xce_handle, domid, remote_port);
+
+    xc_evtchn_unmask(xce_handle, local_port);
 }
 
 lixs::domainU::~domainU()
