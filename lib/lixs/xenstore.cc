@@ -24,7 +24,7 @@ void lixs::xenstore::run(void)
 
 int lixs::xenstore::read(unsigned int tid, const char* path, const char** res)
 {
-    (*res) = st.read(path);
+    (*res) = st.read(tid, path);
 
     return (*res) == NULL ? ENOENT : 0;
 }
