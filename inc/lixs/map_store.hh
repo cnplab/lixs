@@ -35,11 +35,11 @@ private:
     class record {
     public:
         record(void)
-            : val(""), r_time(0), w_time(0)
+            : val(""), deleted(false), r_time(0), w_time(0)
         { };
 
         record(std::string val)
-            : val(val), r_time(0), w_time(get_time())
+            : val(val), deleted(false), r_time(0), w_time(get_time())
         { };
 
         const char* read(void)
