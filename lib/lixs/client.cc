@@ -58,6 +58,7 @@ void lixs::client::watch_cb_k::operator()(const std::string& _path)
         _client.write_bytes = sizeof(_client.msg);
         if (!_client.write(_client.write_buff, _client.write_bytes)) {
             _client.state = tx_hdr;
+            return;
         }
 
         _client.write_buff = _client.body;
