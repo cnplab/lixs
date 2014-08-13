@@ -91,8 +91,9 @@ bool lixs::map_store::merge(int id)
 
         bd_rec = data.find(it->first);
 
-        if (bd_rec != data.end() &&
-                (bd_rec->second.r_time >= trans.time || bd_rec->second.w_time >= trans.time)) {
+        /* Transaction will abort if someone has write an entry that we read */
+        if ((bd_rec != data.end()) &&
+                ((it->second.r_time > 0) && (bd_rec->second.w_time >= trans.time))) {
             abort = true;
             break;
         }
