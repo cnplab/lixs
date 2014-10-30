@@ -58,8 +58,6 @@ private:
     void fire_watches(void);
     void enqueue_watch(char* path);
 
-    unsigned int next_tid;
-
     store& st;
 
     iomux& io;

@@ -6,7 +6,7 @@
 
 
 lixs::xenstore::xenstore(store& st, iomux& io)
-    : next_tid(1), st(st), io(io), nix(NULL), xen(NULL)
+    : st(st), io(io), nix(NULL), xen(NULL)
 {
     st.ensure(0, "/");
 }
@@ -68,7 +68,6 @@ int lixs::xenstore::directory(unsigned int tid, const char* path, const char* li
 
 int lixs::xenstore::transaction_start(unsigned int* tid)
 {
-    *tid = next_tid++;
     st.branch(*tid);
 
     return 0;
@@ -77,7 +76,9 @@ int lixs::xenstore::transaction_start(unsigned int* tid)
 int lixs::xenstore::transaction_end(unsigned int tid, bool commit)
 {
     if (commit) {
-        return st.merge(tid) ? 0 : EAGAIN;
+        bool success;
+        st.merge(tid, success);
+        return success ? 0 : EAGAIN;
     } else {
         st.abort(tid);
         return 0;

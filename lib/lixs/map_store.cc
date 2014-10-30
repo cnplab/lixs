@@ -7,6 +7,15 @@
 #include <string>
 
 
+lixs::map_store::map_store(void)
+    : next_id(1)
+{
+}
+
+lixs::map_store::~map_store()
+{
+}
+
 const char* lixs::map_store::read(std::string key)
 {
     std::map<std::string, record>::iterator it;
@@ -75,17 +84,19 @@ int lixs::map_store::get_childs(std::string key, const char* resp[], int nresp)
     return i;
 }
 
-void lixs::map_store::branch(int id)
+void lixs::map_store::branch(unsigned int& id)
 {
+    id = next_id++;
     ltrans[id];
 }
 
-bool lixs::map_store::merge(int id)
+void lixs::map_store::merge(unsigned int id, bool& success)
 {
-    bool abort = false;
     transaction& trans = ltrans[id];
     std::map<std::string, record>::iterator bd_rec;
 
+    /* Determine if changes can be merged. */
+    success = true;
     for (std::map<std::string, record>::iterator it = trans.data.begin();
             it != trans.data.end(); it++) {
 
@@ -94,12 +105,13 @@ bool lixs::map_store::merge(int id)
         /* Transaction will abort if someone has write an entry that we read */
         if ((bd_rec != data.end()) &&
                 ((it->second.r_time > 0) && (bd_rec->second.w_time >= trans.time))) {
-            abort = true;
+            success = false;
             break;
         }
     }
 
-    if (!abort) {
+    /* Merge changes. */
+    if (success) {
         for (std::map<std::string, record>::iterator it = trans.data.begin();
                 it != trans.data.end(); it++) {
 
@@ -118,12 +130,11 @@ bool lixs::map_store::merge(int id)
         }
     }
 
+    /* Delete transaction information. */
     ltrans.erase(id);
-
-    return !abort;
 }
 
-void lixs::map_store::abort(int id)
+void lixs::map_store::abort(unsigned int id)
 {
     ltrans.erase(id);
 }
