@@ -18,12 +18,6 @@ public:
     virtual bool ensure(int id, std::string key) = 0;
 
     virtual int get_childs(std::string key, const char* resp[], int nresp) = 0;
-
-private:
-    virtual const char* read(std::string key) = 0;
-    virtual void write(std::string key, std::string val) = 0;
-    virtual void del(std::string key) = 0;
-    virtual bool ensure(std::string key) = 0;
 };
 
 } /* namespace lixs */
