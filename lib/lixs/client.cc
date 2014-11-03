@@ -261,12 +261,12 @@ void lixs::client::handle_msg(void)
 void lixs::client::op_read(void)
 {
     int ret;
-    const char* res;
+    std::string res;
 
-    ret = xs.read(msg.tx_id, get_path(), &res);
+    ret = xs.read(msg.tx_id, get_path(), res);
 
     if (ret == 0) {
-        build_resp(res);
+        build_resp(res.c_str());
     } else {
         build_err(ret);
     }

@@ -8,7 +8,9 @@
 lixs::xenstore::xenstore(store& st, iomux& io)
     : st(st), io(io), nix(NULL), xen(NULL)
 {
-    st.ensure(0, "/");
+    bool created;
+
+    st.create(0, "/", created);
 }
 
 lixs::xenstore::~xenstore()
@@ -22,17 +24,15 @@ void lixs::xenstore::run(void)
     fire_watches();
 }
 
-int lixs::xenstore::read(unsigned int tid, const char* path, const char** res)
+int lixs::xenstore::read(unsigned int tid, std::string path, std::string& res)
 {
-    (*res) = st.read(tid, path);
-
-    return (*res) == NULL ? ENOENT : 0;
+    return st.read(tid, path, res);
 }
 
 int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
 {
     ensure_directory(tid, path);
-    st.write(tid, path, val);
+    st.update(tid, path, val);
     /* FIXME: don't enqueue watch if tid != 0 */
     enqueue_watch(path);
 
@@ -41,8 +41,12 @@ int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
 
 int lixs::xenstore::mkdir(unsigned int tid, char* path)
 {
+    bool created;
+
     ensure_directory(tid, path);
-    if (st.ensure(tid, path)) {
+    st.create(tid, path, created);
+
+    if (created) {
         enqueue_watch(path);
     }
 
@@ -173,6 +177,7 @@ void lixs::xenstore::fire_watches(void)
 
 void lixs::xenstore::ensure_directory(int tid, char* path)
 {
+    bool created;
     unsigned int i;
     unsigned int len;
 
@@ -183,7 +188,7 @@ void lixs::xenstore::ensure_directory(int tid, char* path)
         i += strcspn(path + i, "/");
         if (i < len) {
             path[i] = '\0';
-            st.ensure(tid, path);
+            st.create(tid, path, created);
             path[i] = '/';
         }
 

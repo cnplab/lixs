@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <errno.h>
 #include <map>
 #include <string>
 
@@ -14,74 +15,6 @@ lixs::map_store::map_store(void)
 
 lixs::map_store::~map_store()
 {
-}
-
-const char* lixs::map_store::read(std::string key)
-{
-    std::map<std::string, record>::iterator it;
-
-    it = data.find(key);
-
-    if (it == data.end()) {
-        return NULL;
-    } else {
-        return it->second.read();
-    }
-}
-
-void lixs::map_store::write(std::string key, std::string val)
-{
-    data[key].write(val);
-}
-
-void lixs::map_store::del(std::string key)
-{
-    std::map<std::string, record>::iterator it;
-
-    it = data.find(key);
-
-    if (it != data.end()) {
-        it->second.erase();
-    }
-}
-
-bool lixs::map_store::ensure(std::string key)
-{
-    std::map<std::string, record>::iterator it;
-
-    it = data.find(key);
-
-    if (it == data.end()) {
-        data[key].write(std::string(""));
-        return true;
-    } else {
-        return false;
-    }
-}
-
-int lixs::map_store::get_childs(std::string key, const char* resp[], int nresp)
-{
-    int i;
-    std::map<std::string, record>::iterator it;
-
-    for (it = data.begin(), i = 0; it != data.end() && i < nresp; it++) {
-        if (it->first.find(key) == 0 && it->first != key) {
-
-            const char *r = it->first.c_str();
-
-            r += key.length();
-            if (*key.rbegin() != '/') {
-                r++;
-            }
-
-            if (strchr(r, '/'))
-                continue;
-
-            resp[i++] = r;
-        }
-    }
-
-    return i;
 }
 
 void lixs::map_store::branch(unsigned int& id)
@@ -139,64 +72,110 @@ void lixs::map_store::abort(unsigned int id)
     ltrans.erase(id);
 }
 
-const char* lixs::map_store::read(int id, std::string key)
+int lixs::map_store::create(int id, std::string key, bool& created)
 {
-    if (id == 0) {
-        return read(key);
-    }
+    if (data.find(key) == data.end()) {
+        if (id == 0) {
+            data[key].write(std::string(""));
+        } else {
+            ltrans[id].data[key].write(std::string(""));
+        }
 
-    std::map<std::string, record>::iterator it;
-    transaction& trans = ltrans[id];
-
-    it = trans.data.find(key);
-    if (it != trans.data.end() && it->second.w_time > 0) {
-        return it->second.read();
-    }
-
-    trans.data[key].read();
-
-    it = data.find(key);
-    if (it == data.end()) {
-        return NULL;
+        created = true;
     } else {
-        return it->second.val.c_str();
+        created = false;
     }
+
+    return 0;
 }
 
-void lixs::map_store::write(int id, std::string key, std::string val)
+int lixs::map_store::read(int id, std::string key, std::string& val)
 {
-    if (id == 0) {
-        write(key, val);
-        return;
-    }
-
-    ltrans[id].data[key].write(val);
-}
-
-void lixs::map_store::del(int id, std::string key)
-{
-    if (id == 0) {
-        del(key);
-        return;
-    }
-
-    ltrans[id].data[key].erase();
-}
-
-bool lixs::map_store::ensure(int id, std::string key)
-{
-    if (id == 0) {
-        return ensure(key);
-    }
-
     std::map<std::string, record>::iterator it;
 
-    it = data.find(key);
+    if (id == 0) {
+        it = data.find(key);
 
-    if (it == data.end()) {
-        ltrans[id].data[key].write(std::string(""));
-        return true;
+        if (it == data.end()) {
+            return ENOENT;
+        } else {
+            it->second.read();
+            val = it->second.val;
+            return 0;
+        }
     } else {
-        return false;
+        transaction& trans = ltrans[id];
+
+        it = trans.data.find(key);
+        if (it != trans.data.end() && it->second.w_time > 0) {
+            it->second.read();
+            val = it->second.val;
+            return 0;
+        }
+
+        trans.data[key].read();
+
+        it = data.find(key);
+        if (it == data.end()) {
+            return ENOENT;
+        } else {
+            it->second.read();
+            val = it->second.val;
+            return 0;
+        }
     }
 }
+
+int lixs::map_store::update(int id, std::string key, std::string val)
+{
+    if (id == 0) {
+        data[key].write(val);
+    } else {
+        ltrans[id].data[key].write(val);
+    }
+
+    return 0;
+}
+
+int lixs::map_store::del(int id, std::string key)
+{
+    std::map<std::string, record>::iterator it;
+
+    if (id == 0) {
+        it = data.find(key);
+
+        if (it != data.end()) {
+            it->second.erase();
+        }
+    } else {
+        ltrans[id].data[key].erase();
+    }
+
+    return 0;
+}
+
+int lixs::map_store::get_childs(std::string key, const char* resp[], int nresp)
+{
+    int i;
+    std::map<std::string, record>::iterator it;
+
+    for (it = data.begin(), i = 0; it != data.end() && i < nresp; it++) {
+        if (it->first.find(key) == 0 && it->first != key) {
+
+            const char *r = it->first.c_str();
+
+            r += key.length();
+            if (*key.rbegin() != '/') {
+                r++;
+            }
+
+            if (strchr(r, '/'))
+                continue;
+
+            resp[i++] = r;
+        }
+    }
+
+    return i;
+}
+

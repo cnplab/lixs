@@ -15,19 +15,16 @@ public:
     map_store(void);
     ~map_store();
 
-    const char* read(std::string key);
-    void write(std::string key, std::string val);
-    void del(std::string key);
-    bool ensure(std::string key);
-    int get_childs(std::string key, const char* resp[], int nresp);
-
     void branch(unsigned int& id);
     void merge(unsigned int id, bool& success);
     void abort(unsigned int id);
-    const char* read(int id, std::string key);
-    void write(int id, std::string key, std::string val);
-    void del(int id, std::string key);
-    bool ensure(int id, std::string key);
+
+    int create(int id, std::string key, bool& created);
+    int read(int id, std::string key, std::string& val);
+    int update(int id, std::string key, std::string val);
+    int del(int id, std::string key);
+
+    int get_childs(std::string key, const char* resp[], int nresp);
 
 private:
     static long int get_time(void) {

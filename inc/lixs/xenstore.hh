@@ -24,7 +24,7 @@ public:
 
     void run(void);
 
-    int read(unsigned int tid, const char* path, const char** res);
+    int read(unsigned int tid, std::string path, std::string& res);
     int write(unsigned int tid, char* path, const char* val);
     int mkdir(unsigned int tid, char* path);
     int rm(unsigned int tid, char* path);
