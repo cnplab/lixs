@@ -68,7 +68,7 @@ void lixs::client::watch_cb_k::operator()(const std::string& _path)
         }
     } else {
         _client.fire_lst.push_back(
-                std::make_pair<std::string, watch_cb_k&>(path, *this));
+                std::pair<std::string, watch_cb_k&>(path, *this));
     }
 }
 

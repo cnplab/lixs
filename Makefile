@@ -14,7 +14,7 @@ INC	+= $(shell find inc/ -name "*.hh")
 
 
 CFLAGS		+= -Iinc -Wall -g -O3
-CXXFLAGS	+= -Iinc -Wall -g -O3
+CXXFLAGS	+= -Iinc -Wall -g -O3 -std=gnu++11
 LDFLAGS		+= -lxenctrl -lxenstore
 
 
