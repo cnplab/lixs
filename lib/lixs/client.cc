@@ -170,6 +170,10 @@ void lixs::client::process(void)
 
 void lixs::client::handle_msg(void)
 {
+    /* FIXME: This is a quick fix, need to analyse this better */
+    /* Ensure the body is null terminated */
+    body[msg.len] = '\0';
+
     switch (msg.type) {
         case XS_DIRECTORY:
             op_directory();

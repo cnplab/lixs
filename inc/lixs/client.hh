@@ -122,7 +122,10 @@ private:
     std::map<std::string, watch_cb_k> watches;
     std::list<std::pair<std::string, watch_cb_k&> > fire_lst;
 
-    char buff[sizeof(xsd_sockmsg) + 64 + XENSTORE_PAYLOAD_MAX];
+    /*
+     * buff: [HEADER][/local/domain/<id>][BODY][/0]
+     */
+    char buff[sizeof(xsd_sockmsg) + 64 + XENSTORE_PAYLOAD_MAX + 1];
     struct xsd_sockmsg& msg;
 };
 
