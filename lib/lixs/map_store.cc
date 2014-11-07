@@ -74,6 +74,10 @@ void lixs::map_store::abort(unsigned int id)
 
 int lixs::map_store::create(int id, std::string key, bool& created)
 {
+    if (key.back() == '/') {
+        key.pop_back();
+    }
+
     if (data.find(key) == data.end()) {
         if (id == 0) {
             data[key].write(std::string(""));
@@ -92,6 +96,10 @@ int lixs::map_store::create(int id, std::string key, bool& created)
 int lixs::map_store::read(int id, std::string key, std::string& val)
 {
     std::map<std::string, record>::iterator it;
+
+    if (key.back() == '/') {
+        key.pop_back();
+    }
 
     if (id == 0) {
         it = data.find(key);
@@ -128,6 +136,10 @@ int lixs::map_store::read(int id, std::string key, std::string& val)
 
 int lixs::map_store::update(int id, std::string key, std::string val)
 {
+    if (key.back() == '/') {
+        key.pop_back();
+    }
+
     if (id == 0) {
         data[key].write(val);
     } else {
@@ -140,6 +152,10 @@ int lixs::map_store::update(int id, std::string key, std::string val)
 int lixs::map_store::del(int id, std::string key)
 {
     std::map<std::string, record>::iterator it;
+
+    if (key.back() == '/') {
+        key.pop_back();
+    }
 
     if (id == 0) {
         it = data.find(key);
@@ -159,16 +175,22 @@ int lixs::map_store::get_childs(std::string key, const char* resp[], int nresp)
     int i;
     std::map<std::string, record>::iterator it;
 
+    if (key.back() == '/') {
+        key.pop_back();
+    }
+
     for (it = data.begin(), i = 0; it != data.end() && i < nresp; it++) {
-        if (it->first.find(key) == 0 && it->first != key) {
+        if (it->first.find(key) == 0) {
+            const char *r = it->first.c_str() + key.length();
 
-            const char *r = it->first.c_str();
-
-            r += key.length();
-            if (*key.rbegin() != '/') {
-                r++;
+            if (*r != '/') {
+                continue;
             }
 
+            /* Remove the '/' */
+            r++;
+
+            /* We only want direct children */
             if (strchr(r, '/'))
                 continue;
 
