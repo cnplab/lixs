@@ -173,6 +173,8 @@ void lixs::xenstore::fire_watches(void)
             i->second.erase(j++);
         }
     }
+
+    fire_lst.clear();
 }
 
 void lixs::xenstore::ensure_directory(int tid, char* path)
