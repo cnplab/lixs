@@ -7,7 +7,6 @@
 
 #include <map>
 #include <string>
-#include <sys/time.h>
 
 
 namespace lixs {
