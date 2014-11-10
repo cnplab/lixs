@@ -103,6 +103,7 @@ private:
     unsigned int next_id;
 
     void ensure_parents(int id, const std::string& key);
+    void delete_subtree(int id, const std::string& key);
 };
 
 } /* namespace lixs */

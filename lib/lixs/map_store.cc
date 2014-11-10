@@ -155,21 +155,11 @@ int lixs::map_store::update(int id, std::string key, std::string val)
 
 int lixs::map_store::del(int id, std::string key)
 {
-    std::map<std::string, record>::iterator it;
-
     if (key.back() == '/') {
         key.pop_back();
     }
 
-    if (id == 0) {
-        it = data.find(key);
-
-        if (it != data.end()) {
-            it->second.erase();
-        }
-    } else {
-        ltrans[id].data[key].erase();
-    }
+    delete_subtree(id, key);
 
     return 0;
 }
@@ -234,6 +224,49 @@ void lixs::map_store::ensure_parents(int id, const std::string& key)
             data[subkey].write("");
         } else {
             ltrans[id].data[subkey].write("");
+        }
+    }
+}
+
+void lixs::map_store::delete_subtree(int id, const std::string& key)
+{
+    std::map<std::string, record>::iterator it;
+
+    it = data.find(key);
+    if (it != data.end()) {
+        /* Delete root */
+        if (id == 0) {
+            it->second.erase();
+        } else {
+            ltrans[id].data[key].erase();
+        }
+
+        /* Delete children */
+        for (it = data.begin(); it != data.end(); it++) {
+            if (!it->second.deleted
+                    && it->first.find(key) == 0
+                    && it->first[key.length()] == '/') {
+                if (id == 0) {
+                    it->second.erase();
+                } else {
+                    ltrans[id].data[it->first].erase();
+                }
+            }
+        }
+    }
+
+    if (id != 0) {
+        it = ltrans[id].data.find(key);
+        if (it != ltrans[id].data.end()) {
+            it->second.erase();
+        }
+
+        for (it = ltrans[id].data.begin(); it != ltrans[id].data.end(); it++) {
+            if (!it->second.deleted
+                    && it->first.find(key) == 0
+                    && it->first[key.length()] == '/') {
+                it->second.erase();
+            }
         }
     }
 }
