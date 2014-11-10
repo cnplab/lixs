@@ -55,6 +55,7 @@ private:
 
     void fire_watches(void);
     void enqueue_watch(char* path);
+    void enqueue_watch_children(const std::string& path);
 
     store& st;
 

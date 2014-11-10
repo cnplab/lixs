@@ -57,6 +57,7 @@ int lixs::xenstore::rm(unsigned int tid, char* path)
 
     st.del(tid, path);
     enqueue_watch(path);
+    enqueue_watch_children(path);
 
     return 0;
 }
@@ -203,6 +204,21 @@ void lixs::xenstore::enqueue_watch(char* path)
     std::set<watch_cb_k*> lst = watch_lst[path];
     for (it = lst.begin(); it != lst.end(); it++) {
         fire_lst[(*it)].insert(path);
+    }
+}
+
+void lixs::xenstore::enqueue_watch_children(const std::string& path)
+{
+    std::map<std::string, std::set<watch_cb_k*> >::iterator i;
+    std::set<watch_cb_k*>::iterator j;
+
+    for (i = watch_lst.begin(); i != watch_lst.end(); i++) {
+        if (i->first.find(path) == 0
+                && i->first[path.length()] == '/') {
+            for (j = i->second.begin(); j != i->second.end(); j++) {
+                fire_lst[(*j)].insert((*j)->path);
+            }
+        }
     }
 }
 
