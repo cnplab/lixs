@@ -1,4 +1,4 @@
-#include <lixs/map_store.hh>
+#include <lixs/map_store/store.hh>
 
 #include <cstddef>
 #include <cstdio>
@@ -8,22 +8,22 @@
 #include <string>
 
 
-lixs::map_store::map_store(void)
+lixs::map_store::store::store(void)
     : next_id(1)
 {
 }
 
-lixs::map_store::~map_store()
+lixs::map_store::store::~store()
 {
 }
 
-void lixs::map_store::branch(unsigned int& id)
+void lixs::map_store::store::branch(unsigned int& id)
 {
     id = next_id++;
     ltrans[id];
 }
 
-void lixs::map_store::merge(unsigned int id, bool& success)
+void lixs::map_store::store::merge(unsigned int id, bool& success)
 {
     transaction& trans = ltrans[id];
     std::map<std::string, record>::iterator bd_rec;
@@ -67,12 +67,12 @@ void lixs::map_store::merge(unsigned int id, bool& success)
     ltrans.erase(id);
 }
 
-void lixs::map_store::abort(unsigned int id)
+void lixs::map_store::store::abort(unsigned int id)
 {
     ltrans.erase(id);
 }
 
-int lixs::map_store::create(int id, std::string key, bool& created)
+int lixs::map_store::store::create(int id, std::string key, bool& created)
 {
     if (key.back() == '/') {
         key.pop_back();
@@ -95,7 +95,7 @@ int lixs::map_store::create(int id, std::string key, bool& created)
     return 0;
 }
 
-int lixs::map_store::read(int id, std::string key, std::string& val)
+int lixs::map_store::store::read(int id, std::string key, std::string& val)
 {
     std::map<std::string, record>::iterator it;
 
@@ -136,7 +136,7 @@ int lixs::map_store::read(int id, std::string key, std::string& val)
     }
 }
 
-int lixs::map_store::update(int id, std::string key, std::string val)
+int lixs::map_store::store::update(int id, std::string key, std::string val)
 {
     if (key.back() == '/') {
         key.pop_back();
@@ -153,7 +153,7 @@ int lixs::map_store::update(int id, std::string key, std::string val)
     return 0;
 }
 
-int lixs::map_store::del(int id, std::string key)
+int lixs::map_store::store::del(int id, std::string key)
 {
     if (key.back() == '/') {
         key.pop_back();
@@ -164,7 +164,7 @@ int lixs::map_store::del(int id, std::string key)
     return 0;
 }
 
-int lixs::map_store::get_childs(std::string key, const char* resp[], int nresp)
+int lixs::map_store::store::get_childs(std::string key, const char* resp[], int nresp)
 {
     int i;
     std::map<std::string, record>::iterator it;
@@ -195,7 +195,7 @@ int lixs::map_store::get_childs(std::string key, const char* resp[], int nresp)
     return i;
 }
 
-void lixs::map_store::ensure_parents(int id, const std::string& key)
+void lixs::map_store::store::ensure_parents(int id, const std::string& key)
 {
     size_t pos = std::string::npos;
     std::map<std::string, record>::iterator it;
@@ -228,7 +228,7 @@ void lixs::map_store::ensure_parents(int id, const std::string& key)
     }
 }
 
-void lixs::map_store::delete_subtree(int id, const std::string& key)
+void lixs::map_store::store::delete_subtree(int id, const std::string& key)
 {
     std::map<std::string, record>::iterator it;
 

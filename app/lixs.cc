@@ -1,6 +1,6 @@
 #include <lixs/client.hh>
 #include <lixs/epoll.hh>
-#include <lixs/map_store.hh>
+#include <lixs/map_store/store.hh>
 #include <lixs/unix_server.hh>
 #include <lixs/xenstore.hh>
 #include <lixs/xen_server.hh>
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     signal(SIGPIPE, SIG_IGN);
 
     lixs::epoll epoll;
-    lixs::map_store store;
+    lixs::map_store::store store;
     lixs::xenstore xs(store, epoll);
 
     lixs::unix_server nix(xs, "/run/xenstored/socket", "/run/xenstored/socket_ro");
