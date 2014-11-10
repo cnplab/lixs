@@ -184,7 +184,7 @@ int lixs::map_store::get_childs(std::string key, const char* resp[], int nresp)
     }
 
     for (it = data.begin(), i = 0; it != data.end() && i < nresp; it++) {
-        if (it->first.find(key) == 0) {
+        if (!it->second.deleted && it->first.find(key) == 0) {
             const char *r = it->first.c_str() + key.length();
 
             if (*r != '/') {
@@ -210,7 +210,7 @@ void lixs::map_store::ensure_parents(int id, const std::string& key)
     size_t pos = std::string::npos;
     std::map<std::string, record>::iterator it;
 
-    for( ; ; ) {
+    for ( ; ; ) {
         pos = key.find_last_of('/', pos);
         if (pos == std::string::npos) {
             break;
