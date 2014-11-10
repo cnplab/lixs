@@ -53,8 +53,6 @@ public:
 private:
     void run_once_ev(void);
 
-    void ensure_directory(int tid, char* path);
-
     void fire_watches(void);
     void enqueue_watch(char* path);
 

@@ -31,7 +31,6 @@ int lixs::xenstore::read(unsigned int tid, std::string path, std::string& res)
 
 int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
 {
-    ensure_directory(tid, path);
     st.update(tid, path, val);
     /* FIXME: don't enqueue watch if tid != 0 */
     enqueue_watch(path);
@@ -43,7 +42,6 @@ int lixs::xenstore::mkdir(unsigned int tid, char* path)
 {
     bool created;
 
-    ensure_directory(tid, path);
     st.create(tid, path, created);
 
     if (created) {
@@ -175,27 +173,6 @@ void lixs::xenstore::fire_watches(void)
     }
 
     fire_lst.clear();
-}
-
-void lixs::xenstore::ensure_directory(int tid, char* path)
-{
-    bool created;
-    unsigned int i;
-    unsigned int len;
-
-    i = 1;
-    len = strlen(path);
-
-    do {
-        i += strcspn(path + i, "/");
-        if (i < len) {
-            path[i] = '\0';
-            st.create(tid, path, created);
-            path[i] = '/';
-        }
-
-        i++;
-    } while(i < len);
 }
 
 void lixs::xenstore::enqueue_watch(char* path)

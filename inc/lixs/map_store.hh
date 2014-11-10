@@ -101,6 +101,8 @@ private:
     std::map<std::string, record> data;
     std::map<int, transaction> ltrans;
     unsigned int next_id;
+
+    void ensure_parents(int id, const std::string& key);
 };
 
 } /* namespace lixs */

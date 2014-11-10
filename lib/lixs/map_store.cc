@@ -78,6 +78,8 @@ int lixs::map_store::create(int id, std::string key, bool& created)
         key.pop_back();
     }
 
+    ensure_parents(id, key);
+
     if (data.find(key) == data.end()) {
         if (id == 0) {
             data[key].write(std::string(""));
@@ -140,6 +142,8 @@ int lixs::map_store::update(int id, std::string key, std::string val)
         key.pop_back();
     }
 
+    ensure_parents(id, key);
+
     if (id == 0) {
         data[key].write(val);
     } else {
@@ -199,5 +203,38 @@ int lixs::map_store::get_childs(std::string key, const char* resp[], int nresp)
     }
 
     return i;
+}
+
+void lixs::map_store::ensure_parents(int id, const std::string& key)
+{
+    size_t pos = std::string::npos;
+    std::map<std::string, record>::iterator it;
+
+    for( ; ; ) {
+        pos = key.find_last_of('/', pos);
+        if (pos == std::string::npos) {
+            break;
+        }
+
+        std::string subkey = key.substr(0, pos--);
+
+        if (id == 0) {
+            it = data.find(subkey);
+            if (it != data.end() && !it->second.deleted) {
+                break;
+            }
+        } else {
+            it = ltrans[id].data.find(subkey);
+            if (it != ltrans[id].data.end() && !it->second.deleted) {
+                break;
+            }
+        }
+
+        if (id == 0) {
+            data[subkey].write("");
+        } else {
+            ltrans[id].data[subkey].write("");
+        }
+    }
 }
 
