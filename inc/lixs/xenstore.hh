@@ -54,7 +54,8 @@ private:
     void run_once_ev(void);
 
     void fire_watches(void);
-    void enqueue_watch(char* path);
+    void enqueue_watch(const std::string& path);
+    void enqueue_watch_parents(const std::string& path);
     void enqueue_watch_children(const std::string& path);
 
     store& st;

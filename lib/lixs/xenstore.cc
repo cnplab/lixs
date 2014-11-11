@@ -35,6 +35,7 @@ int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
     st.update(tid, path, val);
     /* FIXME: don't enqueue watch if tid != 0 */
     enqueue_watch(path);
+    enqueue_watch_parents(path);
 
     return 0;
 }
@@ -47,6 +48,7 @@ int lixs::xenstore::mkdir(unsigned int tid, char* path)
 
     if (created) {
         enqueue_watch(path);
+        enqueue_watch_parents(path);
     }
 
     return 0;
@@ -58,6 +60,7 @@ int lixs::xenstore::rm(unsigned int tid, char* path)
 
     st.del(tid, path);
     enqueue_watch(path);
+    enqueue_watch_parents(path);
     enqueue_watch_children(path);
 
     return 0;
@@ -177,34 +180,32 @@ void lixs::xenstore::fire_watches(void)
     fire_lst.clear();
 }
 
-void lixs::xenstore::enqueue_watch(char* path)
+void lixs::xenstore::enqueue_watch(const std::string& path)
 {
-    unsigned int i;
-    unsigned int len;
     std::set<watch_cb_k*>::iterator it;
 
-    i = 1;
-    len = strlen(path);
+    for (it = watch_lst[path].begin(); it != watch_lst[path].end(); it++) {
+        fire_lst[(*it)].insert(path);
+    }
+}
 
-    do {
-        i += strcspn(path + i, "/");
-        if (i < len) {
-            path[i] = '\0';
+void lixs::xenstore::enqueue_watch_parents(const std::string& path)
+{
+    std::set<watch_cb_k*>::iterator it;
+    std::string parent = path;
+    size_t pos;
 
-            std::set<watch_cb_k*> lst = watch_lst[path];
-            for (it = lst.begin(); it != lst.end(); it++) {
-                fire_lst[(*it)].insert(path);
-            }
-
-            path[i] = '/';
+    for ( ; ; ) {
+        pos = parent.rfind('/');
+        if (pos == std::string::npos) {
+            break;
         }
 
-        i++;
-    } while(i < len);
+        parent = parent.substr(0, pos);
 
-    std::set<watch_cb_k*> lst = watch_lst[path];
-    for (it = lst.begin(); it != lst.end(); it++) {
-        fire_lst[(*it)].insert(path);
+        for (it = watch_lst[parent].begin(); it != watch_lst[parent].end(); it++) {
+            fire_lst[(*it)].insert(path);
+        }
     }
 }
 
