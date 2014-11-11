@@ -185,33 +185,34 @@ void lixs::map_store::store::get_children(std::string key, std::list<std::string
 
 void lixs::map_store::store::ensure_parents(int id, const std::string& key)
 {
-    size_t pos = std::string::npos;
     database::iterator it;
+    std::string parent = key;
+    size_t pos;
 
     for ( ; ; ) {
-        pos = key.find_last_of('/', pos);
+        pos = parent.rfind('/');
         if (pos == std::string::npos) {
             break;
         }
 
-        std::string subkey = key.substr(0, pos--);
+        parent = parent.substr(0, pos);
 
         if (id == 0) {
-            it = data.find(subkey);
+            it = data.find(parent);
             if (it != data.end() && !it->second.deleted) {
                 break;
             }
         } else {
-            it = ltrans[id].data.find(subkey);
+            it = ltrans[id].data.find(parent);
             if (it != ltrans[id].data.end() && !it->second.deleted) {
                 break;
             }
         }
 
         if (id == 0) {
-            data[subkey].write("");
+            data[parent].write("");
         } else {
-            ltrans[id].data[subkey].write("");
+            ltrans[id].data[parent].write("");
         }
     }
 }
