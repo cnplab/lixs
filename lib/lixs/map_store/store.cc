@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <cstring>
 #include <errno.h>
-#include <map>
 #include <string>
 
 
@@ -26,11 +25,11 @@ void lixs::map_store::store::branch(unsigned int& id)
 void lixs::map_store::store::merge(unsigned int id, bool& success)
 {
     transaction& trans = ltrans[id];
-    std::map<std::string, record>::iterator bd_rec;
+    database::iterator bd_rec;
 
     /* Determine if changes can be merged. */
     success = true;
-    for (std::map<std::string, record>::iterator it = trans.data.begin();
+    for (database::iterator it = trans.data.begin();
             it != trans.data.end(); it++) {
 
         bd_rec = data.find(it->first);
@@ -45,7 +44,7 @@ void lixs::map_store::store::merge(unsigned int id, bool& success)
 
     /* Merge changes. */
     if (success) {
-        for (std::map<std::string, record>::iterator it = trans.data.begin();
+        for (database::iterator it = trans.data.begin();
                 it != trans.data.end(); it++) {
 
             bd_rec = data.find(it->first);
@@ -97,7 +96,7 @@ int lixs::map_store::store::create(int id, std::string key, bool& created)
 
 int lixs::map_store::store::read(int id, std::string key, std::string& val)
 {
-    std::map<std::string, record>::iterator it;
+    database::iterator it;
 
     if (key.back() == '/') {
         key.pop_back();
@@ -167,7 +166,7 @@ int lixs::map_store::store::del(int id, std::string key)
 int lixs::map_store::store::get_childs(std::string key, const char* resp[], int nresp)
 {
     int i;
-    std::map<std::string, record>::iterator it;
+    database::iterator it;
 
     if (key.back() == '/') {
         key.pop_back();
@@ -198,7 +197,7 @@ int lixs::map_store::store::get_childs(std::string key, const char* resp[], int 
 void lixs::map_store::store::ensure_parents(int id, const std::string& key)
 {
     size_t pos = std::string::npos;
-    std::map<std::string, record>::iterator it;
+    database::iterator it;
 
     for ( ; ; ) {
         pos = key.find_last_of('/', pos);
@@ -230,7 +229,7 @@ void lixs::map_store::store::ensure_parents(int id, const std::string& key)
 
 void lixs::map_store::store::delete_subtree(int id, const std::string& key)
 {
-    std::map<std::string, record>::iterator it;
+    database::iterator it;
 
     it = data.find(key);
     if (it != data.end()) {

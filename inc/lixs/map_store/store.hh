@@ -2,7 +2,7 @@
 #define __LIXS_MAP_STORE_STORE_HH__
 
 #include <lixs/store.hh>
-#include <lixs/map_store/record.hh>
+#include <lixs/map_store/database.hh>
 #include <lixs/map_store/transaction.hh>
 
 #include <map>
@@ -29,7 +29,7 @@ public:
     int get_childs(std::string key, const char* resp[], int nresp);
 
 private:
-    std::map<std::string, record> data;
+    database data;
     std::map<int, transaction> ltrans;
     unsigned int next_id;
 
