@@ -1,10 +1,10 @@
 #include <lixs/unix_client.hh>
 #include <lixs/xenstore.hh>
 
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <errno.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>

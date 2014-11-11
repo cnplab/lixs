@@ -1,7 +1,7 @@
 #include <lixs/map_store/store.hh>
 
 #include <cstring>
-#include <errno.h>
+#include <cerrno>
 #include <string>
 
 

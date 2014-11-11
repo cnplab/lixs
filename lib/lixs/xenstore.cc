@@ -1,8 +1,8 @@
 #include <lixs/xenstore.hh>
 
+#include <cerrno>
 #include <cstdio>
 #include <cstring>
-#include <errno.h>
 
 
 lixs::xenstore::xenstore(store& st, iomux& io)

@@ -4,10 +4,10 @@
 #include <lixs/events.hh>
 
 /* Must include errno before xs_wire.h, otherwise xsd_errors doesn't get defined */
-#include <errno.h>
+#include <cerrno>
+#include <cstdint>
 #include <list>
 #include <map>
-#include <stdint.h>
 #include <string>
 #include <utility>
 

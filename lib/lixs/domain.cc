@@ -1,10 +1,10 @@
 #include <lixs/domain.hh>
 #include <lixs/xenstore.hh>
 
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <errno.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>

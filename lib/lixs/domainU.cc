@@ -1,8 +1,8 @@
 #include <lixs/domain.hh>
 
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
-#include <errno.h>
 #include <fstream>
 #include <sys/mman.h>
 #include <sys/stat.h>

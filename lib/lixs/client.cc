@@ -1,11 +1,11 @@
 #include <lixs/client.hh>
 #include <lixs/xenstore.hh>
 
+#include <cerrno>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <errno.h>
 #include <map>
 #include <string>
 #include <utility>
