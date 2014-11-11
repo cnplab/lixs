@@ -28,7 +28,7 @@ public:
     int write(unsigned int tid, char* path, const char* val);
     int mkdir(unsigned int tid, char* path);
     int rm(unsigned int tid, char* path);
-    int directory(unsigned int tid, const char* path, const char* list[], int* nelems);
+    int directory(unsigned int tid, const char* path, std::list<std::string>& list);
 
     int transaction_start(unsigned int* tid);
     int transaction_end(unsigned int tid, bool commit);

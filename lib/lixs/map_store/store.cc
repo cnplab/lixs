@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <cerrno>
+#include <list>
 #include <string>
 
 
@@ -161,35 +162,25 @@ int lixs::map_store::store::del(int id, std::string key)
     return 0;
 }
 
-int lixs::map_store::store::get_childs(std::string key, const char* resp[], int nresp)
+void lixs::map_store::store::get_children(std::string key, std::list<std::string>& resp)
 {
-    int i;
     database::iterator it;
 
     if (key.back() == '/') {
         key.pop_back();
     }
 
-    for (it = data.begin(), i = 0; it != data.end() && i < nresp; it++) {
-        if (!it->second.deleted && it->first.find(key) == 0) {
-            const char *r = it->first.c_str() + key.length();
+    for (it = data.begin(); it != data.end(); it++) {
+        if (!it->second.deleted
+                && it->first.find(key) == 0
+                && it->first[key.length()] == '/'
+                && it->first.find('/', key.length() + 1) == std::string::npos) {
 
-            if (*r != '/') {
-                continue;
-            }
+            /* FIXME: handle transactions */
 
-            /* Remove the '/' */
-            r++;
-
-            /* We only want direct children */
-            if (strchr(r, '/'))
-                continue;
-
-            resp[i++] = r;
+            resp.push_back(it->first.substr(key.length() + 1));
         }
     }
-
-    return i;
 }
 
 void lixs::map_store::store::ensure_parents(int id, const std::string& key)

@@ -5,6 +5,7 @@
 #include <lixs/map_store/database.hh>
 #include <lixs/map_store/transaction.hh>
 
+#include <list>
 #include <map>
 #include <string>
 
@@ -26,7 +27,7 @@ public:
     int update(int id, std::string key, std::string val);
     int del(int id, std::string key);
 
-    int get_childs(std::string key, const char* resp[], int nresp);
+    void get_children(std::string key, std::list<std::string>& resp);
 
 private:
     database data;

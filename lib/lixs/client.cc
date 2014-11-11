@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <list>
 #include <map>
 #include <string>
 #include <utility>
@@ -360,15 +361,15 @@ void lixs::client::op_set_perms(void)
 
 void lixs::client::op_directory(void)
 {
-    int nresp = 1024;
-    const char* resp[1024];
+    std::list<std::string> resp;
+    std::list<std::string>::iterator it;
 
-    xs.directory(msg.tx_id, get_path(), resp, &nresp);
+    xs.directory(msg.tx_id, get_path(), resp);
 
     build_resp("");
 
-    for (int i = 0; i < nresp; i++) {
-        append_resp(resp[i]);
+    for (it = resp.begin(); it != resp.end(); it++) {
+        append_resp((*it).c_str());
         append_sep();
     }
 }

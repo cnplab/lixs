@@ -3,6 +3,7 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
+#include <list>
 
 
 lixs::xenstore::xenstore(store& st, iomux& io)
@@ -62,9 +63,9 @@ int lixs::xenstore::rm(unsigned int tid, char* path)
     return 0;
 }
 
-int lixs::xenstore::directory(unsigned int tid, const char* path, const char* list[], int* nelems)
+int lixs::xenstore::directory(unsigned int tid, const char* path, std::list<std::string>& list)
 {
-    (*nelems) = st.get_childs(path, list, *nelems);
+    st.get_children(path, list);
 
     return 0;
 }
