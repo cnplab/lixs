@@ -3,9 +3,8 @@
 #include <lixs/unix_client.hh>
 #include <lixs/xenstore.hh>
 
-#include <string>
 #include <cstddef>
-#include <cstdio>
+#include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
