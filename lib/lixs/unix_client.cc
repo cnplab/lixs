@@ -15,7 +15,9 @@ lixs::unix_client::unix_client(xenstore& xs, int fd)
     : client(xs)
 {
     asprintf(&cid, "C%d", fd);
+#ifdef DEBUG
     printf("%4s = new conn\n", cid);
+#endif
 
     body = abs_path;
 
@@ -30,7 +32,9 @@ lixs::unix_client::~unix_client()
     xs.remove(fd_cb);
     close(fd_cb.fd);
 
+#ifdef DEBUG
     printf("%4s = closed conn\n", cid);
+#endif
     free(cid);
 }
 

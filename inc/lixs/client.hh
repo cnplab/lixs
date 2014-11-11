@@ -116,7 +116,9 @@ private:
     void inline build_err(int err);
     void inline build_ack(void);
 
+#ifdef DEBUG
     void inline print_msg(char* pre);
+#endif
 
     client::state state;
     std::map<std::string, watch_cb_k> watches;

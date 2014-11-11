@@ -19,7 +19,9 @@ lixs::domain::domain(xenstore& xs, int domid)
     : client(xs), domid(domid)
 {
     asprintf(&cid, "D%d", domid);
+#ifdef DEBUG
     printf("%4s = new conn\n", cid);
+#endif
 
     xs.get_domain_path(domid, abs_path);
     body = abs_path + strlen(abs_path);
@@ -39,7 +41,9 @@ lixs::domain::~domain()
     xc_gnttab_close(xcg_handle);
     xc_evtchn_close(xce_handle);
 
+#ifdef DEBUG
     printf("%4s = closed conn\n", cid);
+#endif
     free(cid);
 }
 

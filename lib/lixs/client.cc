@@ -53,7 +53,9 @@ void lixs::client::watch_cb_k::operator()(const std::string& _path)
 {
     if (_client.state == rx_hdr) {
         _client.build_watch(_path.c_str() + (rel ? _client.body - _client.abs_path : 0), token.c_str());
+#ifdef DEBUG
         _client.print_msg((char*)">");
+#endif
 
         _client.write_buff = reinterpret_cast<char*>(&_client.msg);
         _client.write_bytes = sizeof(_client.msg);
@@ -113,9 +115,13 @@ void lixs::client::process(void)
                     break;
                 }
 
+#ifdef DEBUG
                 print_msg((char*)"<");
+#endif
                 handle_msg();
+#ifdef DEBUG
                 print_msg((char*)">");
+#endif
 
                 state = p_tx;
                 break;
@@ -159,7 +165,9 @@ void lixs::client::process(void)
                     std::pair<std::string, watch_cb_k&>& e = fire_lst.front();
 
                     build_watch(e.first.c_str() + (e.second.rel ? body - abs_path : 0), e.second.token.c_str());
+#ifdef DEBUG
                     print_msg((char*)">");
+#endif
 
                     fire_lst.pop_front();
                     state = tx_hdr;
@@ -492,6 +500,7 @@ void inline lixs::client::build_ack(void)
     memcpy(body, "OK", 2);
 }
 
+#ifdef DEBUG
 void inline lixs::client::print_msg(char* pre)
 {
     unsigned int i;
@@ -510,4 +519,5 @@ void inline lixs::client::print_msg(char* pre)
 
     printf("%s%s\" }\n", i == 0 ? "\"" : "", i > 0 && i == msg.len ? " " : "");
 }
+#endif
 
