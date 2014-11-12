@@ -22,7 +22,7 @@ void lixs::xenstore::run(void)
 {
     run_once_ev();
     io.handle();
-    fire_watches();
+    wmgr.fire();
 }
 
 int lixs::xenstore::read(unsigned int tid, std::string path, std::string& res)
@@ -33,9 +33,8 @@ int lixs::xenstore::read(unsigned int tid, std::string path, std::string& res)
 int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
 {
     st.update(tid, path, val);
-    /* FIXME: don't enqueue watch if tid != 0 */
-    enqueue_watch(path);
-    enqueue_watch_parents(path);
+    wmgr.enqueue(path);
+    wmgr.enqueue_parents(path);
 
     return 0;
 }
@@ -47,8 +46,8 @@ int lixs::xenstore::mkdir(unsigned int tid, char* path)
     st.create(tid, path, created);
 
     if (created) {
-        enqueue_watch(path);
-        enqueue_watch_parents(path);
+        wmgr.enqueue(path);
+        wmgr.enqueue_parents(path);
     }
 
     return 0;
@@ -59,9 +58,9 @@ int lixs::xenstore::rm(unsigned int tid, char* path)
     /* FIXME: delete all the descendents */
 
     st.del(tid, path);
-    enqueue_watch(path);
-    enqueue_watch_parents(path);
-    enqueue_watch_children(path);
+    wmgr.enqueue(path);
+    wmgr.enqueue_parents(path);
+    wmgr.enqueue_children(path);
 
     return 0;
 }
@@ -94,15 +93,12 @@ int lixs::xenstore::transaction_end(unsigned int tid, bool commit)
 
 void lixs::xenstore::watch(watch_cb_k& cb)
 {
-    watch_lst[cb.path].insert(&cb);
-    enqueue_watch(const_cast<char*>(cb.path.c_str()));
+    wmgr.add(cb);
 }
 
 void lixs::xenstore::unwatch(watch_cb_k& cb)
 {
-    /* FIXME: must remove watches from fire list */
-
-    watch_lst[cb.path].erase(&cb);
+    wmgr.del(cb);
 }
 
 void lixs::xenstore::get_domain_path(int domid, char *buff)
@@ -118,13 +114,13 @@ void lixs::xenstore::get_domain_path(char* domid, char (&buff)[32])
 void lixs::xenstore::introduce_domain(int domid, int mfn , int port)
 {
     xen->create_domain(domid, port);
-    enqueue_watch((char*)"@introduceDomain");
+    wmgr.enqueue((char*)"@introduceDomain");
 }
 
 void lixs::xenstore::release_domain(int domid)
 {
     xen->destroy_domain(domid);
-    enqueue_watch((char*)"@releaseDomain");
+    wmgr.enqueue((char*)"@releaseDomain");
 }
 
 void lixs::xenstore::once(ev_cb_k& cb)
@@ -163,64 +159,5 @@ void lixs::xenstore::run_once_ev(void)
         (*i)->operator()();
     }
     once_lst.clear();
-}
-
-void lixs::xenstore::fire_watches(void)
-{
-    std::map<watch_cb_k*, std::set<std::string> >::iterator i;
-    std::set<std::string>::iterator j;
-
-    for (i = fire_lst.begin(); i != fire_lst.end(); i++) {
-        for (j = i->second.begin(); j != i->second.end();) {
-            i->first->operator()(*j);
-            i->second.erase(j++);
-        }
-    }
-
-    fire_lst.clear();
-}
-
-void lixs::xenstore::enqueue_watch(const std::string& path)
-{
-    std::set<watch_cb_k*>::iterator it;
-
-    for (it = watch_lst[path].begin(); it != watch_lst[path].end(); it++) {
-        fire_lst[(*it)].insert(path);
-    }
-}
-
-void lixs::xenstore::enqueue_watch_parents(const std::string& path)
-{
-    std::set<watch_cb_k*>::iterator it;
-    std::string parent = path;
-    size_t pos;
-
-    for ( ; ; ) {
-        pos = parent.rfind('/');
-        if (pos == std::string::npos) {
-            break;
-        }
-
-        parent = parent.substr(0, pos);
-
-        for (it = watch_lst[parent].begin(); it != watch_lst[parent].end(); it++) {
-            fire_lst[(*it)].insert(path);
-        }
-    }
-}
-
-void lixs::xenstore::enqueue_watch_children(const std::string& path)
-{
-    std::map<std::string, std::set<watch_cb_k*> >::iterator i;
-    std::set<watch_cb_k*>::iterator j;
-
-    for (i = watch_lst.begin(); i != watch_lst.end(); i++) {
-        if (i->first.find(path) == 0
-                && i->first[path.length()] == '/') {
-            for (j = i->second.begin(); j != i->second.end(); j++) {
-                fire_lst[(*j)].insert((*j)->path);
-            }
-        }
-    }
 }
 

@@ -6,10 +6,9 @@
 #include <lixs/store.hh>
 #include <lixs/unix_server.hh>
 #include <lixs/xen_server.hh>
+#include <lixs/watch_mgr.hh>
 
 #include <list>
-#include <map>
-#include <set>
 
 
 namespace lixs {
@@ -53,17 +52,12 @@ public:
 private:
     void run_once_ev(void);
 
-    void fire_watches(void);
-    void enqueue_watch(const std::string& path);
-    void enqueue_watch_parents(const std::string& path);
-    void enqueue_watch_children(const std::string& path);
-
     store& st;
+
+    watch_mgr wmgr;
 
     iomux& io;
     std::list<ev_cb_k*> once_lst;
-    std::map<std::string, std::set<watch_cb_k*> > watch_lst;
-    std::map<watch_cb_k*, std::set<std::string> > fire_lst;
 
     unix_server* nix;
     xen_server* xen;
