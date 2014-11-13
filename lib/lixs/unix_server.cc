@@ -14,8 +14,6 @@
 lixs::unix_server::unix_server(xenstore& xs, std::string rw_path, std::string ro_path)
     : xs(xs), rw_path(rw_path), rw_cb(*this), ro_path(ro_path), ro_cb(*this)
 {
-    xs.set_unix_server(this);
-
     struct sockaddr_un sock_addr = { 0 };
     sock_addr.sun_family = AF_UNIX;
 

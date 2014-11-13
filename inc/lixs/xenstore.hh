@@ -4,7 +4,6 @@
 #include <lixs/events.hh>
 #include <lixs/iomux.hh>
 #include <lixs/store.hh>
-#include <lixs/unix_server.hh>
 #include <lixs/xen_server.hh>
 #include <lixs/watch_mgr.hh>
 
@@ -13,7 +12,6 @@
 
 namespace lixs {
 
-class unix_server;
 class xen_server;
 
 class xenstore {
@@ -47,7 +45,6 @@ public:
     void remove(fd_cb_k& cb);
 
     void set_xen_server(xen_server* server);
-    void set_unix_server(unix_server* server);
 
 private:
     void run_once_ev(void);
@@ -59,7 +56,6 @@ private:
     iomux& io;
     std::list<ev_cb_k*> once_lst;
 
-    unix_server* nix;
     xen_server* xen;
 };
 

@@ -7,7 +7,7 @@
 
 
 lixs::xenstore::xenstore(store& st, iomux& io)
-    : st(st), io(io), nix(NULL), xen(NULL)
+    : st(st), io(io), xen(NULL)
 {
     bool created;
 
@@ -141,11 +141,6 @@ void lixs::xenstore::set(fd_cb_k& cb)
 void lixs::xenstore::remove(fd_cb_k& cb)
 {
     io.remove(cb);
-}
-
-void lixs::xenstore::set_unix_server(unix_server* server)
-{
-    nix = server;
 }
 
 void lixs::xenstore::set_xen_server(xen_server* server)

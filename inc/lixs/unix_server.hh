@@ -10,8 +10,6 @@
 
 namespace lixs {
 
-class xenstore;
-
 class unix_server : public server {
 public:
     unix_server(xenstore& xs, std::string rw_path, std::string ro_path);
