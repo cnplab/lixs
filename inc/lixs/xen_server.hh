@@ -3,7 +3,6 @@
 
 #include <lixs/domain.hh>
 #include <lixs/event_mgr.hh>
-#include <lixs/server.hh>
 #include <lixs/xenstore.hh>
 
 #include <map>
@@ -13,7 +12,7 @@ namespace lixs {
 
 class domain;
 
-class xen_server : public server {
+class xen_server {
 public:
     xen_server(xenstore& xs, event_mgr& emgr);
     ~xen_server(void);

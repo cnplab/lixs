@@ -3,7 +3,6 @@
 
 #include <lixs/events.hh>
 #include <lixs/event_mgr.hh>
-#include <lixs/server.hh>
 #include <lixs/xenstore.hh>
 
 #include <string>
@@ -11,7 +10,7 @@
 
 namespace lixs {
 
-class unix_server : public server {
+class unix_server {
 public:
     unix_server(xenstore& xs, event_mgr& emgr, std::string rw_path, std::string ro_path);
     ~unix_server();
