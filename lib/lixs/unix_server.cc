@@ -11,8 +11,9 @@
 #include <unistd.h>
 
 
-lixs::unix_server::unix_server(xenstore& xs, std::string rw_path, std::string ro_path)
-    : xs(xs), rw_path(rw_path), rw_cb(*this), ro_path(ro_path), ro_cb(*this)
+lixs::unix_server::unix_server(xenstore& xs, event_mgr& emgr,
+        std::string rw_path, std::string ro_path)
+    : xs(xs), emgr(emgr), rw_path(rw_path), rw_cb(*this), ro_path(ro_path), ro_cb(*this)
 {
     struct sockaddr_un sock_addr = { 0 };
     sock_addr.sun_family = AF_UNIX;
@@ -25,7 +26,7 @@ lixs::unix_server::unix_server(xenstore& xs, std::string rw_path, std::string ro
     listen(rw_cb.fd, 1);
     rw_cb.ev_read = true;
     rw_cb.ev_write = false;
-    xs.add(rw_cb);
+    emgr.io_add(rw_cb);
 
     /* ro socket */
     ro_cb.fd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -35,7 +36,7 @@ lixs::unix_server::unix_server(xenstore& xs, std::string rw_path, std::string ro
     listen(ro_cb.fd, 1);
     ro_cb.ev_read = true;
     ro_cb.ev_write = false;
-    xs.add(ro_cb);
+    emgr.io_add(ro_cb);
 }
 
 lixs::unix_server::~unix_server(void)
@@ -50,6 +51,6 @@ lixs::unix_server::~unix_server(void)
 
 void lixs::unix_server::fd_cb_k::operator()(bool read, bool write)
 {
-    unix_client::create(server.xs, accept(fd, NULL, NULL));
+    unix_client::create(server.xs, server.emgr, accept(fd, NULL, NULL));
 }
 

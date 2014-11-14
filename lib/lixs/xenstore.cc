@@ -6,8 +6,8 @@
 #include <list>
 
 
-lixs::xenstore::xenstore(store& st, iomux& io)
-    : st(st), io(io), xen(NULL)
+lixs::xenstore::xenstore(store& st, event_mgr& emgr)
+    : st(st), emgr(emgr), wmgr(emgr), xen(NULL)
 {
     bool created;
 
@@ -16,13 +16,6 @@ lixs::xenstore::xenstore(store& st, iomux& io)
 
 lixs::xenstore::~xenstore()
 {
-}
-
-void lixs::xenstore::run(void)
-{
-    run_once_ev();
-    io.handle();
-    wmgr.fire();
 }
 
 int lixs::xenstore::read(unsigned int tid, std::string path, std::string& res)
@@ -123,36 +116,8 @@ void lixs::xenstore::release_domain(int domid)
     wmgr.enqueue((char*)"@releaseDomain");
 }
 
-void lixs::xenstore::once(ev_cb_k& cb)
-{
-    once_lst.push_front(&cb);
-}
-
-void lixs::xenstore::add(fd_cb_k& cb)
-{
-    io.add(cb);
-}
-
-void lixs::xenstore::set(fd_cb_k& cb)
-{
-    io.set(cb);
-}
-
-void lixs::xenstore::remove(fd_cb_k& cb)
-{
-    io.remove(cb);
-}
-
 void lixs::xenstore::set_xen_server(xen_server* server)
 {
     xen = server;
-}
-
-void lixs::xenstore::run_once_ev(void)
-{
-    for(std::list<ev_cb_k*>::iterator i = once_lst.begin(); i != once_lst.end(); i++) {
-        (*i)->operator()();
-    }
-    once_lst.clear();
 }
 

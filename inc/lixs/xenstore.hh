@@ -1,8 +1,7 @@
 #ifndef __LIXS_XENSTORE_HH__
 #define __LIXS_XENSTORE_HH__
 
-#include <lixs/events.hh>
-#include <lixs/iomux.hh>
+#include <lixs/event_mgr.hh>
 #include <lixs/store.hh>
 #include <lixs/xen_server.hh>
 #include <lixs/watch_mgr.hh>
@@ -16,10 +15,8 @@ class xen_server;
 
 class xenstore {
 public:
-    xenstore(store& st, iomux& io);
+    xenstore(store& st, event_mgr& emgr);
     ~xenstore();
-
-    void run(void);
 
     int read(unsigned int tid, std::string path, std::string& res);
     int write(unsigned int tid, char* path, const char* val);
@@ -38,23 +35,13 @@ public:
     void introduce_domain(int domid, int mfn, int port);
     void release_domain(int domid);
 
-    void once(ev_cb_k& cb);
-
-    void add(fd_cb_k& cd);
-    void set(fd_cb_k& cb);
-    void remove(fd_cb_k& cb);
-
     void set_xen_server(xen_server* server);
 
 private:
-    void run_once_ev(void);
-
     store& st;
 
+    event_mgr& emgr;
     watch_mgr wmgr;
-
-    iomux& io;
-    std::list<ev_cb_k*> once_lst;
 
     xen_server* xen;
 };

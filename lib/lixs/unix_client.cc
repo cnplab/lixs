@@ -11,8 +11,8 @@
 #include <unistd.h>
 
 
-lixs::unix_client::unix_client(xenstore& xs, int fd)
-    : client(xs)
+lixs::unix_client::unix_client(xenstore& xs, event_mgr& emgr, int fd)
+    : client(xs, emgr)
 {
     asprintf(&cid, "C%d", fd);
 #ifdef DEBUG
@@ -24,12 +24,12 @@ lixs::unix_client::unix_client(xenstore& xs, int fd)
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 
     fd_cb.fd = fd;
-    xs.add(fd_cb);
+    emgr.io_add(fd_cb);
 }
 
 lixs::unix_client::~unix_client()
 {
-    xs.remove(fd_cb);
+    emgr.io_remove(fd_cb);
     close(fd_cb.fd);
 
 #ifdef DEBUG
@@ -38,9 +38,9 @@ lixs::unix_client::~unix_client()
     free(cid);
 }
 
-void lixs::unix_client::create(xenstore& xs, int fd)
+void lixs::unix_client::create(xenstore& xs, event_mgr& emgr, int fd)
 {
-    new unix_client(xs, fd);
+    new unix_client(xs, emgr, fd);
 }
 
 
@@ -69,7 +69,7 @@ bool lixs::unix_client::read(char*& buff, int& bytes)
             /* need to wait */
             if (!fd_cb.ev_read) {
                 fd_cb.ev_read = true;
-                xs.set(fd_cb);
+                emgr.io_set(fd_cb);
             }
         } else {
             /* error condition */
@@ -85,13 +85,13 @@ bool lixs::unix_client::read(char*& buff, int& bytes)
 
             if (fd_cb.ev_read) {
                 fd_cb.ev_read = false;
-                xs.set(fd_cb);
+                emgr.io_set(fd_cb);
             }
         } else {
             /* need to wait */
             if (!fd_cb.ev_read) {
                 fd_cb.ev_read = true;
-                xs.set(fd_cb);
+                emgr.io_set(fd_cb);
             }
         }
     }
@@ -124,7 +124,7 @@ bool lixs::unix_client::write(char*& buff, int& bytes)
             /* need to wait */
             if (!fd_cb.ev_write) {
                 fd_cb.ev_write = true;
-                xs.set(fd_cb);
+                emgr.io_set(fd_cb);
             }
         } else {
             /* error condition */
@@ -140,13 +140,13 @@ bool lixs::unix_client::write(char*& buff, int& bytes)
 
             if (fd_cb.ev_write) {
                 fd_cb.ev_write = false;
-                xs.set(fd_cb);
+                emgr.io_set(fd_cb);
             }
         } else {
             /* need to wait */
             if (!fd_cb.ev_write) {
                 fd_cb.ev_write = true;
-                xs.set(fd_cb);
+                emgr.io_set(fd_cb);
             }
         }
     }

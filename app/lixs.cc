@@ -1,5 +1,6 @@
 #include <lixs/client.hh>
 #include <lixs/epoll.hh>
+#include <lixs/event_mgr.hh>
 #include <lixs/map_store/store.hh>
 #include <lixs/unix_server.hh>
 #include <lixs/xenstore.hh>
@@ -45,15 +46,16 @@ int main(int argc, char** argv)
     signal(SIGPIPE, SIG_IGN);
 
     lixs::epoll epoll;
+    lixs::event_mgr emgr(epoll);
     lixs::map_store::store store;
-    lixs::xenstore xs(store, epoll);
+    lixs::xenstore xs(store, emgr);
 
-    lixs::unix_server nix(xs, "/run/xenstored/socket", "/run/xenstored/socket_ro");
-    lixs::xen_server xen(xs);
+    lixs::unix_server nix(xs, emgr, "/run/xenstored/socket", "/run/xenstored/socket_ro");
+    lixs::xen_server xen(xs, emgr);
 
     server_stoped = false;
     while(!server_stoped) {
-        xs.run();
+        emgr.run();
     }
 
     return 0;

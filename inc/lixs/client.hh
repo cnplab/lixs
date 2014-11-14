@@ -2,6 +2,7 @@
 #define __LIXS_CLIENT_HH__
 
 #include <lixs/events.hh>
+#include <lixs/event_mgr.hh>
 
 /* Must include errno before xs_wire.h, otherwise xsd_errors doesn't get defined */
 #include <cerrno>
@@ -56,7 +57,7 @@ protected:
         bool rel;
     };
 
-    client(xenstore& xs);
+    client(xenstore& xs, event_mgr& emgr);
     virtual ~client();
 
     virtual void process_events(bool read, bool write);
@@ -66,6 +67,7 @@ protected:
     char* cid;
 
     xenstore& xs;
+    event_mgr& emgr;
     fd_cb_k fd_cb;
     ev_cb_k ev_cb;
 

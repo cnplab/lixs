@@ -20,8 +20,8 @@ extern "C" {
 const std::string lixs::domain0::xsd_kva_path = "/proc/xen/xsd_kva";
 const std::string lixs::domain0::xsd_port_path = "/proc/xen/xsd_port";
 
-lixs::domain0::domain0(xenstore& xs)
-    : domain(xs, 0)
+lixs::domain0::domain0(xenstore& xs, event_mgr& emgr)
+    : domain(xs, emgr, 0)
 {
     map_ring();
 
@@ -32,7 +32,7 @@ lixs::domain0::domain0(xenstore& xs)
     virq_port = xc_evtchn_bind_virq(xce_handle, VIRQ_DOM_EXC);
 
     fd_cb.ev_read = true;
-    xs.set(fd_cb);
+    emgr.io_set(fd_cb);
 }
 
 lixs::domain0::~domain0()

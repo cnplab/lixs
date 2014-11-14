@@ -2,6 +2,7 @@
 #define __LIXS_WATCH_MGR_HH__
 
 #include <lixs/events.hh>
+#include <lixs/event_mgr.hh>
 
 #include <list>
 #include <map>
@@ -14,6 +15,9 @@ namespace lixs {
 class watch_mgr
 {
 public:
+    watch_mgr(event_mgr& emgr);
+    ~watch_mgr();
+
     /* FIXME: handle transactions */
 
     void add(watch_cb_k& cb);
@@ -23,11 +27,10 @@ public:
     void enqueue_parents(const std::string& path);
     void enqueue_children(const std::string& path);
 
-    void fire(void);
-
 private:
+    event_mgr& emgr;
+
     std::map<std::string, std::set<watch_cb_k*> > watch_lst;
-    std::map<watch_cb_k*, std::set<std::string> > fire_lst;
 };
 
 } /* namespace lixs */

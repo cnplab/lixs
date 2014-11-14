@@ -1,4 +1,5 @@
 #include <lixs/domain.hh>
+#include <lixs/event_mgr.hh>
 #include <lixs/xenstore.hh>
 
 #include <cerrno>
@@ -15,8 +16,8 @@ extern "C" {
 }
 
 
-lixs::domain::domain(xenstore& xs, int domid)
-    : client(xs), domid(domid)
+lixs::domain::domain(xenstore& xs, event_mgr& emgr, int domid)
+    : client(xs, emgr), domid(domid)
 {
     asprintf(&cid, "D%d", domid);
 #ifdef DEBUG
@@ -31,12 +32,12 @@ lixs::domain::domain(xenstore& xs, int domid)
     xce_handle = xc_evtchn_open(NULL, 0);
 
     fd_cb.fd = xc_evtchn_fd(xce_handle);
-    xs.add(fd_cb);
+    emgr.io_add(fd_cb);
 }
 
 lixs::domain::~domain()
 {
-    xs.remove(fd_cb);
+    emgr.io_remove(fd_cb);
 
     xc_gnttab_close(xcg_handle);
     xc_evtchn_close(xce_handle);
@@ -76,12 +77,12 @@ bool lixs::domain::read(char*& buff, int& bytes)
 
     if (bytes > 0 && !fd_cb.ev_read) {
         fd_cb.ev_read = true;
-        xs.set(fd_cb);
+        emgr.io_set(fd_cb);
     }
 
     if (bytes == 0 && fd_cb.ev_read) {
         fd_cb.ev_read = false;
-        xs.set(fd_cb);
+        emgr.io_set(fd_cb);
     }
 
     if (len > 0) {
@@ -120,12 +121,12 @@ bool lixs::domain::write(char*& buff, int& bytes)
 
     if (bytes > 0 && !fd_cb.ev_write) {
         fd_cb.ev_write = true;
-        xs.set(fd_cb);
+        emgr.io_set(fd_cb);
     }
 
     if (bytes == 0 && fd_cb.ev_write) {
         fd_cb.ev_write = false;
-        xs.set(fd_cb);
+        emgr.io_set(fd_cb);
     }
 
     if (len > 0) {

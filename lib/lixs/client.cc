@@ -1,4 +1,5 @@
 #include <lixs/client.hh>
+#include <lixs/event_mgr.hh>
 #include <lixs/xenstore.hh>
 
 #include <cerrno>
@@ -16,11 +17,11 @@ extern "C" {
 }
 
 
-lixs::client::client(xenstore& xs)
-    : cid((char*)"X"), xs(xs), fd_cb(*this), ev_cb(*this), alive(true),
+lixs::client::client(xenstore& xs, event_mgr& emgr)
+    : cid((char*)"X"), xs(xs), emgr(emgr), fd_cb(*this), ev_cb(*this), alive(true),
     abs_path(buff + sizeof(xsd_sockmsg)), state(p_rx), msg(*((xsd_sockmsg*)buff))
 {
-    xs.once(ev_cb);
+    emgr.enqueue_event(ev_cb);
 }
 
 lixs::client::~client()

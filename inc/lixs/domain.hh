@@ -2,6 +2,7 @@
 #define __LIXS_DOMAIN_HH__
 
 #include <lixs/client.hh>
+#include <lixs/event_mgr.hh>
 #include <lixs/xenstore.hh>
 
 extern "C" {
@@ -14,7 +15,7 @@ namespace lixs {
 
 class domain : public client {
 public:
-    domain(xenstore& xs, int domid);
+    domain(xenstore& xs, event_mgr& emgr, int domid);
     virtual ~domain();
 
     bool read(char*& buff, int& bytes);
@@ -33,13 +34,13 @@ protected:
 
 class domainU : public domain {
 public:
-    domainU(xenstore& xs, int domid, int port);
+    domainU(xenstore& xs, event_mgr& emgr, int domid, int port);
     ~domainU();
 };
 
 class domain0 : public domain {
 public:
-    domain0(xenstore&xs);
+    domain0(xenstore&xs, event_mgr& emgr);
     ~domain0();
 
     void process_events(bool read, bool write);
