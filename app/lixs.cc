@@ -1,4 +1,3 @@
-#include <lixs/client.hh>
 #include <lixs/epoll.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/map_store/store.hh>
