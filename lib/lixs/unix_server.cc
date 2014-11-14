@@ -1,4 +1,3 @@
-#include <lixs/iomux.hh>
 #include <lixs/unix_server.hh>
 #include <lixs/unix_client.hh>
 #include <lixs/xenstore.hh>
