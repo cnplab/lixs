@@ -20,7 +20,7 @@ public:
 
     bool read(char*& buff, int& bytes);
     bool write(char*& buff, int& bytes);
-    virtual void process_events(bool read, bool write);
+    void process_events(bool read, bool write);
 
 protected:
     xc_gnttab *xcg_handle;
@@ -43,8 +43,6 @@ public:
     domain0(xenstore&xs, event_mgr& emgr);
     ~domain0();
 
-    void process_events(bool read, bool write);
-
 private:
     void map_ring(void);
     void unmap_ring(void);
@@ -53,8 +51,6 @@ private:
 
     static const std::string xsd_kva_path;
     static const std::string xsd_port_path;
-
-    evtchn_port_t virq_port;
 };
 
 } /* namespace lixs */

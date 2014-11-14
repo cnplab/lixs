@@ -29,8 +29,6 @@ lixs::domain0::domain0(xenstore& xs, event_mgr& emgr)
     local_port = xc_evtchn_bind_interdomain(xce_handle, 0, remote_port);
     xc_evtchn_notify(xce_handle, local_port);
 
-    virq_port = xc_evtchn_bind_virq(xce_handle, VIRQ_DOM_EXC);
-
     fd_cb.ev_read = true;
     emgr.io_set(fd_cb);
 }
@@ -63,15 +61,5 @@ evtchn_port_t lixs::domain0::xenbus_evtchn(void)
     file >> port;
 
     return port;
-}
-
-void lixs::domain0::process_events(bool read, bool write)
-{
-    evtchn_port_t port = xc_evtchn_pending(xce_handle);
-    xc_evtchn_unmask(xce_handle, port);
-
-    if (port == virq_port) {
-        /* TODO: implement domain cleanup */
-    }
 }
 

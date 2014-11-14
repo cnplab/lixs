@@ -2,6 +2,7 @@
 #include <lixs/event_mgr.hh>
 #include <lixs/map_store/store.hh>
 #include <lixs/unix_server.hh>
+#include <lixs/virq_handler.hh>
 #include <lixs/xenstore.hh>
 #include <lixs/xen_server.hh>
 
@@ -50,6 +51,7 @@ int main(int argc, char** argv)
     lixs::xenstore xs(store, emgr);
 
     lixs::unix_server nix(xs, emgr, "/run/xenstored/socket", "/run/xenstored/socket_ro");
+    lixs::virq_handler dom_exc(xs, emgr);
     lixs::xen_server xen(xs, emgr);
 
     server_stoped = false;
