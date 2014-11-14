@@ -392,7 +392,7 @@ void lixs::client::op_watch(void)
     it = watches.find(path);
     if (it == watches.end()) {
         it = watches.insert(
-                std::make_pair<std::string, watch_cb_k>(
+                std::pair<std::string, watch_cb_k>(
                     path, watch_cb_k(*this, path, body + strlen(body) + 1, path != body))).first;
         xs.watch(it->second);
     }
