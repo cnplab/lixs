@@ -39,21 +39,6 @@ public:
     ~domainU();
 };
 
-class domain0 : public domain {
-public:
-    domain0(xenstore&xs, event_mgr& emgr);
-    ~domain0();
-
-private:
-    void map_ring(void);
-    void unmap_ring(void);
-
-    static evtchn_port_t xenbus_evtchn(void);
-
-    static const std::string xsd_kva_path;
-    static const std::string xsd_port_path;
-};
-
 } /* namespace lixs */
 
 #endif /* __LIXS_DOMAIN_HH__ */

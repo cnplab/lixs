@@ -10,8 +10,6 @@ lixs::xen_server::xen_server(xenstore& xs, event_mgr& emgr)
     : xs(xs), emgr(emgr)
 {
     xs.set_xen_server(this);
-
-    new domain0(xs, emgr);
 }
 
 lixs::xen_server::~xen_server(void)

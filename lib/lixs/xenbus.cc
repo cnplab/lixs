@@ -1,4 +1,4 @@
-#include <lixs/domain.hh>
+#include <lixs/xenbus.hh>
 
 #include <cerrno>
 #include <cstdlib>
@@ -17,10 +17,10 @@ extern "C" {
 }
 
 
-const std::string lixs::domain0::xsd_kva_path = "/proc/xen/xsd_kva";
-const std::string lixs::domain0::xsd_port_path = "/proc/xen/xsd_port";
+const std::string lixs::xenbus::xsd_kva_path = "/proc/xen/xsd_kva";
+const std::string lixs::xenbus::xsd_port_path = "/proc/xen/xsd_port";
 
-lixs::domain0::domain0(xenstore& xs, event_mgr& emgr)
+lixs::xenbus::xenbus(xenstore& xs, event_mgr& emgr)
     : domain(xs, emgr, 0)
 {
     map_ring();
@@ -33,12 +33,12 @@ lixs::domain0::domain0(xenstore& xs, event_mgr& emgr)
     emgr.io_set(fd_cb);
 }
 
-lixs::domain0::~domain0()
+lixs::xenbus::~xenbus()
 {
     unmap_ring();
 }
 
-void lixs::domain0::map_ring(void)
+void lixs::xenbus::map_ring(void)
 {
     int fd;
 
@@ -48,12 +48,12 @@ void lixs::domain0::map_ring(void)
     close(fd);
 }
 
-void lixs::domain0::unmap_ring(void)
+void lixs::xenbus::unmap_ring(void)
 {
     munmap(interface, getpagesize());
 }
 
-evtchn_port_t lixs::domain0::xenbus_evtchn(void)
+evtchn_port_t lixs::xenbus::xenbus_evtchn(void)
 {
     evtchn_port_t port;
 
