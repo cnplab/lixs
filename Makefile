@@ -42,10 +42,13 @@ $(TST): % : %.o $(LIB)
 
 
 clean:
-	rm -rf $(patsubst %, %.o, $(APP)) $(LIB)
+	rm -rf $(patsubst %, %.o, $(APP))
+	rm -rf $(patsubst %, %.o, $(TST))
+	rm -rf $(LIB)
 
 distclean: clean
 	rm -rf $(APP)
+	rm -rf $(TST)
 
 
 .PHONY: all clean distclean
