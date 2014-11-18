@@ -63,6 +63,7 @@ protected:
     virtual void process_events(bool read, bool write);
     virtual bool read(char*& buff, int& bytes) = 0;
     virtual bool write(char*& buff, int& bytes) = 0;
+    virtual bool is_alive(void) = 0;
 
     char* cid;
 
@@ -70,8 +71,6 @@ protected:
     event_mgr& emgr;
     fd_cb_k fd_cb;
     ev_cb_k ev_cb;
-
-    bool alive;
 
     char* read_buff;
     char* write_buff;

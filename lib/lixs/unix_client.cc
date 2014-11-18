@@ -12,7 +12,7 @@
 
 
 lixs::unix_client::unix_client(xenstore& xs, event_mgr& emgr, int fd)
-    : client(xs, emgr)
+    : client(xs, emgr), alive(true)
 {
     asprintf(&cid, "C%d", fd);
 #ifdef DEBUG
@@ -152,5 +152,10 @@ bool lixs::unix_client::write(char*& buff, int& bytes)
     }
 
     return done;
+}
+
+bool lixs::unix_client::is_alive(void)
+{
+    return alive;
 }
 

@@ -142,3 +142,8 @@ void lixs::domain::process_events(bool read, bool write)
     xc_evtchn_unmask(xce_handle, port);
 }
 
+bool lixs::domain::is_alive(void)
+{
+    return true;
+}
+

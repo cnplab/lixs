@@ -18,6 +18,10 @@ private:
 
     bool read(char*& buff, int& bytes);
     bool write(char*& buff, int& bytes);
+    bool is_alive(void);
+
+private:
+    bool alive;
 };
 
 } /* namespace lixs */

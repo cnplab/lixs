@@ -21,6 +21,7 @@ public:
     bool read(char*& buff, int& bytes);
     bool write(char*& buff, int& bytes);
     void process_events(bool read, bool write);
+    bool is_alive(void);
 
 protected:
     xc_gnttab *xcg_handle;

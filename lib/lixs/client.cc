@@ -18,7 +18,7 @@ extern "C" {
 
 
 lixs::client::client(xenstore& xs, event_mgr& emgr)
-    : cid((char*)"X"), xs(xs), emgr(emgr), fd_cb(*this), ev_cb(*this), alive(true),
+    : cid((char*)"X"), xs(xs), emgr(emgr), fd_cb(*this), ev_cb(*this),
     abs_path(buff + sizeof(xsd_sockmsg)), state(p_rx), msg(*((xsd_sockmsg*)buff))
 {
     emgr.enqueue_event(ev_cb);
@@ -44,7 +44,7 @@ void lixs::client::fd_cb_k::operator()(bool read, bool write)
     _client.process_events(read, write);
     _client.process();
 
-    if (!_client.alive) {
+    if (!_client.is_alive()) {
         /* TODO: destroy without suicide */
         delete &_client;
     }
@@ -86,7 +86,7 @@ void lixs::client::process(void)
     bool ret;
     bool yield = false;
 
-    while (!yield && alive) {
+    while (!yield && is_alive()) {
         switch(state) {
             case p_rx:
                 read_buff = reinterpret_cast<char*>(&msg);
