@@ -27,6 +27,7 @@ private:
     struct xenstore_domain_interface* interface;
 };
 
+
 class domainU : public domain<foreign_ring_mapper> {
 public:
     domainU(xenstore& xs, event_mgr& emgr, domid_t domid, evtchn_port_t port);

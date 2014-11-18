@@ -18,7 +18,6 @@ extern "C" {
 
 
 const std::string lixs::xenbus_mapper::xsd_kva_path = "/proc/xen/xsd_kva";
-const std::string lixs::xenbus::xsd_port_path = "/proc/xen/xsd_port";
 
 lixs::xenbus_mapper::xenbus_mapper(domid_t domid)
 {
@@ -42,15 +41,11 @@ xenstore_domain_interface* lixs::xenbus_mapper::get(void)
 }
 
 
-lixs::xenbus::xenbus(xenstore& xs, event_mgr& emgr)
-    : domain(xs, emgr, 0)
-{
-    remote_port = xenbus_evtchn();
-    local_port = xc_evtchn_bind_interdomain(xce_handle, 0, remote_port);
-    xc_evtchn_notify(xce_handle, local_port);
+const std::string lixs::xenbus::xsd_port_path = "/proc/xen/xsd_port";
 
-    fd_cb.ev_read = true;
-    emgr.io_set(fd_cb);
+lixs::xenbus::xenbus(xenstore& xs, event_mgr& emgr)
+    : domain(xs, emgr, 0, xenbus_evtchn())
+{
 }
 
 lixs::xenbus::~xenbus()

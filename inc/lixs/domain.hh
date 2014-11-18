@@ -18,8 +18,7 @@ template < class MAPPER >
 class domain : public MAPPER, public client {
 public:
     template < typename... ARGS >
-    domain(xenstore& xs, event_mgr& emgr, domid_t domid, ARGS&&... args);
-
+    domain(xenstore& xs, event_mgr& emgr, domid_t domid, evtchn_port_t port, ARGS&&... args);
     ~domain();
 
     bool read(char*& buff, int& bytes);
@@ -39,8 +38,9 @@ protected:
 
 template < typename MAPPER >
 template < typename... ARGS >
-domain<MAPPER>::domain(xenstore& xs, event_mgr& emgr, domid_t domid, ARGS&&... args)
-    : MAPPER(domid, std::forward<ARGS>(args)...), client(xs, emgr), domid(domid)
+domain<MAPPER>::domain(xenstore& xs, event_mgr& emgr, domid_t domid, evtchn_port_t port,
+        ARGS&&... args)
+    : MAPPER(domid, std::forward<ARGS>(args)...), client(xs, emgr), domid(domid), remote_port(port)
 {
     asprintf(&cid, "D%d", domid);
 #ifdef DEBUG
@@ -52,6 +52,9 @@ domain<MAPPER>::domain(xenstore& xs, event_mgr& emgr, domid_t domid, ARGS&&... a
     *body++ = '/';
 
     xce_handle = xc_evtchn_open(NULL, 0);
+    local_port = xc_evtchn_bind_interdomain(xce_handle, domid, remote_port);
+    xc_evtchn_unmask(xce_handle, local_port);
+
     interface = MAPPER::get();
 
     fd_cb.fd = xc_evtchn_fd(xce_handle);

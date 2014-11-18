@@ -27,18 +27,16 @@ private:
     xenstore_domain_interface* interface;
 };
 
+
 class xenbus : public domain<xenbus_mapper> {
 public:
     xenbus(xenstore& xs, event_mgr& emgr);
     ~xenbus();
 
 private:
-    void map_ring(void);
-    void unmap_ring(void);
+    static evtchn_port_t xenbus_evtchn(void);
 
     static const std::string xsd_port_path;
-
-    static evtchn_port_t xenbus_evtchn(void);
 };
 
 } /* namespace lixs */

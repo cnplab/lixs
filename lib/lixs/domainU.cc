@@ -30,13 +30,10 @@ xenstore_domain_interface* lixs::foreign_ring_mapper::get(void)
     return interface;
 }
 
-lixs::domainU::domainU(xenstore& xs, event_mgr& emgr, domid_t domid, evtchn_port_t port)
-    : domain(xs, emgr, domid)
-{
-    remote_port = port;
-    local_port = xc_evtchn_bind_interdomain(xce_handle, domid, remote_port);
 
-    xc_evtchn_unmask(xce_handle, local_port);
+lixs::domainU::domainU(xenstore& xs, event_mgr& emgr, domid_t domid, evtchn_port_t port)
+    : domain(xs, emgr, domid, port)
+{
 }
 
 lixs::domainU::~domainU()
