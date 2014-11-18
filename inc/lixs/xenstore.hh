@@ -1,6 +1,7 @@
 #ifndef __LIXS_XENSTORE_HH__
 #define __LIXS_XENSTORE_HH__
 
+#include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/store.hh>
 #include <lixs/watch_mgr.hh>
@@ -9,8 +10,6 @@
 
 
 namespace lixs {
-
-class xen_server;
 
 class xenstore {
 public:
@@ -34,15 +33,12 @@ public:
     void introduce_domain(int domid, int mfn, int port);
     void release_domain(int domid);
 
-    void set_xen_server(xen_server* server);
-
 private:
     store& st;
 
     event_mgr& emgr;
     watch_mgr wmgr;
-
-    xen_server* xen;
+    domain_mgr dmgr;
 };
 
 } /* namespace lixs */

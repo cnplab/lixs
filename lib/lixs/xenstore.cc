@@ -1,5 +1,5 @@
 #include <lixs/xenstore.hh>
-#include <lixs/xen_server.hh>
+#include <lixs/domain_mgr.hh>
 
 #include <cerrno>
 #include <cstdio>
@@ -8,7 +8,7 @@
 
 
 lixs::xenstore::xenstore(store& st, event_mgr& emgr)
-    : st(st), emgr(emgr), wmgr(emgr), xen(NULL)
+    : st(st), emgr(emgr), wmgr(emgr), dmgr(*this, emgr)
 {
     bool created;
 
@@ -107,18 +107,13 @@ void lixs::xenstore::get_domain_path(char* domid, char (&buff)[32])
 
 void lixs::xenstore::introduce_domain(int domid, int mfn , int port)
 {
-    xen->create_domain(domid, port);
+    dmgr.create_domain(domid, port);
     wmgr.enqueue((char*)"@introduceDomain");
 }
 
 void lixs::xenstore::release_domain(int domid)
 {
-    xen->destroy_domain(domid);
+    dmgr.destroy_domain(domid);
     wmgr.enqueue((char*)"@releaseDomain");
-}
-
-void lixs::xenstore::set_xen_server(xen_server* server)
-{
-    xen = server;
 }
 
