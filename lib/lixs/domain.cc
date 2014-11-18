@@ -16,7 +16,7 @@ extern "C" {
 }
 
 
-lixs::domain::domain(xenstore& xs, event_mgr& emgr, int domid)
+lixs::domain::domain(xenstore& xs, event_mgr& emgr, domid_t domid)
     : client(xs, emgr), domid(domid)
 {
     asprintf(&cid, "D%d", domid);

@@ -15,7 +15,7 @@ namespace lixs {
 
 class domain : public client {
 public:
-    domain(xenstore& xs, event_mgr& emgr, int domid);
+    domain(xenstore& xs, event_mgr& emgr, domid_t domid);
     virtual ~domain();
 
     bool read(char*& buff, int& bytes);
@@ -35,7 +35,7 @@ protected:
 
 class domainU : public domain {
 public:
-    domainU(xenstore& xs, event_mgr& emgr, int domid, int port);
+    domainU(xenstore& xs, event_mgr& emgr, domid_t domid, evtchn_port_t port);
     ~domainU();
 };
 

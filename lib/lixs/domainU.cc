@@ -15,7 +15,7 @@ extern "C" {
 }
 
 
-lixs::domainU::domainU(xenstore& xs, event_mgr& emgr, int domid, int port)
+lixs::domainU::domainU(xenstore& xs, event_mgr& emgr, domid_t domid, evtchn_port_t port)
     : domain(xs, emgr, domid)
 {
     interface = (xenstore_domain_interface*) xc_gnttab_map_grant_ref(xcg_handle, domid,
