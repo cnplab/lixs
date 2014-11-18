@@ -14,7 +14,20 @@ extern "C" {
 
 namespace lixs {
 
-class xenbus : public domain {
+class xenbus_mapper {
+public:
+    xenbus_mapper(domid_t domid);
+    ~xenbus_mapper();
+
+    xenstore_domain_interface* get(void);
+
+private:
+    static const std::string xsd_kva_path;
+
+    xenstore_domain_interface* interface;
+};
+
+class xenbus : public domain<xenbus_mapper> {
 public:
     xenbus(xenstore& xs, event_mgr& emgr);
     ~xenbus();
@@ -23,10 +36,9 @@ private:
     void map_ring(void);
     void unmap_ring(void);
 
-    static evtchn_port_t xenbus_evtchn(void);
-
-    static const std::string xsd_kva_path;
     static const std::string xsd_port_path;
+
+    static evtchn_port_t xenbus_evtchn(void);
 };
 
 } /* namespace lixs */

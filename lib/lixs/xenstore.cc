@@ -1,4 +1,5 @@
 #include <lixs/xenstore.hh>
+#include <lixs/xen_server.hh>
 
 #include <cerrno>
 #include <cstdio>

@@ -1,16 +1,15 @@
 #ifndef __LIXS_XEN_SERVER_HH__
 #define __LIXS_XEN_SERVER_HH__
 
-#include <lixs/domain.hh>
+#include <lixs/domainU.hh>
 #include <lixs/event_mgr.hh>
-#include <lixs/xenstore.hh>
 
 #include <map>
 
 
 namespace lixs {
 
-class domain;
+class xenstore;
 
 class xen_server {
 public:
@@ -24,7 +23,7 @@ private:
     xenstore& xs;
     event_mgr& emgr;
 
-    std::map<int, lixs::domain*> domlist;
+    std::map<int, lixs::domainU*> domlist;
 };
 
 } /* namespace lixs */

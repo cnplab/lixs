@@ -17,14 +17,34 @@ extern "C" {
 }
 
 
-const std::string lixs::xenbus::xsd_kva_path = "/proc/xen/xsd_kva";
+const std::string lixs::xenbus_mapper::xsd_kva_path = "/proc/xen/xsd_kva";
 const std::string lixs::xenbus::xsd_port_path = "/proc/xen/xsd_port";
+
+lixs::xenbus_mapper::xenbus_mapper(domid_t domid)
+{
+    int fd;
+
+    fd = open(xsd_kva_path.c_str(), O_RDWR);
+    interface = (xenstore_domain_interface*) mmap(
+            NULL, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+    close(fd);
+}
+
+lixs::xenbus_mapper::~xenbus_mapper(void)
+{
+    munmap(interface, getpagesize());
+    interface = NULL;
+}
+
+xenstore_domain_interface* lixs::xenbus_mapper::get(void)
+{
+    return interface;
+}
+
 
 lixs::xenbus::xenbus(xenstore& xs, event_mgr& emgr)
     : domain(xs, emgr, 0)
 {
-    map_ring();
-
     remote_port = xenbus_evtchn();
     local_port = xc_evtchn_bind_interdomain(xce_handle, 0, remote_port);
     xc_evtchn_notify(xce_handle, local_port);
@@ -35,22 +55,6 @@ lixs::xenbus::xenbus(xenstore& xs, event_mgr& emgr)
 
 lixs::xenbus::~xenbus()
 {
-    unmap_ring();
-}
-
-void lixs::xenbus::map_ring(void)
-{
-    int fd;
-
-    fd = open(xsd_kva_path.c_str(), O_RDWR);
-    interface = (xenstore_domain_interface*) mmap(
-            NULL, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-    close(fd);
-}
-
-void lixs::xenbus::unmap_ring(void)
-{
-    munmap(interface, getpagesize());
 }
 
 evtchn_port_t lixs::xenbus::xenbus_evtchn(void)

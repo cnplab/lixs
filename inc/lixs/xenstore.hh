@@ -3,7 +3,6 @@
 
 #include <lixs/event_mgr.hh>
 #include <lixs/store.hh>
-#include <lixs/xen_server.hh>
 #include <lixs/watch_mgr.hh>
 
 #include <list>
