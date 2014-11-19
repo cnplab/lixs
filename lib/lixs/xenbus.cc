@@ -24,8 +24,10 @@ lixs::xenbus_mapper::xenbus_mapper(domid_t domid)
     int fd;
 
     fd = open(xsd_kva_path.c_str(), O_RDWR);
+
     interface = (xenstore_domain_interface*) mmap(
             NULL, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+
     close(fd);
 }
 
@@ -35,21 +37,28 @@ lixs::xenbus_mapper::~xenbus_mapper(void)
     interface = NULL;
 }
 
-xenstore_domain_interface* lixs::xenbus_mapper::get(void)
-{
-    return interface;
-}
-
 
 const std::string lixs::xenbus::xsd_port_path = "/proc/xen/xsd_port";
 
 lixs::xenbus::xenbus(xenstore& xs, event_mgr& emgr)
-    : domain(xs, emgr, 0, xenbus_evtchn())
+    : client(xs, emgr, 0, xenbus_evtchn())
 {
+#ifdef DEBUG
+    asprintf(&cid, "D%d", 0);
+    printf("%4s = new conn\n", cid);
+#endif
+
+    xs.get_domain_path(0, abs_path);
+    body = abs_path + strlen(abs_path);
+    *body++ = '/';
 }
 
 lixs::xenbus::~xenbus()
 {
+#ifdef DEBUG
+    printf("%4s = closed conn\n", cid);
+    free(cid);
+#endif
 }
 
 evtchn_port_t lixs::xenbus::xenbus_evtchn(void)

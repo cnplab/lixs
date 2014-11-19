@@ -1,4 +1,6 @@
-#include <lixs/domainU.hh>
+#include <lixs/domain.hh>
+#include <lixs/event_mgr.hh>
+#include <lixs/xenstore.hh>
 
 #include <cerrno>
 
@@ -25,18 +27,25 @@ lixs::foreign_ring_mapper::~foreign_ring_mapper()
     xcg_handle = NULL;
 }
 
-xenstore_domain_interface* lixs::foreign_ring_mapper::get(void)
+
+lixs::domain::domain(xenstore& xs, event_mgr& emgr, domid_t domid, evtchn_port_t port)
+    : client(xs, emgr, domid, port)
 {
-    return interface;
+#ifdef DEBUG
+    asprintf(&cid, "D%d", domid);
+    printf("%4s = new conn\n", cid);
+#endif
+
+    xs.get_domain_path(domid, abs_path);
+    body = abs_path + strlen(abs_path);
+    *body++ = '/';
 }
 
-
-lixs::domainU::domainU(xenstore& xs, event_mgr& emgr, domid_t domid, evtchn_port_t port)
-    : domain(xs, emgr, domid, port)
+lixs::domain::~domain()
 {
-}
-
-lixs::domainU::~domainU()
-{
+#ifdef DEBUG
+    printf("%4s = closed conn\n", cid);
+    free(cid);
+#endif
 }
 

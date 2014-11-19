@@ -6,6 +6,11 @@
 
 namespace lixs {
 
+class functor {
+public:
+    virtual void operator()(void) = 0;
+};
+
 class ev_cb_k {
 public:
     virtual void operator()(void) = 0;

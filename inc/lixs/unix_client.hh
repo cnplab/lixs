@@ -3,25 +3,19 @@
 
 #include <lixs/client.hh>
 #include <lixs/event_mgr.hh>
+#include <lixs/sock_conn.hh>
 #include <lixs/xenstore.hh>
 
 
 namespace lixs {
 
-class unix_client : public client {
+class unix_client : public client<sock_conn> {
 public:
     static void create(xenstore& xs, event_mgr& emgr, int fd);
 
 private:
     unix_client(xenstore& xs, event_mgr& emgr, int fd);
     ~unix_client();
-
-    bool read(char*& buff, int& bytes);
-    bool write(char*& buff, int& bytes);
-    bool is_alive(void);
-
-private:
-    bool alive;
 };
 
 } /* namespace lixs */

@@ -1,4 +1,4 @@
-#include <lixs/domainU.hh>
+#include <lixs/domain.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/xen_server.hh>
 
@@ -18,12 +18,12 @@ lixs::xen_server::~xen_server(void)
 
 void lixs::xen_server::create_domain(int domid, int port)
 {
-    domlist.insert(std::pair<int, lixs::domainU*>(domid, new domainU(xs, emgr, domid, port)));
+    domlist.insert(std::pair<int, lixs::domain*>(domid, new domain(xs, emgr, domid, port)));
 }
 
 void lixs::xen_server::destroy_domain(int domid)
 {
-    std::map<int, lixs::domainU*>::iterator it;
+    std::map<int, lixs::domain*>::iterator it;
 
     it = domlist.find(domid);
 

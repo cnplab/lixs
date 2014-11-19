@@ -12,150 +12,26 @@
 
 
 lixs::unix_client::unix_client(xenstore& xs, event_mgr& emgr, int fd)
-    : client(xs, emgr), alive(true)
+    : client(xs, emgr, fd)
 {
-    asprintf(&cid, "C%d", fd);
 #ifdef DEBUG
+    asprintf(&cid, "C%d", fd);
     printf("%4s = new conn\n", cid);
 #endif
 
     body = abs_path;
-
-    fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
-
-    fd_cb.fd = fd;
-    emgr.io_add(fd_cb);
 }
 
 lixs::unix_client::~unix_client()
 {
-    emgr.io_remove(fd_cb);
-    close(fd_cb.fd);
-
 #ifdef DEBUG
     printf("%4s = closed conn\n", cid);
-#endif
     free(cid);
+#endif
 }
 
 void lixs::unix_client::create(xenstore& xs, event_mgr& emgr, int fd)
 {
     new unix_client(xs, emgr, fd);
-}
-
-
-bool lixs::unix_client::read(char*& buff, int& bytes)
-{
-    bool done;
-    ssize_t len;
-
-    if (!alive) {
-        return false;
-    }
-
-    if (bytes == 0) {
-        return true;
-    }
-
-    done = false;
-
-    len = recv(fd_cb.fd, buff, bytes, 0);
-
-    if (len == 0) {
-        /* socket is closed */
-        alive = false;
-    } else if (len < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            /* need to wait */
-            if (!fd_cb.ev_read) {
-                fd_cb.ev_read = true;
-                emgr.io_set(fd_cb);
-            }
-        } else {
-            /* error condition */
-            alive = false;
-        }
-    } else {
-        /* read successful */
-        buff += len;
-        bytes -= len;
-
-        if (bytes == 0) {
-            done = true;
-
-            if (fd_cb.ev_read) {
-                fd_cb.ev_read = false;
-                emgr.io_set(fd_cb);
-            }
-        } else {
-            /* need to wait */
-            if (!fd_cb.ev_read) {
-                fd_cb.ev_read = true;
-                emgr.io_set(fd_cb);
-            }
-        }
-    }
-
-    return done;
-}
-
-bool lixs::unix_client::write(char*& buff, int& bytes)
-{
-    bool done;
-    ssize_t len;
-
-    if (!alive) {
-        return false;
-    }
-
-    if (bytes == 0) {
-        return true;
-    }
-
-    done = false;
-
-    len = send(fd_cb.fd, buff, bytes, 0);
-
-    if (len == 0) {
-        /* socket is closed */
-        alive = false;
-    } else if (len < 0) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            /* need to wait */
-            if (!fd_cb.ev_write) {
-                fd_cb.ev_write = true;
-                emgr.io_set(fd_cb);
-            }
-        } else {
-            /* error condition */
-            alive = false;
-        }
-    } else {
-        /* write successful */
-        buff += len;
-        bytes -= len;
-
-        if (bytes == 0) {
-            done = true;
-
-            if (fd_cb.ev_write) {
-                fd_cb.ev_write = false;
-                emgr.io_set(fd_cb);
-            }
-        } else {
-            /* need to wait */
-            if (!fd_cb.ev_write) {
-                fd_cb.ev_write = true;
-                emgr.io_set(fd_cb);
-            }
-        }
-    }
-
-    return done;
-}
-
-bool lixs::unix_client::is_alive(void)
-{
-    return alive;
 }
 
