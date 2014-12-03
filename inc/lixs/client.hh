@@ -28,7 +28,18 @@ namespace lixs {
 
 template < typename CONNECTION >
 class client : public CONNECTION, public functor {
+public:
+    template < typename... ARGS >
+    client(xenstore& xs, event_mgr& emgr, ARGS&&... args);
+    virtual ~client();
+
 protected:
+    char* cid;
+
+    char* const abs_path;
+    char* body;
+
+private:
     class ev_cb_k : public lixs::ev_cb_k {
     public:
         ev_cb_k(client& client)
@@ -52,25 +63,6 @@ protected:
         bool rel;
     };
 
-    template < typename... ARGS >
-    client(xenstore& xs, event_mgr& emgr, ARGS&&... args);
-    virtual ~client();
-
-    char* cid;
-
-    xenstore& xs;
-    event_mgr& emgr;
-    ev_cb_k ev_cb;
-
-    char* read_buff;
-    char* write_buff;
-    int read_bytes;
-    int write_bytes;
-
-    char* const abs_path;
-    char* body;
-
-private:
     enum state {
         p_rx,
         rx_hdr,
@@ -113,6 +105,10 @@ private:
     void inline print_msg(char* pre);
 #endif
 
+    xenstore& xs;
+    event_mgr& emgr;
+    ev_cb_k ev_cb;
+
     client::state state;
     std::map<std::string, watch_cb_k> watches;
     std::list<std::pair<std::string, watch_cb_k&> > fire_lst;
@@ -122,6 +118,11 @@ private:
      */
     char buff[sizeof(xsd_sockmsg) + 64 + XENSTORE_PAYLOAD_MAX + 1];
     struct xsd_sockmsg& msg;
+
+    char* read_buff;
+    char* write_buff;
+    int read_bytes;
+    int write_bytes;
 };
 
 template < typename CONNECTION >
@@ -161,8 +162,9 @@ template < typename CONNECTION >
 template < typename... ARGS >
 client<CONNECTION>::client(xenstore& xs, event_mgr& emgr, ARGS&&... args)
     : CONNECTION(*this, emgr, std::forward<ARGS>(args)...),
+    abs_path(buff + sizeof(xsd_sockmsg)), body(abs_path),
     cid((char*)"X"), xs(xs), emgr(emgr), ev_cb(*this),
-    abs_path(buff + sizeof(xsd_sockmsg)), state(p_rx), msg(*((xsd_sockmsg*)buff))
+    state(p_rx), msg(*((xsd_sockmsg*)buff))
 {
     emgr.enqueue_event(ev_cb);
 }
