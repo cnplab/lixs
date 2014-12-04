@@ -23,14 +23,18 @@ public:
     void add(watch_cb_k& cb);
     void del(watch_cb_k& cb);
 
-    void enqueue(const std::string& path);
-    void enqueue_parents(const std::string& path);
-    void enqueue_children(const std::string& path);
+    void enqueue(unsigned int tid, const std::string& path);
+    void enqueue_parents(unsigned int tid, const std::string& path);
+    void enqueue_children(unsigned int tid, const std::string& path);
+
+    void transaction_commit(unsigned int tid);
+    void transaction_abort(unsigned int tid);
 
 private:
     event_mgr& emgr;
 
     std::map<std::string, std::set<watch_cb_k*> > watch_lst;
+    std::map<int, std::list<std::pair<watch_cb_k&, std::string> > > fire_lst;
 };
 
 } /* namespace lixs */

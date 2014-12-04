@@ -27,8 +27,8 @@ int lixs::xenstore::read(unsigned int tid, std::string path, std::string& res)
 int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
 {
     st.update(tid, path, val);
-    wmgr.enqueue(path);
-    wmgr.enqueue_parents(path);
+    wmgr.enqueue(tid, path);
+    wmgr.enqueue_parents(tid, path);
 
     return 0;
 }
@@ -40,8 +40,8 @@ int lixs::xenstore::mkdir(unsigned int tid, char* path)
     st.create(tid, path, created);
 
     if (created) {
-        wmgr.enqueue(path);
-        wmgr.enqueue_parents(path);
+        wmgr.enqueue(tid, path);
+        wmgr.enqueue_parents(tid, path);
     }
 
     return 0;
@@ -52,9 +52,9 @@ int lixs::xenstore::rm(unsigned int tid, char* path)
     /* FIXME: delete all the descendents */
 
     st.del(tid, path);
-    wmgr.enqueue(path);
-    wmgr.enqueue_parents(path);
-    wmgr.enqueue_children(path);
+    wmgr.enqueue(tid, path);
+    wmgr.enqueue_parents(tid, path);
+    wmgr.enqueue_children(tid, path);
 
     return 0;
 }
@@ -78,9 +78,17 @@ int lixs::xenstore::transaction_end(unsigned int tid, bool commit)
     if (commit) {
         bool success;
         st.merge(tid, success);
+
+        if (success) {
+            wmgr.transaction_commit(tid);
+        } else {
+            wmgr.transaction_abort(tid);
+        }
+
         return success ? 0 : EAGAIN;
     } else {
         st.abort(tid);
+        wmgr.transaction_abort(tid);
         return 0;
     }
 }
@@ -108,13 +116,13 @@ void lixs::xenstore::get_domain_path(char* domid, char (&buff)[32])
 void lixs::xenstore::introduce_domain(int domid, int mfn , int port)
 {
     dmgr.create_domain(domid, port);
-    wmgr.enqueue((char*)"@introduceDomain");
+    wmgr.enqueue(0, (char*)"@introduceDomain");
 }
 
 void lixs::xenstore::release_domain(int domid)
 {
     dmgr.destroy_domain(domid);
-    wmgr.enqueue((char*)"@releaseDomain");
+    wmgr.enqueue(0, (char*)"@releaseDomain");
 }
 
 void lixs::xenstore::exists_domain(int domid, bool& exists)
