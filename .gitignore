@@ -1,6 +1,7 @@
 app/lixs
 test/nix
 test/trans
+test/isintro
 
 *.o
 
