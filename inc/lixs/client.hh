@@ -91,6 +91,7 @@ private:
     void op_unwatch(void);
     void op_introduce_domain(void);
     void op_release_domain(void);
+    void op_is_domain_introduced(void);
 
     char* get_path(void);
 
@@ -348,8 +349,7 @@ void client<CONNECTION>::handle_msg(void)
         break;
 
         case XS_IS_DOMAIN_INTRODUCED:
-            printf("client: XS_IS_DOMAIN_INTRODUCED\n");
-            build_err(ENOSYS);
+            op_is_domain_introduced();
         break;
 
         case XS_RELEASE:
@@ -544,6 +544,22 @@ void client<CONNECTION>::op_introduce_domain(void)
     xs.introduce_domain(atoi(body), atoi(arg2), atoi(arg3));
 
     build_ack();
+}
+
+template < typename CONNECTION >
+void client<CONNECTION>::op_is_domain_introduced(void)
+{
+    bool exists;
+
+    xs.exists_domain(atoi(body), exists);
+
+    if (exists) {
+        build_resp("T");
+        append_sep();
+    } else {
+        build_resp("F");
+        append_sep();
+    }
 }
 
 template < typename CONNECTION >
