@@ -627,8 +627,8 @@ void inline client<CONNECTION>::build_err(int err)
 template < typename CONNECTION >
 void inline client<CONNECTION>::build_ack(void)
 {
-    msg.len = 2;
-    memcpy(body, "OK", 2);
+    msg.len = 3;
+    memcpy(body, "OK", 3);
 }
 
 #ifdef DEBUG
