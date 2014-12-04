@@ -619,7 +619,7 @@ void inline client<CONNECTION>::build_err(int err)
         }
     }
 
-    msg.len = strlen(resp);
+    msg.len = strlen(resp) + 1;
     msg.type = XS_ERROR;
     memcpy(body, resp, msg.len);
 }
