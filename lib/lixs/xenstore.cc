@@ -117,3 +117,8 @@ void lixs::xenstore::release_domain(int domid)
     wmgr.enqueue((char*)"@releaseDomain");
 }
 
+void lixs::xenstore::exists_domain(int domid, bool& exists)
+{
+    dmgr.exists_domain(domid, exists);
+}
+

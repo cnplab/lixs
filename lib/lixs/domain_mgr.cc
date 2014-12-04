@@ -36,3 +36,8 @@ void lixs::domain_mgr::destroy_domain(domid_t domid)
     }
 }
 
+void lixs::domain_mgr::exists_domain(domid_t domid, bool& exists)
+{
+    exists = (domlist.find(domid) != domlist.end());
+}
+

@@ -23,6 +23,7 @@ public:
 
     void create_domain(domid_t domid, evtchn_port_t port);
     void destroy_domain(domid_t domid);
+    void exists_domain(domid_t domid, bool& exists);
 
 private:
     xenstore& xs;

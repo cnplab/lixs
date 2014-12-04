@@ -32,6 +32,7 @@ public:
     void get_domain_path(char* domid, char (&buff)[32]);
     void introduce_domain(int domid, int mfn, int port);
     void release_domain(int domid);
+    void exists_domain(int domid, bool& exists);
 
 private:
     store& st;
