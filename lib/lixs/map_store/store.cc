@@ -104,7 +104,7 @@ int lixs::map_store::store::read(int id, std::string key, std::string& val)
     if (id == 0) {
         it = data.find(key);
 
-        if (it == data.end()) {
+        if (it == data.end() || it->second.deleted) {
             return ENOENT;
         } else {
             it->second.read();
@@ -115,7 +115,7 @@ int lixs::map_store::store::read(int id, std::string key, std::string& val)
         transaction& trans = ltrans[id];
 
         it = trans.data.find(key);
-        if (it != trans.data.end() && it->second.w_time > 0) {
+        if (it != trans.data.end() && !it->second.deleted && it->second.w_time > 0) {
             it->second.read();
             val = it->second.val;
             return 0;
