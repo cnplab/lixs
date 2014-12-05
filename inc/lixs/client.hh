@@ -611,6 +611,8 @@ void inline client<CONNECTION>::build_watch(const char* path, const char* token)
     int token_len = strlen(token);
 
     msg.type = XS_WATCH_EVENT;
+    msg.req_id = 0;
+    msg.tx_id = 0;
 
     memcpy(body, path, path_len);
     body[path_len] = '\0';
