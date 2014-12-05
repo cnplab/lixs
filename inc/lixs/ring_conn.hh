@@ -47,6 +47,7 @@ ring_conn<MAPPER>::ring_conn(functor& cb, event_mgr& emgr, domid_t domid, evtchn
     xce_handle = xc_evtchn_open(NULL, 0);
     local_port = xc_evtchn_bind_interdomain(xce_handle, domid, remote_port);
     xc_evtchn_unmask(xce_handle, local_port);
+    xc_evtchn_notify(xce_handle, local_port);
 
     fd = xc_evtchn_fd(xce_handle);
     emgr.io_add(*this);
