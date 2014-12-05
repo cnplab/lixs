@@ -24,6 +24,7 @@ void lixs::watch_mgr::del(watch_cb_k& cb)
 {
     /* FIXME: must remove watches from fire list */
     watch_lst[cb.path].erase(&cb);
+    emgr.dequeue_watch(cb);
 }
 
 void lixs::watch_mgr::enqueue(unsigned int tid, const std::string& path)
