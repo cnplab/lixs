@@ -280,7 +280,7 @@ void client<CONNECTION>::process(void)
 #endif
 
                     fire_lst.pop_front();
-                    state = tx_hdr;
+                    state = p_tx;
                 }
                 break;
         }
