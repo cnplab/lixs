@@ -43,6 +43,11 @@ void lixs::event_mgr::enqueue_watch(watch_cb_k& cb, const std::string& path)
     watch_list[&cb].insert(path);
 }
 
+void lixs::event_mgr::dequeue_watch(watch_cb_k& cb)
+{
+    watch_list.erase(&cb);
+}
+
 void lixs::event_mgr::fire_events(void)
 {
     std::list<ev_cb_k*>::iterator it;

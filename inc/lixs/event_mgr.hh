@@ -31,6 +31,7 @@ public:
 
     void enqueue_event(ev_cb_k& cb);
     void enqueue_watch(watch_cb_k& cb, const std::string& path);
+    void dequeue_watch(watch_cb_k& cb);
 
 private:
     iomux& io;
