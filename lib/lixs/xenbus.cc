@@ -1,15 +1,13 @@
 #include <lixs/xenbus.hh>
+#include <lixs/event_mgr.hh>
+#include <lixs/xenstore.hh>
 
 #include <cerrno>
-#include <cstdlib>
-#include <cstring>
+#include <cstddef>
 #include <fcntl.h>
 #include <fstream>
+#include <string>
 #include <sys/mman.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 extern "C" {
 #include <xenctrl.h>
