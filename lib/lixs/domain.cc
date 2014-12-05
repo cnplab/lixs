@@ -3,6 +3,8 @@
 #include <lixs/xenstore.hh>
 
 #include <cerrno>
+#include <cstddef>
+#include <sys/mman.h>
 
 extern "C" {
 #include <xenctrl.h>
