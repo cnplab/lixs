@@ -163,8 +163,8 @@ template < typename CONNECTION >
 template < typename... ARGS >
 client<CONNECTION>::client(xenstore& xs, event_mgr& emgr, ARGS&&... args)
     : CONNECTION(*this, emgr, std::forward<ARGS>(args)...),
-    abs_path(buff + sizeof(xsd_sockmsg)), body(abs_path),
-    cid((char*)"X"), xs(xs), emgr(emgr), ev_cb(*this),
+    cid((char*)"X"), abs_path(buff + sizeof(xsd_sockmsg)), body(abs_path),
+    xs(xs), emgr(emgr), ev_cb(*this),
     state(p_rx), msg(*((xsd_sockmsg*)buff))
 {
     emgr.enqueue_event(ev_cb);
