@@ -573,7 +573,7 @@ void client<CONNECTION>::op_release_domain(void)
 template < typename CONNECTION >
 char* client<CONNECTION>::get_path()
 {
-    if (body[0] == '/') {
+    if (body[0] == '/' || body[0] == '@') {
         return body;
     } else {
         return abs_path;
