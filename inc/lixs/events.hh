@@ -22,6 +22,7 @@ public:
         : fd(-1), ev_read(false), ev_write(false)
     { };
 
+    /* FIXME: Provide information about errors (e.g. EPOLLERR) */
     virtual void operator() (bool ev_read, bool ev_write) = 0;
 
     int fd;

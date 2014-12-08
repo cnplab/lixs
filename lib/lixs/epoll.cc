@@ -43,8 +43,10 @@ void lixs::epoll::handle(void)
     n_events = epoll_wait(epfd, epev, epoll_max_events, timeout);
 
     for (int i = 0; i < n_events; i++) {
-        cb = reinterpret_cast<fd_cb_k*>(epev[i].data.ptr);
-        cb->operator()(is_read(epev[i].events), is_write(epev[i].events));
+        if (!is_err(epev[i].events)) {
+            cb = reinterpret_cast<fd_cb_k*>(epev[i].data.ptr);
+            cb->operator()(is_read(epev[i].events), is_write(epev[i].events));
+        }
     }
 }
 
@@ -61,5 +63,10 @@ bool inline lixs::epoll::is_read(const uint32_t ev)
 bool inline lixs::epoll::is_write(const uint32_t ev)
 {
     return (ev && EPOLLOUT != 0);
+}
+
+bool inline lixs::epoll::is_err(const uint32_t ev)
+{
+    return (ev & EPOLLERR) != 0;
 }
 
