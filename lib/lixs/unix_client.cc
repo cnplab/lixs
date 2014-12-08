@@ -19,7 +19,10 @@ lixs::unix_client::unix_client(xenstore& xs, event_mgr& emgr, int fd)
     printf("%4s = new conn\n", cid);
 #endif
 
-    body = abs_path;
+    std::string path = "/local/domain/0/";
+
+    memcpy(abs_path, path.c_str(), path.length());
+    body = abs_path + path.length();
 }
 
 lixs::unix_client::~unix_client()
