@@ -57,12 +57,12 @@ uint32_t inline lixs::epoll::get_events(const fd_cb_k& cb)
 
 bool inline lixs::epoll::is_read(const uint32_t ev)
 {
-    return (ev && EPOLLIN != 0);
+    return (ev & EPOLLIN) != 0;
 }
 
 bool inline lixs::epoll::is_write(const uint32_t ev)
 {
-    return (ev && EPOLLOUT != 0);
+    return (ev & EPOLLOUT) != 0;
 }
 
 bool inline lixs::epoll::is_err(const uint32_t ev)
