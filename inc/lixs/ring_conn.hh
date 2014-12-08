@@ -72,14 +72,14 @@ template < typename MAPPER >
 bool ring_conn<MAPPER>::read(char*& buff, int& bytes)
 {
     uint32_t len;
-	XENSTORE_RING_IDX cons;
-	XENSTORE_RING_IDX prod;
+    XENSTORE_RING_IDX cons;
+    XENSTORE_RING_IDX prod;
 
-	cons = MAPPER::interface->req_cons;
-	prod = MAPPER::interface->req_prod;
-	xen_mb();
+    cons = MAPPER::interface->req_cons;
+    prod = MAPPER::interface->req_prod;
+    xen_mb();
 
-	len = XENSTORE_RING_SIZE - MASK_XENSTORE_IDX(cons);
+    len = XENSTORE_RING_SIZE - MASK_XENSTORE_IDX(cons);
     if ((prod - cons) < len) {
         len = prod - cons;
     }
@@ -89,9 +89,9 @@ bool ring_conn<MAPPER>::read(char*& buff, int& bytes)
     }
 
     memcpy(buff, MAPPER::interface->req + MASK_XENSTORE_IDX(cons), len);
-	xen_mb();
+    xen_mb();
 
-	MAPPER::interface->req_cons += len;
+    MAPPER::interface->req_cons += len;
 
     bytes -= len;
     buff += len;
@@ -117,12 +117,12 @@ template < typename MAPPER >
 bool ring_conn<MAPPER>::write(char*& buff, int& bytes)
 {
     uint32_t len;
-	XENSTORE_RING_IDX cons;
-	XENSTORE_RING_IDX prod;
+    XENSTORE_RING_IDX cons;
+    XENSTORE_RING_IDX prod;
 
-	cons = MAPPER::interface->rsp_cons;
-	prod = MAPPER::interface->rsp_prod;
-	xen_mb();
+    cons = MAPPER::interface->rsp_cons;
+    prod = MAPPER::interface->rsp_prod;
+    xen_mb();
 
     len = XENSTORE_RING_SIZE - MASK_XENSTORE_IDX(prod);
     if ((XENSTORE_RING_SIZE - (prod - cons)) < len) {
@@ -136,7 +136,7 @@ bool ring_conn<MAPPER>::write(char*& buff, int& bytes)
     memcpy(MAPPER::interface->rsp + MASK_XENSTORE_IDX(prod), buff, len);
     xen_mb();
 
-	MAPPER::interface->rsp_prod += len;
+    MAPPER::interface->rsp_prod += len;
 
     bytes -= len;
     buff += len;
