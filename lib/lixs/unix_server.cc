@@ -1,5 +1,5 @@
 #include <lixs/unix_server.hh>
-#include <lixs/unix_client.hh>
+#include <lixs/sock_client.hh>
 #include <lixs/xenstore.hh>
 
 #include <cstddef>
@@ -50,6 +50,6 @@ lixs::unix_server::~unix_server(void)
 
 void lixs::unix_server::fd_cb_k::operator()(bool read, bool write)
 {
-    unix_client::create(server.xs, server.emgr, accept(fd, NULL, NULL));
+    sock_client::create(server.xs, server.emgr, accept(fd, NULL, NULL));
 }
 

@@ -1,4 +1,4 @@
-#include <lixs/unix_client.hh>
+#include <lixs/sock_client.hh>
 #include <lixs/xenstore.hh>
 
 #include <cerrno>
@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 
-lixs::unix_client::unix_client(xenstore& xs, event_mgr& emgr, int fd)
+lixs::sock_client::sock_client(xenstore& xs, event_mgr& emgr, int fd)
     : client(xs, emgr, fd)
 {
 #ifdef DEBUG
@@ -25,7 +25,7 @@ lixs::unix_client::unix_client(xenstore& xs, event_mgr& emgr, int fd)
     body = abs_path + path.length();
 }
 
-lixs::unix_client::~unix_client()
+lixs::sock_client::~sock_client()
 {
 #ifdef DEBUG
     printf("%4s = closed conn\n", cid);
@@ -33,8 +33,8 @@ lixs::unix_client::~unix_client()
 #endif
 }
 
-void lixs::unix_client::create(xenstore& xs, event_mgr& emgr, int fd)
+void lixs::sock_client::create(xenstore& xs, event_mgr& emgr, int fd)
 {
-    new unix_client(xs, emgr, fd);
+    new sock_client(xs, emgr, fd);
 }
 
