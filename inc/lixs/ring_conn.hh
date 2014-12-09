@@ -28,6 +28,9 @@ public:
     bool is_alive(void);
 
 private:
+    bool read_chunck(char*& buff, int& bytes);
+    bool write_chunck(char*& buff, int& bytes);
+
     functor& cb;
     event_mgr& emgr;
 
@@ -69,7 +72,7 @@ void ring_conn<MAPPER>::operator()(bool read, bool write)
 }
 
 template < typename MAPPER >
-bool ring_conn<MAPPER>::read(char*& buff, int& bytes)
+bool ring_conn<MAPPER>::read_chunck(char*& buff, int& bytes)
 {
     uint32_t len;
     XENSTORE_RING_IDX cons;
@@ -96,6 +99,23 @@ bool ring_conn<MAPPER>::read(char*& buff, int& bytes)
     bytes -= len;
     buff += len;
 
+    return len > 0;
+}
+
+template < typename MAPPER >
+bool ring_conn<MAPPER>::read(char*& buff, int& bytes)
+{
+    bool notify = false;
+
+    notify = read_chunck(buff, bytes);
+    /*
+     * If we're in the ring boundary and still have data to read we need to
+     * recheck for space from the begin of the ring.
+     */
+    if (bytes > 0 && MASK_XENSTORE_IDX(MAPPER::interface->req_cons) == 0) {
+        notify |= read_chunck(buff, bytes);
+    }
+
     if (bytes > 0 && !ev_read) {
         ev_read = true;
         emgr.io_set(*this);
@@ -106,7 +126,7 @@ bool ring_conn<MAPPER>::read(char*& buff, int& bytes)
         emgr.io_set(*this);
     }
 
-    if (len > 0) {
+    if (notify) {
         xc_evtchn_notify(xce_handle, local_port);
     }
 
@@ -114,7 +134,7 @@ bool ring_conn<MAPPER>::read(char*& buff, int& bytes)
 }
 
 template < typename MAPPER >
-bool ring_conn<MAPPER>::write(char*& buff, int& bytes)
+bool ring_conn<MAPPER>::write_chunck(char*&buff, int& bytes)
 {
     uint32_t len;
     XENSTORE_RING_IDX cons;
@@ -141,6 +161,23 @@ bool ring_conn<MAPPER>::write(char*& buff, int& bytes)
     bytes -= len;
     buff += len;
 
+    return len > 0;
+}
+
+template < typename MAPPER >
+bool ring_conn<MAPPER>::write(char*& buff, int& bytes)
+{
+    bool notify = false;
+
+    notify = ring_conn<MAPPER>::write_chunck(buff, bytes);
+    /*
+     * If we're in the ring boundary and still have data to write we need to
+     * recheck for space from the begin of the ring.
+     */
+    if (bytes > 0 && MASK_XENSTORE_IDX(MAPPER::interface->rsp_prod) == 0) {
+        notify |= write_chunck(buff, bytes);
+    }
+
     if (bytes > 0 && !ev_write) {
         ev_write = true;
         emgr.io_set(*this);
@@ -151,7 +188,7 @@ bool ring_conn<MAPPER>::write(char*& buff, int& bytes)
         emgr.io_set(*this);
     }
 
-    if (len > 0) {
+    if (notify) {
         xc_evtchn_notify(xce_handle, local_port);
     }
 
