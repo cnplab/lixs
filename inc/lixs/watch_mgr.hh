@@ -18,8 +18,6 @@ public:
     watch_mgr(event_mgr& emgr);
     ~watch_mgr();
 
-    /* FIXME: handle transactions */
-
     void add(watch_cb_k& cb);
     void del(watch_cb_k& cb);
 
