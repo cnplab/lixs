@@ -23,10 +23,7 @@ lixs::foreign_ring_mapper::foreign_ring_mapper(domid_t domid, unsigned int mfn)
 lixs::foreign_ring_mapper::~foreign_ring_mapper()
 {
     xc_gnttab_munmap(xcg_handle, interface, 1);
-    interface = NULL;
-
     xc_gnttab_close(xcg_handle);
-    xcg_handle = NULL;
 }
 
 
