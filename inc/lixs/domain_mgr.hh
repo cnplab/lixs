@@ -21,7 +21,7 @@ public:
     domain_mgr(xenstore& xs, event_mgr& emgr);
     ~domain_mgr();
 
-    void create_domain(domid_t domid, evtchn_port_t port);
+    void create_domain(domid_t domid, evtchn_port_t port, unsigned int mfn);
     void destroy_domain(domid_t domid);
     void exists_domain(domid_t domid, bool& exists);
 

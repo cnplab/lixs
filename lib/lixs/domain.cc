@@ -12,7 +12,7 @@ extern "C" {
 }
 
 
-lixs::foreign_ring_mapper::foreign_ring_mapper(domid_t domid)
+lixs::foreign_ring_mapper::foreign_ring_mapper(domid_t domid, unsigned int mfn)
 {
     xcg_handle = xc_gnttab_open(NULL, 0);
 
@@ -30,8 +30,9 @@ lixs::foreign_ring_mapper::~foreign_ring_mapper()
 }
 
 
-lixs::domain::domain(xenstore& xs, event_mgr& emgr, domid_t domid, evtchn_port_t port)
-    : client(xs, emgr, domid, port)
+lixs::domain::domain(xenstore& xs, event_mgr& emgr,
+        domid_t domid, evtchn_port_t port, unsigned int mfn)
+    : client(xs, emgr, domid, port, mfn)
 {
 #ifdef DEBUG
     asprintf(&cid, "D%d", domid);

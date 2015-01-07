@@ -19,9 +19,9 @@ lixs::domain_mgr::~domain_mgr()
 {
 }
 
-void lixs::domain_mgr::create_domain(domid_t domid, evtchn_port_t port)
+void lixs::domain_mgr::create_domain(domid_t domid, evtchn_port_t port, unsigned int mfn)
 {
-    domlist.insert(std::pair<domid_t, lixs::domain*>(domid, new domain(xs, emgr, domid, port)));
+    domlist.insert(std::pair<domid_t, lixs::domain*>(domid, new domain(xs, emgr, domid, port, mfn)));
 }
 
 void lixs::domain_mgr::destroy_domain(domid_t domid)

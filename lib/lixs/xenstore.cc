@@ -115,7 +115,7 @@ void lixs::xenstore::get_domain_path(char* domid, char (&buff)[32])
 
 void lixs::xenstore::introduce_domain(int domid, int mfn , int port)
 {
-    dmgr.create_domain(domid, port);
+    dmgr.create_domain(domid, port, mfn);
     wmgr.enqueue(0, (char*)"@introduceDomain");
 }
 

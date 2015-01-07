@@ -18,7 +18,7 @@ namespace lixs {
 
 class foreign_ring_mapper {
 public:
-    foreign_ring_mapper(domid_t domid);
+    foreign_ring_mapper(domid_t domid, unsigned int mfn);
     ~foreign_ring_mapper();
 
 protected:
@@ -31,7 +31,7 @@ private:
 
 class domain : public client<ring_conn<foreign_ring_mapper> > {
 public:
-    domain(xenstore& xs, event_mgr& emgr, domid_t domid, evtchn_port_t port);
+    domain(xenstore& xs, event_mgr& emgr, domid_t domid, evtchn_port_t port, unsigned int mfn);
     ~domain();
 };
 
