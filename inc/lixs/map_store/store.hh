@@ -22,10 +22,10 @@ public:
     void merge(unsigned int id, bool& success);
     void abort(unsigned int id);
 
-    int create(int id, std::string key, bool& created);
-    int read(int id, std::string key, std::string& val);
-    int update(int id, std::string key, std::string val);
-    int del(int id, std::string key);
+    int create(unsigned int id, std::string key, bool& created);
+    int read(unsigned int id, std::string key, std::string& val);
+    int update(unsigned int id, std::string key, std::string val);
+    int del(unsigned int id, std::string key);
 
     void get_children(std::string key, std::list<std::string>& resp);
 
@@ -34,8 +34,8 @@ private:
     std::map<int, transaction> ltrans;
     unsigned int next_id;
 
-    void ensure_parents(int id, const std::string& key);
-    void delete_subtree(int id, const std::string& key);
+    void ensure_parents(unsigned int id, const std::string& key);
+    void delete_subtree(unsigned int id, const std::string& key);
 };
 
 } /* namespace map_store */

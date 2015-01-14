@@ -70,7 +70,7 @@ void lixs::map_store::store::abort(unsigned int id)
     ltrans.erase(id);
 }
 
-int lixs::map_store::store::create(int id, std::string key, bool& created)
+int lixs::map_store::store::create(unsigned int id, std::string key, bool& created)
 {
     if (key.back() == '/') {
         key.pop_back();
@@ -93,7 +93,7 @@ int lixs::map_store::store::create(int id, std::string key, bool& created)
     return 0;
 }
 
-int lixs::map_store::store::read(int id, std::string key, std::string& val)
+int lixs::map_store::store::read(unsigned int id, std::string key, std::string& val)
 {
     database::iterator it;
 
@@ -134,7 +134,7 @@ int lixs::map_store::store::read(int id, std::string key, std::string& val)
     }
 }
 
-int lixs::map_store::store::update(int id, std::string key, std::string val)
+int lixs::map_store::store::update(unsigned int id, std::string key, std::string val)
 {
     if (key.back() == '/') {
         key.pop_back();
@@ -151,7 +151,7 @@ int lixs::map_store::store::update(int id, std::string key, std::string val)
     return 0;
 }
 
-int lixs::map_store::store::del(int id, std::string key)
+int lixs::map_store::store::del(unsigned int id, std::string key)
 {
     if (key.back() == '/') {
         key.pop_back();
@@ -183,7 +183,7 @@ void lixs::map_store::store::get_children(std::string key, std::list<std::string
     }
 }
 
-void lixs::map_store::store::ensure_parents(int id, const std::string& key)
+void lixs::map_store::store::ensure_parents(unsigned int id, const std::string& key)
 {
     database::iterator it;
     std::string parent = key;
@@ -217,7 +217,7 @@ void lixs::map_store::store::ensure_parents(int id, const std::string& key)
     }
 }
 
-void lixs::map_store::store::delete_subtree(int id, const std::string& key)
+void lixs::map_store::store::delete_subtree(unsigned int id, const std::string& key)
 {
     database::iterator it;
 
