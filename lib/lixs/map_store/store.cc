@@ -162,7 +162,8 @@ int lixs::map_store::store::del(unsigned int id, std::string key)
     return 0;
 }
 
-void lixs::map_store::store::get_children(std::string key, std::list<std::string>& resp)
+int lixs::map_store::store::get_children(unsigned int id, std::string key,
+        std::list<std::string>& resp)
 {
     database::iterator it;
 
@@ -170,6 +171,9 @@ void lixs::map_store::store::get_children(std::string key, std::list<std::string
         key.pop_back();
     }
 
+    /*
+     * FIXME: support transactions
+     */
     for (it = data.begin(); it != data.end(); it++) {
         if (!it->second.deleted
                 && it->first.find(key) == 0
@@ -181,6 +185,8 @@ void lixs::map_store::store::get_children(std::string key, std::list<std::string
             resp.push_back(it->first.substr(key.length() + 1));
         }
     }
+
+    return 0;
 }
 
 void lixs::map_store::store::ensure_parents(unsigned int id, const std::string& key)

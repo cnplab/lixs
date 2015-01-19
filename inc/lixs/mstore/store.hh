@@ -28,7 +28,7 @@ public:
     int update(unsigned int tid, std::string key, std::string val);
     int del(unsigned int tid, std::string key);
 
-    void get_children(std::string key, std::list<std::string>& resp);
+    int get_children(unsigned int tid, std::string key, std::list<std::string>& resp);
 
 private:
     database db;

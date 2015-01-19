@@ -61,9 +61,7 @@ int lixs::xenstore::rm(unsigned int tid, char* path)
 
 int lixs::xenstore::directory(unsigned int tid, const char* path, std::list<std::string>& list)
 {
-    st.get_children(path, list);
-
-    return 0;
+    return st.get_children(tid, path, list);
 }
 
 int lixs::xenstore::transaction_start(unsigned int* tid)

@@ -120,12 +120,24 @@ int lixs::mstore::store::del(unsigned int tid, std::string path)
     }
 }
 
-void lixs::mstore::store::get_children(std::string path, std::list<std::string>& resp)
+int lixs::mstore::store::get_children(unsigned int tid, std::string path,
+        std::list<std::string>& resp)
 {
     if (path.back() == '/') {
         path.pop_back();
     }
 
-    access.get_children(path, resp);
+    if (tid == 0) {
+        return access.get_children(path, resp);
+    } else {
+        std::map<unsigned int, transaction>::iterator it;
+
+        it = trans.find(tid);
+        if (it != trans.end()) {
+            return it->second.get_children(path, resp);
+        } else {
+            return EINVAL;
+        }
+    }
 }
 

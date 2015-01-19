@@ -18,7 +18,7 @@ public:
     virtual int update(unsigned int id, std::string key, std::string val) = 0;
     virtual int del(unsigned int id, std::string key) = 0;
 
-    virtual void get_children(std::string key, std::list<std::string>& resp) = 0;
+    virtual int get_children(unsigned int id, std::string key, std::list<std::string>& resp) = 0;
 };
 
 } /* namespace lixs */
