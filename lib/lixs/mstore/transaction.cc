@@ -2,7 +2,6 @@
 #include <lixs/mstore/transaction.hh>
 #include <lixs/mstore/util.hh>
 
-#include <list>
 #include <map>
 #include <set>
 #include <string>
@@ -118,7 +117,7 @@ int lixs::mstore::transaction::del(const std::string& path)
     return 0;
 }
 
-int lixs::mstore::transaction::get_children(const std::string& path, std::list<std::string>& resp)
+int lixs::mstore::transaction::get_children(const std::string& path, std::set<std::string>& resp)
 {
     record& rec = db[path];
     entry& te = rec.te[id];
@@ -140,21 +139,17 @@ int lixs::mstore::transaction::get_children(const std::string& path, std::list<s
 
     if (te.write_seq) {
         for (i = te.children.begin(); i != te.children.end(); i++) {
-            resp.push_back(*i);
+            resp.insert(*i);
         }
     }
 
     if (rec.e.write_seq) {
         for (i = rec.e.children.begin(); i != rec.e.children.end(); i++) {
             if (!db[path + *i].te[id].delete_seq) {
-                resp.push_back(*i);
+                resp.insert(*i);
             }
         }
     }
-
-    /* FIXME: resp should be a set */
-    resp.sort();
-    resp.unique();
 
     return 0;
 }

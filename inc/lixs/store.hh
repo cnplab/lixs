@@ -1,7 +1,7 @@
 #ifndef __LIXS_STORE_HH__
 #define __LIXS_STORE_HH__
 
-#include <list>
+#include <set>
 #include <string>
 
 
@@ -18,7 +18,7 @@ public:
     virtual int update(unsigned int tid, std::string key, std::string val) = 0;
     virtual int del(unsigned int tid, std::string key) = 0;
 
-    virtual int get_children(unsigned int tid, std::string key, std::list<std::string>& resp) = 0;
+    virtual int get_children(unsigned int tid, std::string key, std::set<std::string>& resp) = 0;
 };
 
 } /* namespace lixs */

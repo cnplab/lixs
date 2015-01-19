@@ -3,7 +3,6 @@
 
 #include <lixs/mstore/database.hh>
 
-#include <list>
 #include <map>
 #include <set>
 #include <string>
@@ -21,7 +20,7 @@ public:
     int update(const std::string& path, const std::string& val);
     int del(const std::string& path);
 
-    int get_children(const std::string& path, std::list<std::string>& resp);
+    int get_children(const std::string& path, std::set<std::string>& resp);
 
 private:
     void register_with_parent(const std::string& path);

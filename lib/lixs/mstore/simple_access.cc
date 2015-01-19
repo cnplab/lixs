@@ -2,7 +2,6 @@
 #include <lixs/mstore/simple_access.hh>
 #include <lixs/mstore/util.hh>
 
-#include <list>
 #include <map>
 #include <set>
 #include <string>
@@ -82,7 +81,7 @@ int lixs::mstore::simple_access::del(const std::string& path)
     }
 }
 
-int lixs::mstore::simple_access::get_children(const std::string& path, std::list<std::string>& resp)
+int lixs::mstore::simple_access::get_children(const std::string& path, std::set<std::string>& resp)
 {
     database::iterator it;
     std::set<std::string>::iterator i;
@@ -90,7 +89,7 @@ int lixs::mstore::simple_access::get_children(const std::string& path, std::list
     it = db.find(path);
     if (it != db.end() && it->second.e.write_seq) {
         for (i = it->second.e.children.begin(); i != it->second.e.children.end(); i++) {
-            resp.push_back(*i);
+            resp.insert(*i);
         }
 
         return 0;

@@ -15,6 +15,7 @@
 #include <cstring>
 #include <list>
 #include <map>
+#include <set>
 #include <string>
 #include <unistd.h>
 #include <utility>
@@ -489,8 +490,8 @@ void client<CONNECTION>::op_set_perms(void)
 template < typename CONNECTION >
 void client<CONNECTION>::op_directory(void)
 {
-    std::list<std::string> resp;
-    std::list<std::string>::iterator it;
+    std::set<std::string> resp;
+    std::set<std::string>::iterator it;
 
     xs.directory(msg.tx_id, get_path(), resp);
 

@@ -121,7 +121,7 @@ int lixs::mstore::store::del(unsigned int tid, std::string path)
 }
 
 int lixs::mstore::store::get_children(unsigned int tid, std::string path,
-        std::list<std::string>& resp)
+        std::set<std::string>& resp)
 {
     if (path.back() == '/') {
         path.pop_back();

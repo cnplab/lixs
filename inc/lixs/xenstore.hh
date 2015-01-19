@@ -6,7 +6,8 @@
 #include <lixs/store.hh>
 #include <lixs/watch_mgr.hh>
 
-#include <list>
+#include <string>
+#include <set>
 
 
 namespace lixs {
@@ -20,7 +21,7 @@ public:
     int write(unsigned int tid, char* path, const char* val);
     int mkdir(unsigned int tid, char* path);
     int rm(unsigned int tid, char* path);
-    int directory(unsigned int tid, const char* path, std::list<std::string>& list);
+    int directory(unsigned int tid, const char* path, std::set<std::string>& res);
 
     int transaction_start(unsigned int* tid);
     int transaction_end(unsigned int tid, bool commit);

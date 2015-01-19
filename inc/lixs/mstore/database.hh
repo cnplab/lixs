@@ -1,7 +1,6 @@
 #ifndef __LIXS_MSTORE_DATABASE_HH__
 #define __LIXS_MSTORE_DATABASE_HH__
 
-#include <list>
 #include <map>
 #include <set>
 #include <string>
@@ -50,7 +49,7 @@ public:
     virtual int update(const std::string& path, const std::string& val) = 0;
     virtual int del(const std::string& path) = 0;
 
-    virtual int get_children(const std::string& path, std::list<std::string>& resp) = 0;
+    virtual int get_children(const std::string& path, std::set<std::string>& resp) = 0;
 
 protected:
     database& db;

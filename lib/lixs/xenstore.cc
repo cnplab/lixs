@@ -4,7 +4,7 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
-#include <list>
+#include <set>
 
 
 lixs::xenstore::xenstore(store& st, event_mgr& emgr)
@@ -59,9 +59,9 @@ int lixs::xenstore::rm(unsigned int tid, char* path)
     return 0;
 }
 
-int lixs::xenstore::directory(unsigned int tid, const char* path, std::list<std::string>& list)
+int lixs::xenstore::directory(unsigned int tid, const char* path, std::set<std::string>& res)
 {
-    return st.get_children(tid, path, list);
+    return st.get_children(tid, path, res);
 }
 
 int lixs::xenstore::transaction_start(unsigned int* tid)

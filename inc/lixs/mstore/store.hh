@@ -6,8 +6,8 @@
 #include <lixs/mstore/simple_access.hh>
 #include <lixs/mstore/transaction.hh>
 
-#include <list>
 #include <map>
+#include <set>
 #include <string>
 
 
@@ -28,7 +28,7 @@ public:
     int update(unsigned int tid, std::string key, std::string val);
     int del(unsigned int tid, std::string key);
 
-    int get_children(unsigned int tid, std::string key, std::list<std::string>& resp);
+    int get_children(unsigned int tid, std::string key, std::set<std::string>& resp);
 
 private:
     database db;
