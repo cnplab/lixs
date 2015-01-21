@@ -49,8 +49,6 @@ int lixs::xenstore::mkdir(unsigned int tid, char* path)
 
 int lixs::xenstore::rm(unsigned int tid, char* path)
 {
-    /* FIXME: delete all the descendents */
-
     st.del(tid, path);
     wmgr.enqueue(tid, path);
     wmgr.enqueue_parents(tid, path);
