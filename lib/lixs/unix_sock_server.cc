@@ -1,4 +1,4 @@
-#include <lixs/unix_server.hh>
+#include <lixs/unix_sock_server.hh>
 #include <lixs/sock_client.hh>
 #include <lixs/xenstore.hh>
 
@@ -10,7 +10,7 @@
 #include <unistd.h>
 
 
-lixs::unix_server::unix_server(xenstore& xs, event_mgr& emgr,
+lixs::unix_sock_server::unix_sock_server(xenstore& xs, event_mgr& emgr,
         std::string rw_path, std::string ro_path)
     : xs(xs), emgr(emgr), rw_path(rw_path), rw_cb(*this), ro_path(ro_path), ro_cb(*this)
 {
@@ -38,7 +38,7 @@ lixs::unix_server::unix_server(xenstore& xs, event_mgr& emgr,
     emgr.io_add(ro_cb);
 }
 
-lixs::unix_server::~unix_server(void)
+lixs::unix_sock_server::~unix_sock_server(void)
 {
     close(rw_cb.fd);
     unlink(rw_path.c_str());
@@ -48,7 +48,7 @@ lixs::unix_server::~unix_server(void)
 }
 
 
-void lixs::unix_server::fd_cb_k::operator()(bool read, bool write)
+void lixs::unix_sock_server::fd_cb_k::operator()(bool read, bool write)
 {
     sock_client::create(server.xs, server.emgr, accept(fd, NULL, NULL));
 }
