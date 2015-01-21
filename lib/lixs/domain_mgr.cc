@@ -2,6 +2,7 @@
 #include <lixs/event_mgr.hh>
 #include <lixs/domain_mgr.hh>
 
+#include <cerrno>
 #include <map>
 #include <utility>
 

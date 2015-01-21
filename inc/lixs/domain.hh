@@ -6,6 +6,7 @@
 #include <lixs/ring_conn.hh>
 #include <lixs/xenstore.hh>
 
+#include <cerrno>
 #include <sys/mman.h>
 
 extern "C" {

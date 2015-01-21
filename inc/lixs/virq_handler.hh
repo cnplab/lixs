@@ -5,6 +5,8 @@
 #include <lixs/event_mgr.hh>
 #include <lixs/xenstore.hh>
 
+#include <cerrno>
+
 extern "C" {
 #include <xenctrl.h>
 }
