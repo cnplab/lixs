@@ -1,9 +1,9 @@
-#include <lixs/mstore/util.hh>
+#include <lixs/util.hh>
 
 #include <string>
 
 
-bool lixs::mstore::basename(const std::string& path, std::string& parent, std::string& name)
+bool lixs::basename(const std::string& path, std::string& parent, std::string& name)
 {
     size_t pos;
 

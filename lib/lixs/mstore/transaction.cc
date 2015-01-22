@@ -1,6 +1,6 @@
 #include <lixs/mstore/database.hh>
 #include <lixs/mstore/transaction.hh>
-#include <lixs/mstore/util.hh>
+#include <lixs/util.hh>
 
 #include <map>
 #include <set>
