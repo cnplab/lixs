@@ -80,21 +80,33 @@ int lixs::xenstore::transaction_start(unsigned int* tid)
 
 int lixs::xenstore::transaction_end(unsigned int tid, bool commit)
 {
+    int ret;
+    bool success;
+
     if (commit) {
-        bool success;
-        st.merge(tid, success);
+        ret = st.merge(tid, success);
 
-        if (success) {
-            wmgr.fire_transaction(tid);
+        if (ret == 0) {
+            if (success) {
+                wmgr.fire_transaction(tid);
+            } else {
+                wmgr.abort_transaction(tid);
+            }
+
+            return success ? 0 : EAGAIN;
         } else {
-            wmgr.abort_transaction(tid);
+            return ret;
         }
-
-        return success ? 0 : EAGAIN;
     } else {
-        st.abort(tid);
-        wmgr.abort_transaction(tid);
-        return 0;
+        ret = st.abort(tid);
+
+        if (ret == 0) {
+            wmgr.abort_transaction(tid);
+
+            return 0;
+        } else {
+            return ret;
+        }
     }
 }
 
