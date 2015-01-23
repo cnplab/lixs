@@ -21,8 +21,8 @@ public:
     domain_mgr(xenstore& xs, event_mgr& emgr);
     ~domain_mgr();
 
-    void create(domid_t domid, evtchn_port_t port, unsigned int mfn);
-    void destroy(domid_t domid);
+    int create(domid_t domid, evtchn_port_t port, unsigned int mfn);
+    int destroy(domid_t domid);
     void exists(domid_t domid, bool& exists);
 
 private:
