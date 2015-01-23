@@ -1,5 +1,5 @@
-#ifndef __LIXS_EPOLL_HH__
-#define __LIXS_EPOLL_HH__
+#ifndef __LIXS_OS_LINUX_EPOLL_HH__
+#define __LIXS_OS_LINUX_EPOLL_HH__
 
 #include <lixs/events.hh>
 #include <lixs/iomux.hh>
@@ -8,6 +8,7 @@
 
 
 namespace lixs {
+namespace os_linux {
 
 class epoll : public iomux {
 public:
@@ -37,7 +38,8 @@ private:
     struct epoll_event epev[epoll_max_events];
 };
 
+} /* namespace os_linux */
 } /* namespace lixs */
 
-#endif /* __LIXS_EPOLL_HH__ */
+#endif /* __LIXS_OS_LINUX_EPOLL_HH__ */
 

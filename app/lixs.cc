@@ -1,6 +1,6 @@
-#include <lixs/epoll.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/mstore/store.hh>
+#include <lixs/os_linux/epoll.hh>
 #include <lixs/unix_sock_server.hh>
 #include <lixs/virq_handler.hh>
 #include <lixs/xenbus.hh>
@@ -162,7 +162,7 @@ int main(int argc, char** argv)
     signal(SIGINT, signal_handler);
     signal(SIGPIPE, SIG_IGN);
 
-    lixs::epoll epoll;
+    lixs::os_linux::epoll epoll;
     lixs::event_mgr emgr(epoll);
     lixs::mstore::store store;
     lixs::xenstore xs(store, emgr);

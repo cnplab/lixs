@@ -1,4 +1,4 @@
-#include <lixs/epoll.hh>
+#include <lixs/os_linux/epoll.hh>
 
 #include <cstddef>
 #include <cstdio>
@@ -6,36 +6,36 @@
 #include <sys/epoll.h>
 
 
-lixs::epoll::epoll(void)
+lixs::os_linux::epoll::epoll(void)
     : epfd(epoll_create(0x7E57))
 {
 }
 
-lixs::epoll::~epoll()
+lixs::os_linux::epoll::~epoll()
 {
 }
 
-void lixs::epoll::add(fd_cb_k& cb)
+void lixs::os_linux::epoll::add(fd_cb_k& cb)
 {
     struct epoll_event event = { get_events(cb), { reinterpret_cast<void*>(&cb) } };
 
     epoll_ctl(epfd, EPOLL_CTL_ADD, cb.fd, &event);
 }
 
-void lixs::epoll::set(fd_cb_k& cb)
+void lixs::os_linux::epoll::set(fd_cb_k& cb)
 {
     struct epoll_event event = { get_events(cb), { reinterpret_cast<void*>(&cb) } };
 
     epoll_ctl(epfd, EPOLL_CTL_MOD, cb.fd, &event);
 }
 
-void lixs::epoll::remove(fd_cb_k& cb)
+void lixs::os_linux::epoll::remove(fd_cb_k& cb)
 {
     /* Passing event == NULL requires linux > 2.6.9, see BUGS */
     epoll_ctl(epfd, EPOLL_CTL_DEL, cb.fd, NULL);
 }
 
-void lixs::epoll::handle(void)
+void lixs::os_linux::epoll::handle(void)
 {
     fd_cb_k* cb;
     int n_events;
@@ -50,22 +50,22 @@ void lixs::epoll::handle(void)
     }
 }
 
-uint32_t inline lixs::epoll::get_events(const fd_cb_k& cb)
+uint32_t inline lixs::os_linux::epoll::get_events(const fd_cb_k& cb)
 {
     return (cb.ev_read ? EPOLLIN : 0) | (cb.ev_write ? EPOLLOUT : 0);
 }
 
-bool inline lixs::epoll::is_read(const uint32_t ev)
+bool inline lixs::os_linux::epoll::is_read(const uint32_t ev)
 {
     return (ev & EPOLLIN) != 0;
 }
 
-bool inline lixs::epoll::is_write(const uint32_t ev)
+bool inline lixs::os_linux::epoll::is_write(const uint32_t ev)
 {
     return (ev & EPOLLOUT) != 0;
 }
 
-bool inline lixs::epoll::is_err(const uint32_t ev)
+bool inline lixs::os_linux::epoll::is_err(const uint32_t ev)
 {
     return (ev & EPOLLERR) != 0;
 }
