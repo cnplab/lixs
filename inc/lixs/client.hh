@@ -449,6 +449,7 @@ void client<CONNECTION>::op_transaction_start(void)
 
     snprintf(id_str, 32, "%u", tid);
     build_resp(id_str);
+    append_sep();
 }
 
 template < typename CONNECTION >
