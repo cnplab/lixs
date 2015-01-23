@@ -22,23 +22,24 @@ lixs::domain_mgr::~domain_mgr()
 
 void lixs::domain_mgr::create_domain(domid_t domid, evtchn_port_t port, unsigned int mfn)
 {
-    domlist.insert(std::pair<domid_t, lixs::domain*>(domid, new domain(xs, emgr, domid, port, mfn)));
+    /* TODO: Consider using emplace when moving to gcc 4.8 is acceptable */
+
+    domains.insert(std::make_pair(domid, new domain(xs, emgr, domid, port, mfn)));
 }
 
 void lixs::domain_mgr::destroy_domain(domid_t domid)
 {
-    std::map<domid_t, lixs::domain*>::iterator it;
+    domain_map::iterator it;
 
-    it = domlist.find(domid);
-
-    if (it != domlist.end()) {
+    it = domains.find(domid);
+    if (it != domains.end()) {
         delete it->second;
-        domlist.erase(it);
+        domains.erase(it);
     }
 }
 
 void lixs::domain_mgr::exists_domain(domid_t domid, bool& exists)
 {
-    exists = (domlist.find(domid) != domlist.end());
+    exists = (domains.find(domid) != domains.end());
 }
 

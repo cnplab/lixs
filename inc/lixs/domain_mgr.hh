@@ -26,10 +26,13 @@ public:
     void exists_domain(domid_t domid, bool& exists);
 
 private:
+    typedef std::map<domid_t, domain*> domain_map;
+
+
     xenstore& xs;
     event_mgr& emgr;
 
-    std::map<domid_t, lixs::domain*> domlist;
+    domain_map domains;
 };
 
 } /* namespace lixs */
