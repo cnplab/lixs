@@ -105,16 +105,20 @@ int lixs::mstore::transaction::del(const std::string& path)
 
     if (te.write_seq || rec.e.write_seq) {
         delete_branch(path);
+
+        if (te.write_seq) {
+            unregister_from_parent(path);
+        }
+
+        te.delete_seq = rec.next_seq++;
+        te.write_seq = 0;
+
+        return 0;
+    } else {
+        te.read_seq = rec.next_seq++;
+
+        return ENOENT;
     }
-
-    if (te.write_seq) {
-        unregister_from_parent(path);
-    }
-
-    te.delete_seq = rec.next_seq++;
-    te.write_seq = 0;
-
-    return 0;
 }
 
 int lixs::mstore::transaction::get_children(const std::string& path, std::set<std::string>& resp)
