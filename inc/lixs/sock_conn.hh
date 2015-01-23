@@ -9,7 +9,7 @@ namespace lixs {
 
 class sock_conn : public fd_cb_k {
 public:
-    sock_conn(functor& cb, event_mgr& emgr, int fd);
+    sock_conn(ev_cb_k& cb, event_mgr& emgr, int fd);
     virtual ~sock_conn();
 
     bool read(char*& buff, int& bytes);
@@ -20,7 +20,7 @@ public:
 
 private:
     bool alive;
-    functor& cb;
+    ev_cb_k& cb;
     event_mgr& emgr;
 };
 

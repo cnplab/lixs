@@ -9,7 +9,7 @@
 #include <unistd.h>
 
 
-lixs::sock_conn::sock_conn(functor& cb, event_mgr& emgr, int fd)
+lixs::sock_conn::sock_conn(ev_cb_k& cb, event_mgr& emgr, int fd)
     : alive(true), cb(cb), emgr(emgr)
 {
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);

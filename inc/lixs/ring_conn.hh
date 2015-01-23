@@ -18,7 +18,7 @@ template < typename MAPPER >
 class ring_conn : public MAPPER, public fd_cb_k {
 public:
     template < typename... ARGS >
-    ring_conn(functor& cb, event_mgr& emgr, domid_t domid, evtchn_port_t port, ARGS&&... args);
+    ring_conn(ev_cb_k& cb, event_mgr& emgr, domid_t domid, evtchn_port_t port, ARGS&&... args);
     virtual ~ring_conn();
 
     void operator()(bool read, bool write);
@@ -31,7 +31,7 @@ private:
     bool read_chunck(char*& buff, int& bytes);
     bool write_chunck(char*& buff, int& bytes);
 
-    functor& cb;
+    ev_cb_k& cb;
     event_mgr& emgr;
 
     xc_evtchn *xce_handle;
@@ -44,7 +44,7 @@ private:
 
 template < typename MAPPER >
 template < typename... ARGS >
-ring_conn<MAPPER>::ring_conn(functor& cb, event_mgr& emgr, domid_t domid, evtchn_port_t port, ARGS&&... args)
+ring_conn<MAPPER>::ring_conn(ev_cb_k& cb, event_mgr& emgr, domid_t domid, evtchn_port_t port, ARGS&&... args)
     : MAPPER(domid, std::forward<ARGS>(args)...), cb(cb), emgr(emgr),  domid(domid), remote_port(port)
 {
     xce_handle = xc_evtchn_open(NULL, 0);

@@ -28,7 +28,7 @@ extern "C" {
 namespace lixs {
 
 template < typename CONNECTION >
-class client : public CONNECTION, public functor {
+class client : public CONNECTION, public ev_cb_k {
 public:
     template < typename... ARGS >
     client(xenstore& xs, event_mgr& emgr, ARGS&&... args);
