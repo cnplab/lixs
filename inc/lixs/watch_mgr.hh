@@ -21,12 +21,12 @@ public:
     void add(watch_cb_k& cb);
     void del(watch_cb_k& cb);
 
-    void enqueue(unsigned int tid, const std::string& path);
-    void enqueue_parents(unsigned int tid, const std::string& path);
-    void enqueue_children(unsigned int tid, const std::string& path);
+    void fire(unsigned int tid, const std::string& path);
+    void fire_parents(unsigned int tid, const std::string& path);
+    void fire_children(unsigned int tid, const std::string& path);
 
-    void transaction_commit(unsigned int tid);
-    void transaction_abort(unsigned int tid);
+    void fire_transaction(unsigned int tid);
+    void abort_transaction(unsigned int tid);
 
 private:
     typedef std::set<watch_cb_k*> watch_set;

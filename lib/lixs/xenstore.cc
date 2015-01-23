@@ -27,8 +27,8 @@ int lixs::xenstore::read(unsigned int tid, std::string path, std::string& res)
 int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
 {
     st.update(tid, path, val);
-    wmgr.enqueue(tid, path);
-    wmgr.enqueue_parents(tid, path);
+    wmgr.fire(tid, path);
+    wmgr.fire_parents(tid, path);
 
     return 0;
 }
@@ -40,8 +40,8 @@ int lixs::xenstore::mkdir(unsigned int tid, char* path)
     st.create(tid, path, created);
 
     if (created) {
-        wmgr.enqueue(tid, path);
-        wmgr.enqueue_parents(tid, path);
+        wmgr.fire(tid, path);
+        wmgr.fire_parents(tid, path);
     }
 
     return 0;
@@ -50,9 +50,9 @@ int lixs::xenstore::mkdir(unsigned int tid, char* path)
 int lixs::xenstore::rm(unsigned int tid, char* path)
 {
     st.del(tid, path);
-    wmgr.enqueue(tid, path);
-    wmgr.enqueue_parents(tid, path);
-    wmgr.enqueue_children(tid, path);
+    wmgr.fire(tid, path);
+    wmgr.fire_parents(tid, path);
+    wmgr.fire_children(tid, path);
 
     return 0;
 }
@@ -76,15 +76,15 @@ int lixs::xenstore::transaction_end(unsigned int tid, bool commit)
         st.merge(tid, success);
 
         if (success) {
-            wmgr.transaction_commit(tid);
+            wmgr.fire_transaction(tid);
         } else {
-            wmgr.transaction_abort(tid);
+            wmgr.abort_transaction(tid);
         }
 
         return success ? 0 : EAGAIN;
     } else {
         st.abort(tid);
-        wmgr.transaction_abort(tid);
+        wmgr.abort_transaction(tid);
         return 0;
     }
 }
@@ -112,13 +112,13 @@ void lixs::xenstore::get_domain_path(char* domid, char (&buff)[32])
 void lixs::xenstore::introduce_domain(int domid, int mfn , int port)
 {
     dmgr.create_domain(domid, port, mfn);
-    wmgr.enqueue(0, (char*)"@introduceDomain");
+    wmgr.fire(0, (char*)"@introduceDomain");
 }
 
 void lixs::xenstore::release_domain(int domid)
 {
     dmgr.destroy_domain(domid);
-    wmgr.enqueue(0, (char*)"@releaseDomain");
+    wmgr.fire(0, (char*)"@releaseDomain");
 }
 
 void lixs::xenstore::exists_domain(int domid, bool& exists)

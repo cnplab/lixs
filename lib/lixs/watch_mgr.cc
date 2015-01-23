@@ -34,7 +34,7 @@ void lixs::watch_mgr::del(watch_cb_k& cb)
     emgr.dequeue_watch(cb);
 }
 
-void lixs::watch_mgr::enqueue(unsigned int tid, const std::string& path)
+void lixs::watch_mgr::fire(unsigned int tid, const std::string& path)
 {
     if (tid == 0) {
         _fire(path, path);
@@ -43,7 +43,7 @@ void lixs::watch_mgr::enqueue(unsigned int tid, const std::string& path)
     }
 }
 
-void lixs::watch_mgr::enqueue_parents(unsigned int tid, const std::string& path)
+void lixs::watch_mgr::fire_parents(unsigned int tid, const std::string& path)
 {
     if (tid == 0) {
         _fire_parents(path, path);
@@ -52,7 +52,7 @@ void lixs::watch_mgr::enqueue_parents(unsigned int tid, const std::string& path)
     }
 }
 
-void lixs::watch_mgr::enqueue_children(unsigned int tid, const std::string& path)
+void lixs::watch_mgr::fire_children(unsigned int tid, const std::string& path)
 {
     if (tid == 0) {
         _fire_children(path);
@@ -61,7 +61,7 @@ void lixs::watch_mgr::enqueue_children(unsigned int tid, const std::string& path
     }
 }
 
-void lixs::watch_mgr::transaction_commit(unsigned int tid)
+void lixs::watch_mgr::fire_transaction(unsigned int tid)
 {
     fire_list::iterator it;
 
@@ -73,7 +73,7 @@ void lixs::watch_mgr::transaction_commit(unsigned int tid)
     tdb.erase(tid);
 }
 
-void lixs::watch_mgr::transaction_abort(unsigned int tid)
+void lixs::watch_mgr::abort_transaction(unsigned int tid)
 {
     tdb.erase(tid);
 }
