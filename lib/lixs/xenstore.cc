@@ -111,18 +111,18 @@ void lixs::xenstore::get_domain_path(char* domid, char (&buff)[32])
 
 void lixs::xenstore::introduce_domain(int domid, int mfn , int port)
 {
-    dmgr.create_domain(domid, port, mfn);
+    dmgr.create(domid, port, mfn);
     wmgr.fire(0, "@introduceDomain");
 }
 
 void lixs::xenstore::release_domain(int domid)
 {
-    dmgr.destroy_domain(domid);
+    dmgr.destroy(domid);
     wmgr.fire(0, "@releaseDomain");
 }
 
 void lixs::xenstore::exists_domain(int domid, bool& exists)
 {
-    dmgr.exists_domain(domid, exists);
+    dmgr.exists(domid, exists);
 }
 

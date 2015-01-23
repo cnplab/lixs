@@ -20,14 +20,14 @@ lixs::domain_mgr::~domain_mgr()
 {
 }
 
-void lixs::domain_mgr::create_domain(domid_t domid, evtchn_port_t port, unsigned int mfn)
+void lixs::domain_mgr::create(domid_t domid, evtchn_port_t port, unsigned int mfn)
 {
     /* TODO: Consider using emplace when moving to gcc 4.8 is acceptable */
 
     domains.insert(std::make_pair(domid, new domain(xs, emgr, domid, port, mfn)));
 }
 
-void lixs::domain_mgr::destroy_domain(domid_t domid)
+void lixs::domain_mgr::destroy(domid_t domid)
 {
     domain_map::iterator it;
 
@@ -38,7 +38,7 @@ void lixs::domain_mgr::destroy_domain(domid_t domid)
     }
 }
 
-void lixs::domain_mgr::exists_domain(domid_t domid, bool& exists)
+void lixs::domain_mgr::exists(domid_t domid, bool& exists)
 {
     exists = (domains.find(domid) != domains.end());
 }
