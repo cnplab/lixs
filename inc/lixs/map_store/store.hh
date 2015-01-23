@@ -19,8 +19,8 @@ public:
     ~store();
 
     void branch(unsigned int& id);
-    void merge(unsigned int id, bool& success);
-    void abort(unsigned int id);
+    int merge(unsigned int id, bool& success);
+    int abort(unsigned int id);
 
     int create(unsigned int id, std::string key, bool& created);
     int read(unsigned int id, std::string key, std::string& val);

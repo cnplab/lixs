@@ -10,8 +10,8 @@ namespace lixs {
 class store {
 public:
     virtual void branch(unsigned int& tid) = 0;
-    virtual void merge(unsigned int tid, bool& success) = 0;
-    virtual void abort(unsigned int tid) = 0;
+    virtual int merge(unsigned int tid, bool& success) = 0;
+    virtual int abort(unsigned int tid) = 0;
 
     virtual int create(unsigned int tid, std::string path, bool& created) = 0;
     virtual int read(unsigned int tid, std::string path, std::string& val) = 0;

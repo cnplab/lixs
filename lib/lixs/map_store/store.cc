@@ -21,7 +21,7 @@ void lixs::map_store::store::branch(unsigned int& id)
     ltrans[id];
 }
 
-void lixs::map_store::store::merge(unsigned int id, bool& success)
+int lixs::map_store::store::merge(unsigned int id, bool& success)
 {
     transaction& trans = ltrans[id];
     database::iterator bd_rec;
@@ -63,11 +63,15 @@ void lixs::map_store::store::merge(unsigned int id, bool& success)
 
     /* Delete transaction information. */
     ltrans.erase(id);
+
+    return 0;
 }
 
-void lixs::map_store::store::abort(unsigned int id)
+int lixs::map_store::store::abort(unsigned int id)
 {
     ltrans.erase(id);
+
+    return 0;
 }
 
 int lixs::map_store::store::create(unsigned int id, std::string key, bool& created)

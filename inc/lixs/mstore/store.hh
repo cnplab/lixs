@@ -20,8 +20,8 @@ public:
     ~store();
 
     void branch(unsigned int& tid);
-    void merge(unsigned int tid, bool& success);
-    void abort(unsigned int tid);
+    int merge(unsigned int tid, bool& success);
+    int abort(unsigned int tid);
 
     int create(unsigned int tid, std::string path, bool& created);
     int read(unsigned int tid, std::string key, std::string& val);

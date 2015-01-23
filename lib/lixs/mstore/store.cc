@@ -16,7 +16,7 @@ void lixs::mstore::store::branch(unsigned int& tid)
     trans.insert({tid, transaction(tid, db)});
 }
 
-void lixs::mstore::store::merge(unsigned int tid, bool& success)
+int lixs::mstore::store::merge(unsigned int tid, bool& success)
 {
     std::map<unsigned int, transaction>::iterator it;
 
@@ -24,12 +24,14 @@ void lixs::mstore::store::merge(unsigned int tid, bool& success)
     if (it != trans.end()) {
         it->second.merge(success);
         trans.erase(it);
+
+        return 0;
     } else {
-        success = false;
+        return ENOENT;
     }
 }
 
-void lixs::mstore::store::abort(unsigned int tid)
+int lixs::mstore::store::abort(unsigned int tid)
 {
     std::map<unsigned int, transaction>::iterator it;
 
@@ -37,6 +39,10 @@ void lixs::mstore::store::abort(unsigned int tid)
     if (it != trans.end()) {
         it->second.abort();
         trans.erase(it);
+
+        return 0;
+    } else {
+        return ENOENT;
     }
 }
 
