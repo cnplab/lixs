@@ -26,35 +26,44 @@ int lixs::xenstore::read(unsigned int tid, std::string path, std::string& res)
 
 int lixs::xenstore::write(unsigned int tid, char* path, const char* val)
 {
-    st.update(tid, path, val);
-    wmgr.fire(tid, path);
-    wmgr.fire_parents(tid, path);
+    int ret;
 
-    return 0;
-}
-
-int lixs::xenstore::mkdir(unsigned int tid, char* path)
-{
-    bool created;
-
-    st.create(tid, path, created);
-
-    if (created) {
+    ret = st.update(tid, path, val);
+    if (ret == 0) {
         wmgr.fire(tid, path);
         wmgr.fire_parents(tid, path);
     }
 
-    return 0;
+    return ret;
+}
+
+int lixs::xenstore::mkdir(unsigned int tid, char* path)
+{
+    int ret;
+    bool created;
+
+    ret = st.create(tid, path, created);
+    if (ret == 0 && created) {
+        wmgr.fire(tid, path);
+        wmgr.fire_parents(tid, path);
+    }
+
+    return ret;
 }
 
 int lixs::xenstore::rm(unsigned int tid, char* path)
 {
-    st.del(tid, path);
-    wmgr.fire(tid, path);
-    wmgr.fire_parents(tid, path);
-    wmgr.fire_children(tid, path);
+    int ret;
 
-    return 0;
+    ret = st.del(tid, path);
+
+    if (ret == 0) {
+        wmgr.fire(tid, path);
+        wmgr.fire_parents(tid, path);
+        wmgr.fire_children(tid, path);
+    }
+
+    return ret;
 }
 
 int lixs::xenstore::directory(unsigned int tid, const char* path, std::set<std::string>& res)
