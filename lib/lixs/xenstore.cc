@@ -1,10 +1,8 @@
 #include <lixs/xenstore.hh>
-#include <lixs/domain_mgr.hh>
 
 #include <cerrno>
-#include <cstdio>
-#include <cstring>
 #include <set>
+#include <string>
 
 
 lixs::xenstore::xenstore(store& st, event_mgr& emgr)
@@ -56,7 +54,6 @@ int lixs::xenstore::store_rm(unsigned int tid, const std::string& path)
     int ret;
 
     ret = st.del(tid, path);
-
     if (ret == 0) {
         wmgr.fire(tid, path);
         wmgr.fire_parents(tid, path);
