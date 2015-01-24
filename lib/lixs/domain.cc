@@ -37,7 +37,7 @@ lixs::domain::domain(xenstore& xs, event_mgr& emgr,
 #endif
 
     std::string path;
-    xs.get_domain_path(domid, path);
+    xs.domain_path(domid, path);
     std::strcpy(abs_path, path.c_str());
     body = abs_path + strlen(abs_path);
     *body++ = '/';

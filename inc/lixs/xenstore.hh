@@ -17,22 +17,22 @@ public:
     xenstore(store& st, event_mgr& emgr);
     ~xenstore();
 
-    int read(unsigned int tid, const std::string& path, std::string& val);
-    int write(unsigned int tid, const std::string& path, const std::string& val);
-    int mkdir(unsigned int tid, const std::string& path);
-    int rm(unsigned int tid, const std::string& path);
-    int directory(unsigned int tid, const std::string& path, std::set<std::string>& res);
+    int store_read(unsigned int tid, const std::string& path, std::string& val);
+    int store_write(unsigned int tid, const std::string& path, const std::string& val);
+    int store_mkdir(unsigned int tid, const std::string& path);
+    int store_rm(unsigned int tid, const std::string& path);
+    int store_dir(unsigned int tid, const std::string& path, std::set<std::string>& res);
 
     int transaction_start(unsigned int* tid);
     int transaction_end(unsigned int tid, bool commit);
 
-    void watch(watch_cb_k& cb);
-    void unwatch(watch_cb_k& cb);
+    void watch_add(watch_cb_k& cb);
+    void watch_del(watch_cb_k& cb);
 
-    void get_domain_path(domid_t domid, std::string& path);
-    void introduce_domain(domid_t domid, unsigned int mfn, evtchn_port_t port);
-    void release_domain(domid_t domid);
-    void exists_domain(domid_t domid, bool& exists);
+    void domain_path(domid_t domid, std::string& path);
+    void domain_introduce(domid_t domid, unsigned int mfn, evtchn_port_t port);
+    void domain_release(domid_t domid);
+    void domain_exists(domid_t domid, bool& exists);
 
 private:
     store& st;

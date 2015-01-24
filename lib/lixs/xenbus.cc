@@ -47,7 +47,7 @@ lixs::xenbus::xenbus(xenstore& xs, event_mgr& emgr)
 #endif
 
     std::string path;
-    xs.get_domain_path(0, path);
+    xs.domain_path(0, path);
     std::strcpy(abs_path, path.c_str());
     body = abs_path + strlen(abs_path);
     *body++ = '/';

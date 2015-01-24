@@ -19,12 +19,12 @@ lixs::xenstore::~xenstore()
 {
 }
 
-int lixs::xenstore::read(unsigned int tid, const std::string& path, std::string& val)
+int lixs::xenstore::store_read(unsigned int tid, const std::string& path, std::string& val)
 {
     return st.read(tid, path, val);
 }
 
-int lixs::xenstore::write(unsigned int tid, const std::string& path, const std::string& val)
+int lixs::xenstore::store_write(unsigned int tid, const std::string& path, const std::string& val)
 {
     int ret;
 
@@ -37,7 +37,7 @@ int lixs::xenstore::write(unsigned int tid, const std::string& path, const std::
     return ret;
 }
 
-int lixs::xenstore::mkdir(unsigned int tid, const std::string& path)
+int lixs::xenstore::store_mkdir(unsigned int tid, const std::string& path)
 {
     int ret;
     bool created;
@@ -51,7 +51,7 @@ int lixs::xenstore::mkdir(unsigned int tid, const std::string& path)
     return ret;
 }
 
-int lixs::xenstore::rm(unsigned int tid, const std::string& path)
+int lixs::xenstore::store_rm(unsigned int tid, const std::string& path)
 {
     int ret;
 
@@ -66,7 +66,7 @@ int lixs::xenstore::rm(unsigned int tid, const std::string& path)
     return ret;
 }
 
-int lixs::xenstore::directory(unsigned int tid, const std::string& path, std::set<std::string>& res)
+int lixs::xenstore::store_dir(unsigned int tid, const std::string& path, std::set<std::string>& res)
 {
     return st.get_children(tid, path, res);
 }
@@ -110,17 +110,17 @@ int lixs::xenstore::transaction_end(unsigned int tid, bool commit)
     }
 }
 
-void lixs::xenstore::watch(watch_cb_k& cb)
+void lixs::xenstore::watch_add(watch_cb_k& cb)
 {
     wmgr.add(cb);
 }
 
-void lixs::xenstore::unwatch(watch_cb_k& cb)
+void lixs::xenstore::watch_del(watch_cb_k& cb)
 {
     wmgr.del(cb);
 }
 
-void lixs::xenstore::get_domain_path(domid_t domid, std::string& path)
+void lixs::xenstore::domain_path(domid_t domid, std::string& path)
 {
     char numstr[35];
     sprintf(numstr, "/local/domain/%d", domid);
@@ -128,21 +128,21 @@ void lixs::xenstore::get_domain_path(domid_t domid, std::string& path)
     path = std::string(numstr);
 }
 
-void lixs::xenstore::introduce_domain(domid_t domid, unsigned int mfn , evtchn_port_t port)
+void lixs::xenstore::domain_introduce(domid_t domid, unsigned int mfn , evtchn_port_t port)
 {
     if (dmgr.create(domid, port, mfn) == 0) {
         wmgr.fire(0, "@introduceDomain");
     }
 }
 
-void lixs::xenstore::release_domain(domid_t domid)
+void lixs::xenstore::domain_release(domid_t domid)
 {
     if (dmgr.destroy(domid)) {
         wmgr.fire(0, "@releaseDomain");
     }
 }
 
-void lixs::xenstore::exists_domain(domid_t domid, bool& exists)
+void lixs::xenstore::domain_exists(domid_t domid, bool& exists)
 {
     dmgr.exists(domid, exists);
 }

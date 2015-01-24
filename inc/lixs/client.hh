@@ -177,7 +177,7 @@ client<CONNECTION>::~client()
     typename std::map<std::string, watch_cb_k>::iterator it;
 
     for (it = watches.begin(); it != watches.end(); it++) {
-        xs.unwatch(it->second);
+        xs.watch_del(it->second);
     }
 }
 
@@ -388,7 +388,7 @@ void client<CONNECTION>::op_read(void)
     int ret;
     std::string res;
 
-    ret = xs.read(msg.tx_id, get_path(), res);
+    ret = xs.store_read(msg.tx_id, get_path(), res);
 
     if (ret == 0) {
         build_resp(res.c_str());
@@ -402,7 +402,7 @@ void client<CONNECTION>::op_write(void)
 {
     int ret;
 
-    ret = xs.write(msg.tx_id, get_path(), body + strlen(body) + 1);
+    ret = xs.store_write(msg.tx_id, get_path(), body + strlen(body) + 1);
 
     if (ret == 0) {
         build_ack();
@@ -416,7 +416,7 @@ void client<CONNECTION>::op_mkdir(void)
 {
     int ret;
 
-    ret = xs.mkdir(msg.tx_id, get_path());
+    ret = xs.store_mkdir(msg.tx_id, get_path());
 
     if (ret == 0) {
         build_ack();
@@ -430,7 +430,7 @@ void client<CONNECTION>::op_rm(void)
 {
     int ret;
 
-    ret = xs.rm(msg.tx_id, get_path());
+    ret = xs.store_rm(msg.tx_id, get_path());
 
     if (ret == 0) {
         build_ack();
@@ -471,7 +471,7 @@ void client<CONNECTION>::op_get_domain_path(void)
 {
     std::string path;
 
-    xs.get_domain_path(std::stoi(body), path);
+    xs.domain_path(std::stoi(body), path);
 
     build_resp(path.c_str());
 }
@@ -494,7 +494,7 @@ void client<CONNECTION>::op_directory(void)
     std::set<std::string> resp;
     std::set<std::string>::iterator it;
 
-    xs.directory(msg.tx_id, get_path(), resp);
+    xs.store_dir(msg.tx_id, get_path(), resp);
 
     build_resp("");
 
@@ -516,7 +516,7 @@ void client<CONNECTION>::op_watch(void)
         it = watches.insert(
                 std::pair<std::string, watch_cb_k>(
                     path, watch_cb_k(*this, path, body + strlen(body) + 1, path != body))).first;
-        xs.watch(it->second);
+        xs.watch_add(it->second);
     }
 
     build_ack();
@@ -529,7 +529,7 @@ void client<CONNECTION>::op_unwatch(void)
     it = watches.find(get_path());
 
     if (it != watches.end()) {
-        xs.unwatch(it->second);
+        xs.watch_del(it->second);
         watches.erase(it);
         build_ack();
     } else {
@@ -543,7 +543,7 @@ void client<CONNECTION>::op_introduce_domain(void)
     char* arg2 = body + strlen(body) + 1;
     char* arg3 = arg2 + strlen(arg2) + 1;
 
-    xs.introduce_domain(atoi(body), atoi(arg2), atoi(arg3));
+    xs.domain_introduce(atoi(body), atoi(arg2), atoi(arg3));
 
     build_ack();
 }
@@ -553,7 +553,7 @@ void client<CONNECTION>::op_is_domain_introduced(void)
 {
     bool exists;
 
-    xs.exists_domain(atoi(body), exists);
+    xs.domain_exists(atoi(body), exists);
 
     if (exists) {
         build_resp("T");
@@ -567,7 +567,7 @@ void client<CONNECTION>::op_is_domain_introduced(void)
 template < typename CONNECTION >
 void client<CONNECTION>::op_release_domain(void)
 {
-    xs.release_domain(atoi(body));
+    xs.domain_release(atoi(body));
 
     build_ack();
 }
