@@ -469,11 +469,11 @@ void client<CONNECTION>::op_transaction_end(void)
 template < typename CONNECTION >
 void client<CONNECTION>::op_get_domain_path(void)
 {
-    char buff[32];
+    std::string path;
 
-    xs.get_domain_path(body, buff);
+    xs.get_domain_path(std::stoi(body), path);
 
-    build_resp(buff);
+    build_resp(path.c_str());
 }
 
 template < typename CONNECTION >

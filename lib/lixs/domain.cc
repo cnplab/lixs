@@ -36,7 +36,9 @@ lixs::domain::domain(xenstore& xs, event_mgr& emgr,
     printf("%4s = new conn\n", cid);
 #endif
 
-    xs.get_domain_path(domid, abs_path);
+    std::string path;
+    xs.get_domain_path(domid, path);
+    std::strcpy(abs_path, path.c_str());
     body = abs_path + strlen(abs_path);
     *body++ = '/';
 }
