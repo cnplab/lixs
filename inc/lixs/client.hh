@@ -115,7 +115,7 @@ protected:
     client_base::state state;
 
     std::map<std::string, watch_cb_k> watches;
-    std::list<std::pair<std::string, watch_cb_k&> > fire_lst;
+    std::list<std::pair<std::string, std::string> > fire_lst;
 
     /*
      * buff: [HEADER][/local/domain/<id>][BODY][/0]
@@ -251,14 +251,14 @@ void client<CONNECTION>::process(void)
                 if (fire_lst.empty()) {
                     state = p_rx;
                 } else {
-                    std::pair<std::string, watch_cb_k&>& e = fire_lst.front();
+                    std::pair<std::string, std::string>& e = fire_lst.front();
 
-                    build_watch(e.first.c_str() + (e.second.rel ? msg.body - msg.abs_path : 0), e.second.token.c_str());
+                    build_watch(e.first.c_str(), e.second.c_str());
 #ifdef DEBUG
                     print_msg((char*)">");
 #endif
-
                     fire_lst.pop_front();
+
                     state = p_tx;
                 }
                 break;

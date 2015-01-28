@@ -42,8 +42,11 @@ void lixs::client_base::ev_cb_k::operator()(void)
 
 void lixs::client_base::watch_cb_k::operator()(const std::string& path)
 {
+    std::string fire_path = path.c_str() + (rel ? _client.msg.body - _client.msg.abs_path : 0);
+
     if (_client.state == rx_hdr) {
-        _client.build_watch(path.c_str() + (rel ? _client.msg.body - _client.msg.abs_path : 0), token.c_str());
+        _client.build_watch(fire_path.c_str(), token.c_str());
+
 #ifdef DEBUG
         _client.print_msg((char*)">");
 #endif
@@ -61,8 +64,7 @@ void lixs::client_base::watch_cb_k::operator()(const std::string& path)
             _client.state = tx_body;
         }
     } else {
-        _client.fire_lst.push_back(
-                std::pair<std::string, watch_cb_k&>(path, *this));
+        _client.fire_lst.push_back(std::pair<std::string, std::string>(fire_path, token));
     }
 }
 
