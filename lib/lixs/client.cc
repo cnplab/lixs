@@ -154,7 +154,7 @@ void lixs::client_base::handle_msg(void)
         break;
 
         default:
-            build_err(EINVAL);
+            build_err(ENOSYS);
         break;
     }
 }
