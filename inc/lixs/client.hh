@@ -84,12 +84,17 @@ protected:
     void op_get_domain_path(void);
     void op_get_perms(void);
     void op_set_perms(void);
+    void op_set_target(void);
+    void op_restrict(void);
     void op_directory(void);
     void op_watch(void);
     void op_unwatch(void);
+    void op_reset_watches(void);
     void op_introduce_domain(void);
     void op_release_domain(void);
     void op_is_domain_introduced(void);
+    void op_debug(void);
+    void op_resume(void);
 
     char* get_path(void);
     void build_resp(const char* resp);

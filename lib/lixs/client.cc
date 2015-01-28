@@ -102,8 +102,7 @@ void lixs::client_base::handle_msg(void)
         break;
 
         case XS_DEBUG:
-            printf("XS_DEBUG\n");
-            build_ack();
+            op_debug();
         break;
 
         case XS_WATCH:
@@ -139,18 +138,19 @@ void lixs::client_base::handle_msg(void)
         break;
 
         case XS_RESUME:
-            printf("client: XS_RESUME\n");
-            build_err(ENOSYS);
+            op_resume();
         break;
 
         case XS_SET_TARGET:
-            printf("client: XS_SET_TARGET\n");
-            build_err(ENOSYS);
+            op_set_target();
         break;
 
         case XS_RESET_WATCHES:
-            printf("client: XS_RESET_WATCHES\n");
-            build_err(ENOSYS);
+            op_reset_watches();
+        break;
+
+        case XS_RESTRICT:
+            op_restrict();
         break;
 
         default:
@@ -248,12 +248,37 @@ void lixs::client_base::op_get_domain_path(void)
 
 void lixs::client_base::op_get_perms(void)
 {
+    /* FIXME: implement
+     *
+     * Currently this implementation doesn't support permissions.
+     * Return full permissions.
+     */
     build_resp("b0");
 }
 
 void lixs::client_base::op_set_perms(void)
 {
+    /* FIXME: implement
+     *
+     * Currently this implementation doesn't support permissions.
+     * Acknowledge the change.
+     */
+
     build_ack();
+}
+
+void lixs::client_base::op_set_target(void)
+{
+    /* FIXME: implement */
+
+    build_err(ENOSYS);
+}
+
+void lixs::client_base::op_restrict(void)
+{
+    /* FIXME: implement */
+
+    build_err(ENOSYS);
 }
 
 void lixs::client_base::op_directory(void)
@@ -302,6 +327,13 @@ void lixs::client_base::op_unwatch(void)
     }
 }
 
+void lixs::client_base::op_reset_watches(void)
+{
+    /* FIXME: implement */
+
+    build_err(ENOSYS);
+}
+
 void lixs::client_base::op_introduce_domain(void)
 {
     char* arg2 = msg.body + strlen(msg.body) + 1;
@@ -332,6 +364,20 @@ void lixs::client_base::op_is_domain_introduced(void)
         build_resp("F");
         append_sep();
     }
+}
+
+void lixs::client_base::op_debug(void)
+{
+    /* FIXME: implement */
+
+    build_err(ENOSYS);
+}
+
+void lixs::client_base::op_resume(void)
+{
+    /* FIXME: implement */
+
+    build_err(ENOSYS);
 }
 
 char* lixs::client_base::get_path()
