@@ -8,6 +8,7 @@
 #include <fstream>
 #include <string>
 #include <sys/mman.h>
+#include <unistd.h>
 
 extern "C" {
 #include <xenctrl.h>
