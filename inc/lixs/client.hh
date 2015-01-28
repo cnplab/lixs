@@ -90,8 +90,8 @@ protected:
     void op_watch(void);
     void op_unwatch(void);
     void op_reset_watches(void);
-    void op_introduce_domain(void);
-    void op_release_domain(void);
+    void op_introduce(void);
+    void op_release(void);
     void op_is_domain_introduced(void);
     void op_debug(void);
     void op_resume(void);

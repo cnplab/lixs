@@ -122,7 +122,7 @@ void lixs::client_base::handle_msg(void)
         break;
 
         case XS_INTRODUCE:
-            op_introduce_domain();
+            op_introduce();
         break;
 
         case XS_IS_DOMAIN_INTRODUCED:
@@ -130,7 +130,7 @@ void lixs::client_base::handle_msg(void)
         break;
 
         case XS_RELEASE:
-            op_release_domain();
+            op_release();
         break;
 
         case XS_GET_DOMAIN_PATH:
@@ -334,7 +334,7 @@ void lixs::client_base::op_reset_watches(void)
     build_err(ENOSYS);
 }
 
-void lixs::client_base::op_introduce_domain(void)
+void lixs::client_base::op_introduce(void)
 {
     char* arg2 = msg.body + strlen(msg.body) + 1;
     char* arg3 = arg2 + strlen(arg2) + 1;
@@ -344,7 +344,7 @@ void lixs::client_base::op_introduce_domain(void)
     build_ack();
 }
 
-void lixs::client_base::op_release_domain(void)
+void lixs::client_base::op_release(void)
 {
     xs.domain_release(atoi(msg.body));
 
