@@ -35,10 +35,18 @@ public:
     virtual ~client();
 
 protected:
-    char* cid;
+    struct msg {
+        msg(char* buff)
+            : hdr(*((xsd_sockmsg*)buff)), abs_path(buff + sizeof(xsd_sockmsg)), body(abs_path)
+        { }
 
-    char* const abs_path;
-    char* body;
+        struct xsd_sockmsg& hdr;
+        char* abs_path;
+        char* body;
+    };
+
+    struct msg msg;
+    char* cid;
 
 private:
     class ev_cb_k : public lixs::ev_cb_k {
@@ -118,8 +126,7 @@ private:
     /*
      * buff: [HEADER][/local/domain/<id>][BODY][/0]
      */
-    char buff[sizeof(xsd_sockmsg) + 64 + XENSTORE_PAYLOAD_MAX + 1];
-    struct xsd_sockmsg& msg;
+    char buff[sizeof(xsd_sockmsg) + 35 + XENSTORE_PAYLOAD_MAX + 1];
 
     char* read_buff;
     char* write_buff;
@@ -137,20 +144,20 @@ template < typename CONNECTION >
 void client<CONNECTION>::watch_cb_k::operator()(const std::string& path)
 {
     if (_client.state == rx_hdr) {
-        _client.build_watch(path.c_str() + (rel ? _client.body - _client.abs_path : 0), token.c_str());
+        _client.build_watch(path.c_str() + (rel ? _client.msg.body - _client.msg.abs_path : 0), token.c_str());
 #ifdef DEBUG
         _client.print_msg((char*)">");
 #endif
 
-        _client.write_buff = reinterpret_cast<char*>(&_client.msg);
-        _client.write_bytes = sizeof(_client.msg);
+        _client.write_buff = reinterpret_cast<char*>(&_client.msg.hdr);
+        _client.write_bytes = sizeof(_client.msg.hdr);
         if (!_client.write(_client.write_buff, _client.write_bytes)) {
             _client.state = tx_hdr;
             return;
         }
 
-        _client.write_buff = _client.body;
-        _client.write_bytes = _client.msg.len;
+        _client.write_buff = _client.msg.body;
+        _client.write_bytes = _client.msg.hdr.len;
         if (!_client.write(_client.write_buff, _client.write_bytes)) {
             _client.state = tx_body;
         }
@@ -164,9 +171,7 @@ template < typename CONNECTION >
 template < typename... ARGS >
 client<CONNECTION>::client(xenstore& xs, event_mgr& emgr, ARGS&&... args)
     : CONNECTION(*this, emgr, std::forward<ARGS>(args)...),
-    cid((char*)"X"), abs_path(buff + sizeof(xsd_sockmsg)), body(abs_path),
-    xs(xs), emgr(emgr), ev_cb(*this),
-    state(p_rx), msg(*((xsd_sockmsg*)buff))
+    msg(buff), cid((char*)"X"), xs(xs), emgr(emgr), ev_cb(*this), state(p_rx)
 {
     emgr.enqueue_event(ev_cb);
 }
@@ -199,8 +204,8 @@ void client<CONNECTION>::process(void)
     while (!yield && CONNECTION::is_alive()) {
         switch(state) {
             case p_rx:
-                read_buff = reinterpret_cast<char*>(&msg);
-                read_bytes = sizeof(msg);
+                read_buff = reinterpret_cast<char*>(&(msg.hdr));
+                read_bytes = sizeof(msg.hdr);
 
                 state = rx_hdr;
                 break;
@@ -212,8 +217,8 @@ void client<CONNECTION>::process(void)
                     break;
                 }
 
-                read_buff = body;
-                read_bytes = msg.len;
+                read_buff = msg.body;
+                read_bytes = msg.hdr.len;
 
                 state = rx_body;
                 break;
@@ -238,8 +243,8 @@ void client<CONNECTION>::process(void)
                 break;
 
             case p_tx:
-                write_buff = reinterpret_cast<char*>(&msg);
-                write_bytes = sizeof(msg);
+                write_buff = reinterpret_cast<char*>((&msg.hdr));
+                write_bytes = sizeof(msg.hdr);
 
                 state = tx_hdr;
                 break;
@@ -252,8 +257,8 @@ void client<CONNECTION>::process(void)
                     break;
                 }
 
-                write_buff = body;
-                write_bytes = msg.len;
+                write_buff = msg.body;
+                write_bytes = msg.hdr.len;
 
                 state = tx_body;
                 break;
@@ -275,7 +280,7 @@ void client<CONNECTION>::process(void)
                 } else {
                     std::pair<std::string, watch_cb_k&>& e = fire_lst.front();
 
-                    build_watch(e.first.c_str() + (e.second.rel ? body - abs_path : 0), e.second.token.c_str());
+                    build_watch(e.first.c_str() + (e.second.rel ? msg.body - msg.abs_path : 0), e.second.token.c_str());
 #ifdef DEBUG
                     print_msg((char*)">");
 #endif
@@ -293,9 +298,9 @@ void client<CONNECTION>::handle_msg(void)
 {
     /* FIXME: This is a quick fix, need to analyse this better */
     /* Ensure the body is null terminated */
-    body[msg.len] = '\0';
+    msg.body[msg.hdr.len] = '\0';
 
-    switch (msg.type) {
+    switch (msg.hdr.type) {
         case XS_DIRECTORY:
             op_directory();
         break;
@@ -388,7 +393,7 @@ void client<CONNECTION>::op_read(void)
     int ret;
     std::string res;
 
-    ret = xs.store_read(msg.tx_id, get_path(), res);
+    ret = xs.store_read(msg.hdr.tx_id, get_path(), res);
 
     if (ret == 0) {
         build_resp(res.c_str());
@@ -402,7 +407,7 @@ void client<CONNECTION>::op_write(void)
 {
     int ret;
 
-    ret = xs.store_write(msg.tx_id, get_path(), body + strlen(body) + 1);
+    ret = xs.store_write(msg.hdr.tx_id, get_path(), msg.body + strlen(msg.body) + 1);
 
     if (ret == 0) {
         build_ack();
@@ -416,7 +421,7 @@ void client<CONNECTION>::op_mkdir(void)
 {
     int ret;
 
-    ret = xs.store_mkdir(msg.tx_id, get_path());
+    ret = xs.store_mkdir(msg.hdr.tx_id, get_path());
 
     if (ret == 0) {
         build_ack();
@@ -430,7 +435,7 @@ void client<CONNECTION>::op_rm(void)
 {
     int ret;
 
-    ret = xs.store_rm(msg.tx_id, get_path());
+    ret = xs.store_rm(msg.hdr.tx_id, get_path());
 
     if (ret == 0) {
         build_ack();
@@ -457,7 +462,7 @@ void client<CONNECTION>::op_transaction_end(void)
 {
     int ret;
 
-    ret = xs.transaction_end(msg.tx_id, strcmp(body, "T") == 0);
+    ret = xs.transaction_end(msg.hdr.tx_id, strcmp(msg.body, "T") == 0);
 
     if (ret == 0) {
         build_ack();
@@ -471,7 +476,7 @@ void client<CONNECTION>::op_get_domain_path(void)
 {
     std::string path;
 
-    xs.domain_path(std::stoi(body), path);
+    xs.domain_path(std::stoi(msg.body), path);
 
     build_resp(path.c_str());
 }
@@ -494,7 +499,7 @@ void client<CONNECTION>::op_directory(void)
     std::set<std::string> resp;
     std::set<std::string>::iterator it;
 
-    xs.store_dir(msg.tx_id, get_path(), resp);
+    xs.store_dir(msg.hdr.tx_id, get_path(), resp);
 
     build_resp("");
 
@@ -515,7 +520,7 @@ void client<CONNECTION>::op_watch(void)
     if (it == watches.end()) {
         it = watches.insert(
                 std::pair<std::string, watch_cb_k>(
-                    path, watch_cb_k(*this, path, body + strlen(body) + 1, path != body))).first;
+                    path, watch_cb_k(*this, path, msg.body + strlen(msg.body) + 1, path != msg.body))).first;
         xs.watch_add(it->second);
     }
 
@@ -540,10 +545,10 @@ void client<CONNECTION>::op_unwatch(void)
 template < typename CONNECTION >
 void client<CONNECTION>::op_introduce_domain(void)
 {
-    char* arg2 = body + strlen(body) + 1;
+    char* arg2 = msg.body + strlen(msg.body) + 1;
     char* arg3 = arg2 + strlen(arg2) + 1;
 
-    xs.domain_introduce(atoi(body), atoi(arg2), atoi(arg3));
+    xs.domain_introduce(atoi(msg.body), atoi(arg2), atoi(arg3));
 
     build_ack();
 }
@@ -553,7 +558,7 @@ void client<CONNECTION>::op_is_domain_introduced(void)
 {
     bool exists;
 
-    xs.domain_exists(atoi(body), exists);
+    xs.domain_exists(atoi(msg.body), exists);
 
     if (exists) {
         build_resp("T");
@@ -567,7 +572,7 @@ void client<CONNECTION>::op_is_domain_introduced(void)
 template < typename CONNECTION >
 void client<CONNECTION>::op_release_domain(void)
 {
-    xs.domain_release(atoi(body));
+    xs.domain_release(atoi(msg.body));
 
     build_ack();
 }
@@ -575,10 +580,10 @@ void client<CONNECTION>::op_release_domain(void)
 template < typename CONNECTION >
 char* client<CONNECTION>::get_path()
 {
-    if (body[0] == '/' || body[0] == '@') {
-        return body;
+    if (msg.body[0] == '/' || msg.body[0] == '@') {
+        return msg.body;
     } else {
-        return abs_path;
+        return msg.abs_path;
     }
 }
 
@@ -587,8 +592,8 @@ void inline client<CONNECTION>::build_resp(const char* resp)
 {
     /* FIXME: buffer will overflow if resp to big */
 
-    msg.len = strlen(resp);
-    memcpy(body, resp, msg.len);
+    msg.hdr.len = strlen(resp);
+    memcpy(msg.body, resp, msg.hdr.len);
 }
 
 template < typename CONNECTION >
@@ -596,14 +601,14 @@ void inline client<CONNECTION>::append_resp(const char* resp)
 {
     int len = strlen(resp);
 
-    memcpy(body + msg.len, resp, len);
-    msg.len += len;
+    memcpy(msg.body + msg.hdr.len, resp, len);
+    msg.hdr.len += len;
 }
 
 template < typename CONNECTION >
 void inline client<CONNECTION>::append_sep(void)
 {
-    body[msg.len++] = '\0';
+    msg.body[msg.hdr.len++] = '\0';
 }
 
 template < typename CONNECTION >
@@ -612,16 +617,16 @@ void inline client<CONNECTION>::build_watch(const char* path, const char* token)
     int path_len = strlen(path);
     int token_len = strlen(token);
 
-    msg.type = XS_WATCH_EVENT;
-    msg.req_id = 0;
-    msg.tx_id = 0;
+    msg.hdr.type = XS_WATCH_EVENT;
+    msg.hdr.req_id = 0;
+    msg.hdr.tx_id = 0;
 
-    memcpy(body, path, path_len);
-    body[path_len] = '\0';
-    memcpy(body + path_len + 1, token, token_len);
-    body[path_len + 1 + token_len] = '\0';
+    memcpy(msg.body, path, path_len);
+    msg.body[path_len] = '\0';
+    memcpy(msg.body + path_len + 1, token, token_len);
+    msg.body[path_len + 1 + token_len] = '\0';
 
-    msg.len = path_len + token_len + 2;
+    msg.hdr.len = path_len + token_len + 2;
 }
 
 template < typename CONNECTION >
@@ -639,16 +644,16 @@ void inline client<CONNECTION>::build_err(int err)
         }
     }
 
-    msg.len = strlen(resp) + 1;
-    msg.type = XS_ERROR;
-    memcpy(body, resp, msg.len);
+    msg.hdr.len = strlen(resp) + 1;
+    msg.hdr.type = XS_ERROR;
+    memcpy(msg.body, resp, msg.hdr.len);
 }
 
 template < typename CONNECTION >
 void inline client<CONNECTION>::build_ack(void)
 {
-    msg.len = 3;
-    memcpy(body, "OK", 3);
+    msg.hdr.len = 3;
+    memcpy(msg.body, "OK", 3);
 }
 
 #ifdef DEBUG
@@ -658,18 +663,18 @@ void inline client<CONNECTION>::print_msg(char* pre)
     unsigned int i;
     char c;
 
-    body[msg.len] = '\0';
+    msg.body[msg.hdr.len] = '\0';
 
     printf("%4s %s { type = %2d, req_id = %d, tx_id = %d, len = %d, msg = ",
-            cid, pre, msg.type, msg.req_id, msg.tx_id, msg.len);
+            cid, pre, msg.hdr.type, msg.hdr.req_id, msg.hdr.tx_id, msg.hdr.len);
 
     c = '"';
-    for (i = 0; i < msg.len; i += strlen(body + i) + 1) {
-        printf("%c%s", c, body + i);
+    for (i = 0; i < msg.hdr.len; i += strlen(msg.body + i) + 1) {
+        printf("%c%s", c, msg.body + i);
         c = ' ';
     }
 
-    printf("%s%s\" }\n", i == 0 ? "\"" : "", i > 0 && i == msg.len ? " " : "");
+    printf("%s%s\" }\n", i == 0 ? "\"" : "", i > 0 && i == msg.hdr.len ? " " : "");
 }
 #endif
 

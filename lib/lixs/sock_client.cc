@@ -21,8 +21,8 @@ lixs::sock_client::sock_client(xenstore& xs, event_mgr& emgr, int fd)
 
     std::string path = "/local/domain/0/";
 
-    memcpy(abs_path, path.c_str(), path.length());
-    body = abs_path + path.length();
+    memcpy(msg.abs_path, path.c_str(), path.length());
+    msg.body = msg.abs_path + path.length();
 }
 
 lixs::sock_client::~sock_client()
