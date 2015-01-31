@@ -72,9 +72,7 @@ protected:
 
     virtual void operator()(void) = 0;
     virtual void process(void) = 0;
-
-    virtual bool read(char*& buff, int& bytes) = 0;
-    virtual bool write(char*& buff, int& bytes) = 0;
+    virtual void watch_fired(const std::string& path, const std::string& token) = 0;
 
     void handle_msg(void);
 
@@ -145,9 +143,7 @@ public:
 private:
     void operator()(void);
     void process(void);
-
-    bool read(char*& buff, int& bytes);
-    bool write(char*& buff, int& bytes);
+    void watch_fired(const std::string& path, const std::string& token);
 };
 
 template < typename CONNECTION >
@@ -270,15 +266,29 @@ void client<CONNECTION>::process(void)
 }
 
 template < typename CONNECTION >
-bool client<CONNECTION>::read(char*& buff, int& bytes)
+void client<CONNECTION>::watch_fired(const std::string& path, const std::string& token)
 {
-    return CONNECTION::read(buff, bytes);
-}
+    if (state == rx_hdr) {
+        build_watch(path.c_str(), token.c_str());
+#ifdef DEBUG
+        print_msg((char*)">");
+#endif
 
-template < typename CONNECTION >
-bool client<CONNECTION>::write(char*& buff, int& bytes)
-{
-    return CONNECTION::write(buff, bytes);
+        write_buff = reinterpret_cast<char*>(&msg.hdr);
+        write_bytes = sizeof(msg.hdr);
+        if (!CONNECTION::write(write_buff, write_bytes)) {
+            state = tx_hdr;
+            return;
+        }
+
+        write_buff = msg.body;
+        write_bytes = msg.hdr.len;
+        if (!CONNECTION::write(write_buff, write_bytes)) {
+            state = tx_body;
+        }
+    } else {
+        to_fire.push_back(std::pair<std::string, std::string>(path, token));
+    }
 }
 
 } /* namespace lixs */

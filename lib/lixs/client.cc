@@ -44,28 +44,7 @@ void lixs::client_base::watch_cb_k::operator()(const std::string& path)
 {
     std::string fire_path = path.c_str() + (rel ? _client.msg.body - _client.msg.abs_path : 0);
 
-    if (_client.state == rx_hdr) {
-        _client.build_watch(fire_path.c_str(), token.c_str());
-
-#ifdef DEBUG
-        _client.print_msg((char*)">");
-#endif
-
-        _client.write_buff = reinterpret_cast<char*>(&_client.msg.hdr);
-        _client.write_bytes = sizeof(_client.msg.hdr);
-        if (!_client.write(_client.write_buff, _client.write_bytes)) {
-            _client.state = tx_hdr;
-            return;
-        }
-
-        _client.write_buff = _client.msg.body;
-        _client.write_bytes = _client.msg.hdr.len;
-        if (!_client.write(_client.write_buff, _client.write_bytes)) {
-            _client.state = tx_body;
-        }
-    } else {
-        _client.to_fire.push_back(std::pair<std::string, std::string>(fire_path, token));
-    }
+    _client.watch_fired(fire_path, token);
 }
 
 void lixs::client_base::handle_msg(void)
