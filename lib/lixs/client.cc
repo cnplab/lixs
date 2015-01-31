@@ -28,7 +28,7 @@ lixs::client_base::client_base(xenstore& xs, event_mgr& emgr)
 
 lixs::client_base::~client_base()
 {
-    std::map<std::string, watch_cb_k>::iterator it;
+    watch_map::iterator it;
 
     for (it = watches.begin(); it != watches.end(); it++) {
         xs.watch_del(it->second);
@@ -64,7 +64,7 @@ void lixs::client_base::watch_cb_k::operator()(const std::string& path)
             _client.state = tx_body;
         }
     } else {
-        _client.fire_lst.push_back(std::pair<std::string, std::string>(fire_path, token));
+        _client.to_fire.push_back(std::pair<std::string, std::string>(fire_path, token));
     }
 }
 
@@ -300,7 +300,7 @@ void lixs::client_base::op_directory(void)
 
 void lixs::client_base::op_watch(void)
 {
-    typename std::map<std::string, watch_cb_k>::iterator it;
+    watch_map::iterator it;
 
     char* path = get_path();
 
@@ -317,7 +317,7 @@ void lixs::client_base::op_watch(void)
 
 void lixs::client_base::op_unwatch(void)
 {
-    typename std::map<std::string, watch_cb_k>::iterator it;
+    watch_map::iterator it;
     it = watches.find(get_path());
 
     if (it != watches.end()) {
