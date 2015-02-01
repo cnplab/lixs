@@ -27,14 +27,6 @@ public:
 
 class watch_cb_k {
 public:
-    watch_cb_k(void)
-        : path("/"), token("")
-    { };
-
-    watch_cb_k(const char* path, const char* token)
-        : path(path), token(token)
-    { };
-
     watch_cb_k(const std::string& path, const std::string& token)
         : path(path), token(token)
     { };
