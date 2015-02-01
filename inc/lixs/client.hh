@@ -98,6 +98,10 @@ protected:
     void op_resume(void);
 
     char* get_path(void);
+    char* get_arg1(void);
+    char* get_arg2(void);
+    char* get_arg3(void);
+
     void build_resp(const char* resp);
     void append_resp(const char* resp);
     void append_sep(void);

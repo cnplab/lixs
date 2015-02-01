@@ -158,7 +158,7 @@ void lixs::client_base::op_write(void)
 {
     int ret;
 
-    ret = xs.store_write(msg.hdr.tx_id, get_path(), msg.body + strlen(msg.body) + 1);
+    ret = xs.store_write(msg.hdr.tx_id, get_path(), get_arg2());
 
     if (ret == 0) {
         build_ack();
@@ -209,7 +209,7 @@ void lixs::client_base::op_transaction_end(void)
 {
     int ret;
 
-    ret = xs.transaction_end(msg.hdr.tx_id, strcmp(msg.body, "T") == 0);
+    ret = xs.transaction_end(msg.hdr.tx_id, strcmp(get_arg1(), "T") == 0);
 
     if (ret == 0) {
         build_ack();
@@ -222,7 +222,7 @@ void lixs::client_base::op_get_domain_path(void)
 {
     std::string path;
 
-    xs.domain_path(std::stoi(msg.body), path);
+    xs.domain_path(std::stoi(get_arg1()), path);
 
     build_resp(path.c_str());
 }
@@ -287,7 +287,7 @@ void lixs::client_base::op_watch(void)
     if (it == watches.end()) {
         it = watches.insert(
                 std::pair<std::string, watch_cb_k>(
-                    path, watch_cb_k(*this, path, msg.body + strlen(msg.body) + 1, path != msg.body))).first;
+                    path, watch_cb_k(*this, path, get_arg2(), path != msg.body))).first;
         xs.watch_add(it->second);
     }
 
@@ -317,17 +317,14 @@ void lixs::client_base::op_reset_watches(void)
 
 void lixs::client_base::op_introduce(void)
 {
-    char* arg2 = msg.body + strlen(msg.body) + 1;
-    char* arg3 = arg2 + strlen(arg2) + 1;
-
-    xs.domain_introduce(atoi(msg.body), atoi(arg2), atoi(arg3));
+    xs.domain_introduce(atoi(get_arg1()), atoi(get_arg2()), atoi(get_arg3()));
 
     build_ack();
 }
 
 void lixs::client_base::op_release(void)
 {
-    xs.domain_release(atoi(msg.body));
+    xs.domain_release(atoi(get_arg1()));
 
     build_ack();
 }
@@ -336,7 +333,7 @@ void lixs::client_base::op_is_domain_introduced(void)
 {
     bool exists;
 
-    xs.domain_exists(atoi(msg.body), exists);
+    xs.domain_exists(atoi(get_arg1()), exists);
 
     if (exists) {
         build_resp("T");
@@ -368,6 +365,23 @@ char* lixs::client_base::get_path()
     } else {
         return msg.abs_path;
     }
+}
+
+char* lixs::client_base::get_arg1(void)
+{
+    return msg.body;
+}
+
+char* lixs::client_base::get_arg2(void)
+{
+    return msg.body + strlen(msg.body) + 1;
+}
+
+char* lixs::client_base::get_arg3(void)
+{
+    char* arg2 = get_arg2();
+
+    return arg2 + strlen(arg2) + 1;
 }
 
 void lixs::client_base::build_resp(const char* resp)
