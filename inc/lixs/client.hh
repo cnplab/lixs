@@ -43,14 +43,13 @@ protected:
 
     class watch_cb_k : public lixs::watch_cb_k {
     public:
-        watch_cb_k(client_base& client, const std::string& path, const std::string& token, bool rel)
-            : lixs::watch_cb_k(path, token), _client(client), rel(rel)
+        watch_cb_k(client_base& client, const std::string& path, const std::string& token, bool relative)
+            : lixs::watch_cb_k(path, token, relative), _client(client)
         { };
 
         void operator()(const std::string& path);
 
         client_base& _client;
-        bool rel;
     };
 
     enum state {
