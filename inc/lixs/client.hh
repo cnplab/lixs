@@ -247,23 +247,19 @@ void client<CONNECTION>::process(void)
                     break;
                 }
 
-                state = p_watch;
+                state = to_fire.empty() ? p_rx : p_watch;
                 break;
 
             case p_watch:
-                if (to_fire.empty()) {
-                    state = p_rx;
-                } else {
-                    std::pair<std::string, std::string>& e = to_fire.front();
+                std::pair<std::string, std::string>& e = to_fire.front();
+                build_watch(e.first.c_str(), e.second.c_str());
+                to_fire.pop_front();
 
-                    build_watch(e.first.c_str(), e.second.c_str());
 #ifdef DEBUG
-                    print_msg((char*)">");
+                print_msg((char*)">");
 #endif
-                    to_fire.pop_front();
 
-                    state = p_tx;
-                }
+                state = p_tx;
                 break;
         }
     }
