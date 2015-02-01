@@ -43,7 +43,7 @@ protected:
 
     class watch_cb_k : public lixs::watch_cb_k {
     public:
-        watch_cb_k(client_base& client, char* path, char* token, bool rel)
+        watch_cb_k(client_base& client, const std::string& path, const std::string& token, bool rel)
             : lixs::watch_cb_k(path, token), _client(client), rel(rel)
         { };
 
