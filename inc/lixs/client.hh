@@ -30,17 +30,6 @@ protected:
         char* body;
     };
 
-    class ev_cb_k : public lixs::ev_cb_k {
-    public:
-        ev_cb_k(client_base& client)
-            : _client(client)
-        { };
-
-        void operator()(void);
-
-        client_base& _client;
-    };
-
     class watch_cb_k : public lixs::watch_cb_k {
     public:
         watch_cb_k(client_base& client, const std::string& path, const std::string& token, bool relative)
@@ -115,7 +104,6 @@ protected:
     xenstore& xs;
     event_mgr& emgr;
 
-    ev_cb_k ev_cb;
     client_base::state state;
 
     watch_map watches;

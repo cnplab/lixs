@@ -6,6 +6,7 @@
 
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 
@@ -29,13 +30,14 @@ public:
     void io_set(fd_cb_k& cb);
     void io_remove(fd_cb_k& cb);
 
-    void enqueue_event(ev_cb_k& cb);
+    void enqueue_event(std::function<void(void)> cb);
+
     void enqueue_watch(watch_cb_k& cb, const std::string& path);
     void dequeue_watch(watch_cb_k& cb);
 
 private:
     iomux& io;
-    std::list<ev_cb_k*> event_list;
+    std::list<std::function<void(void)> > event_list;
     std::map<watch_cb_k*, std::set<std::string> > watch_list;
 
     void fire_events(void);

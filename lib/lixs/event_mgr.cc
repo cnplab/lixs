@@ -33,9 +33,9 @@ void lixs::event_mgr::io_remove(fd_cb_k& cb)
     io.remove(cb);
 }
 
-void lixs::event_mgr::enqueue_event(ev_cb_k& cb)
+void lixs::event_mgr::enqueue_event(std::function<void(void)> cb)
 {
-    event_list.push_front(&cb);
+    event_list.push_front(cb);
 }
 
 void lixs::event_mgr::enqueue_watch(watch_cb_k& cb, const std::string& path)
@@ -50,10 +50,10 @@ void lixs::event_mgr::dequeue_watch(watch_cb_k& cb)
 
 void lixs::event_mgr::fire_events(void)
 {
-    std::list<ev_cb_k*>::iterator it;
+    std::list<std::function<void(void)> >::iterator it;
 
     for(it = event_list.begin(); it != event_list.end(); it++) {
-        (*it)->operator()();
+        it->operator()();
     }
 
     event_list.clear();

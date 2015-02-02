@@ -11,6 +11,7 @@
 #include <cerrno>
 #include <list>
 #include <map>
+#include <memory>
 #include <string>
 #include <unistd.h>
 #include <utility>
@@ -21,9 +22,9 @@ extern "C" {
 
 
 lixs::client_base::client_base(xenstore& xs, event_mgr& emgr)
-    : xs(xs), emgr(emgr), ev_cb(*this), state(p_rx), msg(buff), cid((char*)"X")
+    : xs(xs), emgr(emgr), state(p_rx), msg(buff), cid((char*)"X")
 {
-    emgr.enqueue_event(ev_cb);
+    emgr.enqueue_event(std::bind(&client_base::process, this));
 }
 
 lixs::client_base::~client_base()
@@ -33,11 +34,6 @@ lixs::client_base::~client_base()
     for (it = watches.begin(); it != watches.end(); it++) {
         xs.watch_del(it->second);
     }
-}
-
-void lixs::client_base::ev_cb_k::operator()(void)
-{
-    _client.process();
 }
 
 void lixs::client_base::watch_cb_k::operator()(const std::string& path)
