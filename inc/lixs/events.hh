@@ -6,11 +6,6 @@
 
 namespace lixs {
 
-class ev_cb_k {
-public:
-    virtual void operator()(void) = 0;
-};
-
 class fd_cb_k {
 public:
     fd_cb_k(void)
