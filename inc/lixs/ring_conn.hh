@@ -18,7 +18,7 @@ template < typename MAPPER >
 class ring_conn : public MAPPER, public fd_cb_k {
 public:
     template < typename... ARGS >
-    ring_conn(ev_cb_k& cb, event_mgr& emgr, domid_t domid, evtchn_port_t port, ARGS&&... args);
+    ring_conn(event_mgr& emgr, domid_t domid, evtchn_port_t port, ARGS&&... args);
     virtual ~ring_conn();
 
     void operator()(bool read, bool write);
@@ -27,11 +27,12 @@ public:
     bool write(char*& buff, int& bytes);
     bool is_alive(void);
 
+    virtual void process(void) = 0;
+
 private:
     bool read_chunck(char*& buff, int& bytes);
     bool write_chunck(char*& buff, int& bytes);
 
-    ev_cb_k& cb;
     event_mgr& emgr;
 
     xc_evtchn *xce_handle;
@@ -44,8 +45,8 @@ private:
 
 template < typename MAPPER >
 template < typename... ARGS >
-ring_conn<MAPPER>::ring_conn(ev_cb_k& cb, event_mgr& emgr, domid_t domid, evtchn_port_t port, ARGS&&... args)
-    : MAPPER(domid, std::forward<ARGS>(args)...), cb(cb), emgr(emgr),  domid(domid), remote_port(port)
+ring_conn<MAPPER>::ring_conn(event_mgr& emgr, domid_t domid, evtchn_port_t port, ARGS&&... args)
+    : MAPPER(domid, std::forward<ARGS>(args)...), emgr(emgr),  domid(domid), remote_port(port)
 {
     xce_handle = xc_evtchn_open(NULL, 0);
     local_port = xc_evtchn_bind_interdomain(xce_handle, domid, remote_port);
@@ -68,7 +69,7 @@ void ring_conn<MAPPER>::operator()(bool read, bool write)
     evtchn_port_t port = xc_evtchn_pending(xce_handle);
     xc_evtchn_unmask(xce_handle, port);
 
-    cb();
+    process();
 }
 
 template < typename MAPPER >

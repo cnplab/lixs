@@ -58,7 +58,6 @@ protected:
     client_base(xenstore& xs, event_mgr& emgr);
     virtual ~client_base();
 
-    virtual void operator()(void) = 0;
     virtual void process(void) = 0;
     virtual void watch_fired(const std::string& path, const std::string& token) = 0;
 
@@ -125,14 +124,13 @@ protected:
 
 
 template < typename CONNECTION >
-class client : public client_base, public CONNECTION, public ev_cb_k {
+class client : public client_base, public CONNECTION {
 public:
     template < typename... ARGS >
     client(xenstore& xs, event_mgr& emgr, ARGS&&... args);
     virtual ~client();
 
 private:
-    void operator()(void);
     void process(void);
     void watch_fired(const std::string& path, const std::string& token);
 };
@@ -140,22 +138,13 @@ private:
 template < typename CONNECTION >
 template < typename... ARGS >
 client<CONNECTION>::client(xenstore& xs, event_mgr& emgr, ARGS&&... args)
-    : client_base(xs, emgr), CONNECTION(*this, emgr, std::forward<ARGS>(args)...)
+    : client_base(xs, emgr), CONNECTION(emgr, std::forward<ARGS>(args)...)
 {
 }
 
 template < typename CONNECTION >
 client<CONNECTION>::~client()
 {
-}
-
-template < typename CONNECTION >
-void client<CONNECTION>::operator()(void)
-{
-    process();
-    if (!CONNECTION::is_alive()) {
-        delete this;
-    }
 }
 
 template < typename CONNECTION >
@@ -249,6 +238,10 @@ void client<CONNECTION>::process(void)
                 state = p_tx;
                 break;
         }
+    }
+
+    if (!CONNECTION::is_alive()) {
+        delete this;
     }
 }
 

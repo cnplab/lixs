@@ -9,8 +9,8 @@
 #include <unistd.h>
 
 
-lixs::sock_conn::sock_conn(ev_cb_k& cb, event_mgr& emgr, int fd)
-    : alive(true), cb(cb), emgr(emgr)
+lixs::sock_conn::sock_conn(event_mgr& emgr, int fd)
+    : alive(true), emgr(emgr)
 {
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 
@@ -26,7 +26,7 @@ lixs::sock_conn::~sock_conn()
 
 void lixs::sock_conn::operator()(bool read, bool write)
 {
-    cb();
+    process();
 }
 
 bool lixs::sock_conn::read(char*& buff, int& bytes)
