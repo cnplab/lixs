@@ -16,23 +16,21 @@ public:
     unix_sock_server(xenstore& xs, event_mgr& emgr, std::string rw_path, std::string ro_path);
     ~unix_sock_server();
 
-
 private:
-    class fd_cb_k : public lixs::fd_cb_k {
-    public:
+    struct fd_cb_k : public lixs::fd_cb_k {
         fd_cb_k (unix_sock_server& server)
             : server(server)
-        { };
+        { }
 
         void operator()(bool read, bool write);
 
         unix_sock_server& server;
     };
 
-
+private:
     void client_dead(sock_client* client);
 
-
+private:
     xenstore& xs;
     event_mgr& emgr;
 
