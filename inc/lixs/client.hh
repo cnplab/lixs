@@ -21,13 +21,19 @@ namespace lixs {
 class client_base {
 protected:
     struct msg {
-        msg(char* buff)
-            : hdr(*((xsd_sockmsg*)buff)), abs_path(buff + sizeof(xsd_sockmsg)), body(abs_path)
+        msg()
+            : abs_path(buff), body(buff)
         { }
 
-        struct xsd_sockmsg& hdr;
+        struct xsd_sockmsg hdr;
+
         char* abs_path;
         char* body;
+
+        /*
+         * buff: [/local/domain/<id>][BODY][/0]
+         */
+        char buff[35 + XENSTORE_PAYLOAD_MAX + 1];
     };
 
     class watch_cb_k : public lixs::watch_cb_k {
@@ -108,10 +114,6 @@ protected:
     watch_map watches;
     fire_list to_fire;
 
-    /*
-     * buff: [HEADER][/local/domain/<id>][BODY][/0]
-     */
-    char buff[sizeof(xsd_sockmsg) + 35 + XENSTORE_PAYLOAD_MAX + 1];
     struct msg msg;
 
     char* cid;
