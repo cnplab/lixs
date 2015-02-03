@@ -36,12 +36,13 @@ public:
     void dequeue_watch(watch_cb_k& cb);
 
 private:
+    void fire_events(void);
+    void fire_watches(void);
+
+private:
     iomux& io;
     std::list<std::function<void(void)> > event_list;
     std::map<watch_cb_k*, std::set<std::string> > watch_list;
-
-    void fire_events(void);
-    void fire_watches(void);
 };
 
 } /* namespace lixs */
