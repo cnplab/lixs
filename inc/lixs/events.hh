@@ -6,8 +6,7 @@
 
 namespace lixs {
 
-class fd_cb_k {
-public:
+struct fd_cb_k {
     fd_cb_k(void)
         : fd(-1), ev_read(false), ev_write(false)
     { };
@@ -20,8 +19,7 @@ public:
     bool ev_write;
 };
 
-class watch_cb_k {
-public:
+struct watch_cb_k {
     watch_cb_k(const std::string& path, const std::string& token, bool relative)
         : path(path), token(token), relative(relative)
     { };
