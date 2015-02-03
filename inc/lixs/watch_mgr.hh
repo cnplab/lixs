@@ -12,8 +12,7 @@
 
 namespace lixs {
 
-class watch_mgr
-{
+class watch_mgr {
 public:
     watch_mgr(event_mgr& emgr);
     ~watch_mgr();
@@ -31,8 +30,7 @@ public:
 private:
     typedef std::set<watch_cb_k*> watch_set;
 
-    class record {
-    public:
+    struct record {
         watch_set path;
         watch_set children;
     };
@@ -43,7 +41,7 @@ private:
 
     typedef std::map<unsigned int, fire_list> transaction_database;
 
-
+private:
     void _fire(const std::string& path, const std::string& fire_path);
     void _tfire(unsigned int tid, const std::string& path, const std::string& fire_path);
     void _fire_parents(const std::string& path, const std::string& fire_path);
@@ -53,7 +51,7 @@ private:
     void register_with_parents(const std::string& path, watch_cb_k& cb);
     void unregister_from_parents(const std::string& path, watch_cb_k& cb);
 
-
+private:
     event_mgr& emgr;
 
     database db;
