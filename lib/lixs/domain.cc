@@ -15,7 +15,6 @@ extern "C" {
 lixs::foreign_ring_mapper::foreign_ring_mapper(domid_t domid, unsigned int mfn)
 {
     xcg_handle = xc_gnttab_open(NULL, 0);
-
     interface = (xenstore_domain_interface*) xc_gnttab_map_grant_ref(xcg_handle, domid,
             GNTTAB_RESERVED_XENSTORE, PROT_READ|PROT_WRITE);
 }
