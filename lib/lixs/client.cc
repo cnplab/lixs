@@ -192,12 +192,10 @@ void lixs::client_base::op_rm(void)
 void lixs::client_base::op_transaction_start(void)
 {
     unsigned int tid;
-    char id_str[32];
 
     xs.transaction_start(&tid);
 
-    snprintf(id_str, 32, "%u", tid);
-    build_resp(id_str);
+    build_resp(std::to_string(tid).c_str());
     append_sep();
 }
 
@@ -266,7 +264,6 @@ void lixs::client_base::op_directory(void)
     xs.store_dir(msg.hdr.tx_id, get_path(), resp);
 
     build_resp("");
-
     for (it = resp.begin(); it != resp.end(); it++) {
         append_resp((*it).c_str());
         append_sep();
@@ -275,9 +272,10 @@ void lixs::client_base::op_directory(void)
 
 void lixs::client_base::op_watch(void)
 {
+    char* path;
     watch_map::iterator it;
 
-    char* path = get_path();
+    path = get_path();
 
     it = watches.find(path);
     if (it == watches.end()) {
@@ -292,9 +290,12 @@ void lixs::client_base::op_watch(void)
 
 void lixs::client_base::op_unwatch(void)
 {
+    char* path;
     watch_map::iterator it;
-    it = watches.find(get_path());
 
+    path = get_path();
+
+    it = watches.find(path);
     if (it != watches.end()) {
         xs.watch_del(it->second);
         watches.erase(it);
@@ -331,13 +332,8 @@ void lixs::client_base::op_is_domain_introduced(void)
 
     xs.domain_exists(atoi(get_arg1()), exists);
 
-    if (exists) {
-        build_resp("T");
-        append_sep();
-    } else {
-        build_resp("F");
-        append_sep();
-    }
+    build_resp(exists ? "T" : "F");
+    append_sep();
 }
 
 void lixs::client_base::op_debug(void)
@@ -354,7 +350,7 @@ void lixs::client_base::op_resume(void)
     build_err(ENOSYS);
 }
 
-char* lixs::client_base::get_path()
+char* lixs::client_base::get_path(void)
 {
     if (msg.body[0] == '/' || msg.body[0] == '@') {
         return msg.body;

@@ -137,6 +137,7 @@ private:
     void watch_fired(const std::string& path, const std::string& token);
 };
 
+
 template < typename CONNECTION >
 template < typename... ARGS >
 client<CONNECTION>::client(xenstore& xs, event_mgr& emgr, ARGS&&... args)
