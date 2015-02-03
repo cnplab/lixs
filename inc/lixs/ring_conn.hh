@@ -16,12 +16,10 @@ namespace lixs {
 
 template < typename MAPPER >
 class ring_conn : public MAPPER, public fd_cb_k {
-public:
+protected:
     template < typename... ARGS >
     ring_conn(event_mgr& emgr, domid_t domid, evtchn_port_t port, ARGS&&... args);
     virtual ~ring_conn();
-
-    void operator()(bool read, bool write);
 
     bool read(char*& buff, int& bytes);
     bool write(char*& buff, int& bytes);
@@ -29,9 +27,12 @@ public:
     virtual void process(void) = 0;
 
 private:
+    void operator()(bool read, bool write);
+
     bool read_chunck(char*& buff, int& bytes);
     bool write_chunck(char*& buff, int& bytes);
 
+private:
     event_mgr& emgr;
 
     xc_evtchn *xce_handle;
@@ -61,6 +62,68 @@ ring_conn<MAPPER>::~ring_conn()
 {
     emgr.io_remove(*this);
     xc_evtchn_close(xce_handle);
+}
+
+template < typename MAPPER >
+bool ring_conn<MAPPER>::read(char*& buff, int& bytes)
+{
+    bool notify = false;
+
+    notify = read_chunck(buff, bytes);
+    /*
+     * If we're in the ring boundary and still have data to read we need to
+     * recheck for space from the begin of the ring.
+     */
+    if (bytes > 0 && MASK_XENSTORE_IDX(MAPPER::interface->req_cons) == 0) {
+        notify |= read_chunck(buff, bytes);
+    }
+
+    if (bytes > 0 && !ev_read) {
+        ev_read = true;
+        emgr.io_set(*this);
+    }
+
+    if (bytes == 0 && ev_read) {
+        ev_read = false;
+        emgr.io_set(*this);
+    }
+
+    if (notify) {
+        xc_evtchn_notify(xce_handle, local_port);
+    }
+
+    return bytes == 0;
+}
+
+template < typename MAPPER >
+bool ring_conn<MAPPER>::write(char*& buff, int& bytes)
+{
+    bool notify = false;
+
+    notify = ring_conn<MAPPER>::write_chunck(buff, bytes);
+    /*
+     * If we're in the ring boundary and still have data to write we need to
+     * recheck for space from the begin of the ring.
+     */
+    if (bytes > 0 && MASK_XENSTORE_IDX(MAPPER::interface->rsp_prod) == 0) {
+        notify |= write_chunck(buff, bytes);
+    }
+
+    if (bytes > 0 && !ev_write) {
+        ev_write = true;
+        emgr.io_set(*this);
+    }
+
+    if (bytes == 0 && ev_write) {
+        ev_write = false;
+        emgr.io_set(*this);
+    }
+
+    if (notify) {
+        xc_evtchn_notify(xce_handle, local_port);
+    }
+
+    return bytes == 0;
 }
 
 template < typename MAPPER >
@@ -104,37 +167,6 @@ bool ring_conn<MAPPER>::read_chunck(char*& buff, int& bytes)
 }
 
 template < typename MAPPER >
-bool ring_conn<MAPPER>::read(char*& buff, int& bytes)
-{
-    bool notify = false;
-
-    notify = read_chunck(buff, bytes);
-    /*
-     * If we're in the ring boundary and still have data to read we need to
-     * recheck for space from the begin of the ring.
-     */
-    if (bytes > 0 && MASK_XENSTORE_IDX(MAPPER::interface->req_cons) == 0) {
-        notify |= read_chunck(buff, bytes);
-    }
-
-    if (bytes > 0 && !ev_read) {
-        ev_read = true;
-        emgr.io_set(*this);
-    }
-
-    if (bytes == 0 && ev_read) {
-        ev_read = false;
-        emgr.io_set(*this);
-    }
-
-    if (notify) {
-        xc_evtchn_notify(xce_handle, local_port);
-    }
-
-    return bytes == 0;
-}
-
-template < typename MAPPER >
 bool ring_conn<MAPPER>::write_chunck(char*&buff, int& bytes)
 {
     uint32_t len;
@@ -163,37 +195,6 @@ bool ring_conn<MAPPER>::write_chunck(char*&buff, int& bytes)
     buff += len;
 
     return len > 0;
-}
-
-template < typename MAPPER >
-bool ring_conn<MAPPER>::write(char*& buff, int& bytes)
-{
-    bool notify = false;
-
-    notify = ring_conn<MAPPER>::write_chunck(buff, bytes);
-    /*
-     * If we're in the ring boundary and still have data to write we need to
-     * recheck for space from the begin of the ring.
-     */
-    if (bytes > 0 && MASK_XENSTORE_IDX(MAPPER::interface->rsp_prod) == 0) {
-        notify |= write_chunck(buff, bytes);
-    }
-
-    if (bytes > 0 && !ev_write) {
-        ev_write = true;
-        emgr.io_set(*this);
-    }
-
-    if (bytes == 0 && ev_write) {
-        ev_write = false;
-        emgr.io_set(*this);
-    }
-
-    if (notify) {
-        xc_evtchn_notify(xce_handle, local_port);
-    }
-
-    return bytes == 0;
 }
 
 } /* namespace lixs */
