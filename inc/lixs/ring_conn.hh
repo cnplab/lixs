@@ -59,6 +59,7 @@ ring_conn<MAPPER>::ring_conn(event_mgr& emgr, domid_t domid, evtchn_port_t port,
 template < typename MAPPER >
 ring_conn<MAPPER>::~ring_conn()
 {
+    emgr.io_remove(*this);
     xc_evtchn_close(xce_handle);
 }
 
