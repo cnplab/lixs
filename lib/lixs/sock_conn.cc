@@ -24,11 +24,6 @@ lixs::sock_conn::~sock_conn()
     close(fd);
 }
 
-void lixs::sock_conn::operator()(bool read, bool write)
-{
-    process();
-}
-
 bool lixs::sock_conn::read(char*& buff, int& bytes)
 {
     bool done;
@@ -145,5 +140,10 @@ bool lixs::sock_conn::write(char*& buff, int& bytes)
     }
 
     return done;
+}
+
+void lixs::sock_conn::operator()(bool read, bool write)
+{
+    process();
 }
 

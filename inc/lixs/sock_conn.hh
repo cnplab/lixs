@@ -8,19 +8,18 @@
 namespace lixs {
 
 class sock_conn : public fd_cb_k {
-public:
+protected:
     sock_conn(event_mgr& emgr, int fd);
     virtual ~sock_conn();
 
     bool read(char*& buff, int& bytes);
     bool write(char*& buff, int& bytes);
 
-    void operator()(bool read, bool write);
-
     virtual void process(void) = 0;
-
-protected:
     virtual void conn_dead(void) = 0;
+
+private:
+    void operator()(bool read, bool write);
 
 private:
     bool alive;
