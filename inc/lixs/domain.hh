@@ -18,9 +18,9 @@ extern "C" {
 namespace lixs {
 
 class foreign_ring_mapper {
-public:
+protected:
     foreign_ring_mapper(domid_t domid, unsigned int mfn);
-    ~foreign_ring_mapper();
+    virtual ~foreign_ring_mapper();
 
 protected:
     struct xenstore_domain_interface* interface;
