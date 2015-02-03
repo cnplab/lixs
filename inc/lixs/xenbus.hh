@@ -17,9 +17,9 @@ extern "C" {
 namespace lixs {
 
 class xenbus_mapper {
-public:
+protected:
     xenbus_mapper(domid_t domid);
-    ~xenbus_mapper();
+    virtual ~xenbus_mapper();
 
 protected:
     xenstore_domain_interface* interface;
