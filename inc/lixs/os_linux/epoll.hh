@@ -21,13 +21,11 @@ public:
 
     void handle(void);
 
-
 private:
     uint32_t inline get_events(const fd_cb_k& cb);
     bool inline is_read(const uint32_t ev);
     bool inline is_write(const uint32_t ev);
     bool inline is_err(const uint32_t ev);
-
 
 private:
     /* TODO: make this configurable */
