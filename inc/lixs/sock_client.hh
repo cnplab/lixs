@@ -19,7 +19,7 @@ public:
 private:
     void conn_dead(void);
 
-
+private:
     event_mgr& emgr;
     std::function<void(sock_client*)> dead_cb;
 };
