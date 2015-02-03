@@ -153,7 +153,7 @@ void client<CONNECTION>::process(void)
     bool ret;
     bool yield = false;
 
-    while (!yield && CONNECTION::is_alive()) {
+    while (!yield) {
         switch(state) {
             case p_rx:
                 read_buff = reinterpret_cast<char*>(&(msg.hdr));
@@ -238,10 +238,6 @@ void client<CONNECTION>::process(void)
                 state = p_tx;
                 break;
         }
-    }
-
-    if (!CONNECTION::is_alive()) {
-        delete this;
     }
 }
 

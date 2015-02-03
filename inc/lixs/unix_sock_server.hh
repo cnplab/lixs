@@ -3,6 +3,7 @@
 
 #include <lixs/events.hh>
 #include <lixs/event_mgr.hh>
+#include <lixs/sock_client.hh>
 #include <lixs/xenstore.hh>
 
 #include <string>
@@ -27,6 +28,10 @@ private:
 
         unix_sock_server& server;
     };
+
+
+    void client_dead(sock_client* client);
+
 
     xenstore& xs;
     event_mgr& emgr;

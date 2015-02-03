@@ -81,6 +81,10 @@ bool lixs::sock_conn::read(char*& buff, int& bytes)
         }
     }
 
+    if (!alive) {
+        conn_dead();
+    }
+
     return done;
 }
 
@@ -136,11 +140,10 @@ bool lixs::sock_conn::write(char*& buff, int& bytes)
         }
     }
 
-    return done;
-}
+    if (!alive) {
+        conn_dead();
+    }
 
-bool lixs::sock_conn::is_alive(void)
-{
-    return alive;
+    return done;
 }
 

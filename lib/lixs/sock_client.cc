@@ -6,13 +6,15 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <memory>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
 
-lixs::sock_client::sock_client(xenstore& xs, event_mgr& emgr, int fd)
-    : client(xs, emgr, fd)
+lixs::sock_client::sock_client(std::function<void(sock_client*)> dead_cb,
+        xenstore& xs, event_mgr& emgr, int fd)
+    : client(xs, emgr, fd), emgr(emgr), dead_cb(dead_cb)
 {
 #ifdef DEBUG
     asprintf(&cid, "C%d", fd);
@@ -33,8 +35,8 @@ lixs::sock_client::~sock_client()
 #endif
 }
 
-void lixs::sock_client::create(xenstore& xs, event_mgr& emgr, int fd)
+void lixs::sock_client::conn_dead(void)
 {
-    new sock_client(xs, emgr, fd);
+    emgr.enqueue_event(std::bind(dead_cb, this));
 }
 

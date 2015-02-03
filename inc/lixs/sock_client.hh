@@ -6,16 +6,22 @@
 #include <lixs/sock_conn.hh>
 #include <lixs/xenstore.hh>
 
+#include <memory>
+
 
 namespace lixs {
 
 class sock_client : public client<sock_conn> {
 public:
-    static void create(xenstore& xs, event_mgr& emgr, int fd);
+    sock_client(std::function<void(sock_client*)> dead_cb, xenstore& xs, event_mgr& emgr, int fd);
+    ~sock_client();
 
 private:
-    sock_client(xenstore& xs, event_mgr& emgr, int fd);
-    ~sock_client();
+    void conn_dead(void);
+
+
+    event_mgr& emgr;
+    std::function<void(sock_client*)> dead_cb;
 };
 
 } /* namespace lixs */

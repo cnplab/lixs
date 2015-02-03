@@ -14,11 +14,13 @@ public:
 
     bool read(char*& buff, int& bytes);
     bool write(char*& buff, int& bytes);
-    bool is_alive(void);
 
     void operator()(bool read, bool write);
 
     virtual void process(void) = 0;
+
+protected:
+    virtual void conn_dead(void) = 0;
 
 private:
     bool alive;

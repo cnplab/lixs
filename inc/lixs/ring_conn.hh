@@ -25,7 +25,6 @@ public:
 
     bool read(char*& buff, int& bytes);
     bool write(char*& buff, int& bytes);
-    bool is_alive(void);
 
     virtual void process(void) = 0;
 
@@ -194,12 +193,6 @@ bool ring_conn<MAPPER>::write(char*& buff, int& bytes)
     }
 
     return bytes == 0;
-}
-
-template < typename MAPPER >
-bool ring_conn<MAPPER>::is_alive(void)
-{
-    return true;
 }
 
 } /* namespace lixs */
