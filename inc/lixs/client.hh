@@ -148,6 +148,11 @@ client<CONNECTION>::client(xenstore& xs, event_mgr& emgr, ARGS&&... args)
 template < typename CONNECTION >
 client<CONNECTION>::~client()
 {
+    watch_map::iterator it;
+
+    for (it = watches.begin(); it != watches.end(); it++) {
+        xs.watch_del(it->second);
+    }
 }
 
 template < typename CONNECTION >

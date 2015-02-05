@@ -29,11 +29,6 @@ lixs::client_base::client_base(xenstore& xs, event_mgr& emgr)
 
 lixs::client_base::~client_base()
 {
-    watch_map::iterator it;
-
-    for (it = watches.begin(); it != watches.end(); it++) {
-        xs.watch_del(it->second);
-    }
 }
 
 void lixs::client_base::watch_cb_k::operator()(const std::string& path)
