@@ -129,7 +129,7 @@ void lixs::watch_mgr::_fire_children(const std::string& path)
 
     record& rec = db[path];
     for (it = rec.children.begin(); it != rec.children.end(); it++) {
-        emgr.enqueue_watch(**it, path);
+        emgr.enqueue_watch(**it, (*it)->path);
     }
 }
 
@@ -140,7 +140,7 @@ void lixs::watch_mgr::_tfire_children(unsigned int tid, const std::string& path)
     record& rec = db[path];
     fire_list& l = tdb[tid];
     for (it = rec.children.begin(); it != rec.children.end(); it++) {
-        l.push_back(std::pair<watch_cb_k&, std::string>(**it, path));
+        l.push_back(std::pair<watch_cb_k&, std::string>(**it, (*it)->path));
     }
 }
 
