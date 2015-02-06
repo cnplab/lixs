@@ -60,5 +60,5 @@ private:
 
 } /* namespace lixs */
 
-#endif /* __LIXS_XENSTORE_HH__ */
+#endif /* __LIXS_WATCH_MGR_HH__ */
 
