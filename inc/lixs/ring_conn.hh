@@ -1,7 +1,6 @@
 #ifndef __LIXS_RING_CONN_HH__
 #define __LIXS_RING_CONN_HH__
 
-#include <lixs/events.hh>
 #include <lixs/iomux.hh>
 
 #include <cerrno>

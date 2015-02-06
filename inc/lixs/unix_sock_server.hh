@@ -1,7 +1,6 @@
 #ifndef __LIXS_UNIX_SOCK_SERVER_HH__
 #define __LIXS_UNIX_SOCK_SERVER_HH__
 
-#include <lixs/events.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/iomux.hh>
 #include <lixs/sock_client.hh>

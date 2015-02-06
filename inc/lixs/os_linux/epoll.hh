@@ -1,7 +1,6 @@
 #ifndef __LIXS_OS_LINUX_EPOLL_HH__
 #define __LIXS_OS_LINUX_EPOLL_HH__
 
-#include <lixs/events.hh>
 #include <lixs/iomux.hh>
 
 #include <sys/epoll.h>

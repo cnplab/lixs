@@ -1,7 +1,6 @@
 #ifndef __LIXS_SOCK_CONN_HH__
 #define __LIXS_SOCK_CONN_HH__
 
-#include <lixs/events.hh>
 #include <lixs/iomux.hh>
 
 

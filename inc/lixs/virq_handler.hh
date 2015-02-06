@@ -1,8 +1,7 @@
 #ifndef __LIXS_VIRQ_HANDLER_HH__
 #define __LIXS_VIRQ_HANDLER_HH__
 
-#include <lixs/events.hh>
-#include <lixs/event_mgr.hh>
+#include <lixs/iomux.hh>
 #include <lixs/xenstore.hh>
 
 #include <cerrno>

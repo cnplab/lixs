@@ -1,7 +1,7 @@
-#include <lixs/events.hh>
 #include <lixs/iomux.hh>
 #include <lixs/sock_conn.hh>
 
+#include <cerrno>
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
