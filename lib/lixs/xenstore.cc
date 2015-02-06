@@ -6,7 +6,7 @@
 
 
 lixs::xenstore::xenstore(store& st, event_mgr& emgr, iomux& io)
-    : st(st), emgr(emgr), wmgr(emgr), dmgr(*this, emgr, io)
+    : st(st), wmgr(emgr), dmgr(*this, emgr, io)
 {
     bool created;
 

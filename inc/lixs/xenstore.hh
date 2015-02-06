@@ -37,7 +37,6 @@ public:
 private:
     store& st;
 
-    event_mgr& emgr;
     watch_mgr wmgr;
     domain_mgr dmgr;
 };
