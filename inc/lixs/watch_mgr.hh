@@ -1,8 +1,8 @@
 #ifndef __LIXS_WATCH_MGR_HH__
 #define __LIXS_WATCH_MGR_HH__
 
-#include <lixs/events.hh>
 #include <lixs/event_mgr.hh>
+#include <lixs/watch.hh>
 
 #include <list>
 #include <map>

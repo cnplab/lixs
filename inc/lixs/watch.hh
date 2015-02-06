@@ -1,5 +1,5 @@
-#ifndef __LIXS_EVENTS_HH__
-#define __LIXS_EVENTS_HH__
+#ifndef __LIXS_WATCH_HH__
+#define __LIXS_WATCH_HH__
 
 #include <string>
 
@@ -20,5 +20,5 @@ struct watch_cb_k {
 
 } /* namespace lixs */
 
-#endif /* __LIXS_EVENTS_HH__ */
+#endif /* __LIXS_WATCH_HH__ */
 

@@ -1,5 +1,5 @@
-#include <lixs/events.hh>
 #include <lixs/util.hh>
+#include <lixs/watch.hh>
 #include <lixs/watch_mgr.hh>
 
 #include <memory>

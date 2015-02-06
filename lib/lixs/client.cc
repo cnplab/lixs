@@ -1,6 +1,6 @@
 #include <lixs/client.hh>
-#include <lixs/events.hh>
 #include <lixs/event_mgr.hh>
+#include <lixs/watch.hh>
 #include <lixs/xenstore.hh>
 
 #include <cstddef>
