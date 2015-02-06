@@ -2,6 +2,8 @@
 #include <lixs/util.hh>
 #include <lixs/watch_mgr.hh>
 
+#include <memory>
+
 
 lixs::watch_mgr::watch_mgr(event_mgr& emgr)
     : emgr(emgr)
@@ -17,7 +19,8 @@ void lixs::watch_mgr::add(watch_cb_k& cb)
     db[cb.path].path.insert(&cb);
 
     register_with_parents(cb.path, cb);
-    emgr.enqueue_watch(cb, cb.path);
+
+    emgr.enqueue_event(std::bind(&watch_mgr::callback, this, cb.path, &cb, cb.path));
 }
 
 void lixs::watch_mgr::del(watch_cb_k& cb)
@@ -28,10 +31,7 @@ void lixs::watch_mgr::del(watch_cb_k& cb)
         db.erase(cb.path);
     }
 
-    /* FIXME: remove from tdb */
-
     unregister_from_parents(cb.path, cb);
-    emgr.dequeue_watch(cb);
 }
 
 void lixs::watch_mgr::fire(unsigned int tid, const std::string& path)
@@ -67,7 +67,7 @@ void lixs::watch_mgr::fire_transaction(unsigned int tid)
 
     fire_list& l = tdb[tid];
     for (it = l.begin(); it != l.end(); it++) {
-        emgr.enqueue_watch(it->first, it->second);
+        emgr.enqueue_event(*it);
     }
 
     tdb.erase(tid);
@@ -78,13 +78,27 @@ void lixs::watch_mgr::abort_transaction(unsigned int tid)
     tdb.erase(tid);
 }
 
+void lixs::watch_mgr::callback(const std::string& key, watch_cb_k* cb, const std::string& path)
+{
+    database::iterator it;
+
+    it = db.find(key);
+    if (it != db.end()) {
+        record& rec = it->second;
+
+        if (rec.path.find(cb) != rec.path.end()) {
+            cb->operator()(path);
+        }
+    }
+}
+
 void lixs::watch_mgr::_fire(const std::string& path, const std::string& fire_path)
 {
     watch_set::iterator it;
 
     record& rec = db[path];
     for (it = rec.path.begin(); it != rec.path.end(); it++) {
-        emgr.enqueue_watch(**it, fire_path);
+        emgr.enqueue_event(std::bind(&watch_mgr::callback, this, path, *it, fire_path));
     }
 }
 
@@ -96,7 +110,7 @@ void lixs::watch_mgr::_tfire(unsigned int tid, const std::string& path,
     record& rec = db[path];
     fire_list& l = tdb[tid];
     for (it = rec.path.begin(); it != rec.path.end(); it++) {
-        l.push_back(std::pair<watch_cb_k&, std::string>(**it, fire_path));
+        l.push_back(std::bind(&watch_mgr::callback, this, path, *it, fire_path));
     }
 }
 
@@ -129,7 +143,7 @@ void lixs::watch_mgr::_fire_children(const std::string& path)
 
     record& rec = db[path];
     for (it = rec.children.begin(); it != rec.children.end(); it++) {
-        emgr.enqueue_watch(**it, (*it)->path);
+        emgr.enqueue_event(std::bind(&watch_mgr::callback, this, path, *it, (*it)->path));
     }
 }
 
@@ -140,7 +154,7 @@ void lixs::watch_mgr::_tfire_children(unsigned int tid, const std::string& path)
     record& rec = db[path];
     fire_list& l = tdb[tid];
     for (it = rec.children.begin(); it != rec.children.end(); it++) {
-        l.push_back(std::pair<watch_cb_k&, std::string>(**it, (*it)->path));
+        l.push_back(std::bind(&watch_mgr::callback, this, path, *it, (*it)->path));
     }
 }
 

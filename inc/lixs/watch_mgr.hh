@@ -6,6 +6,7 @@
 
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 
@@ -29,7 +30,6 @@ public:
 
 private:
     typedef std::set<watch_cb_k*> watch_set;
-
     struct record {
         watch_set path;
         watch_set children;
@@ -37,11 +37,12 @@ private:
 
     typedef std::map<std::string, record> database;
 
-    typedef std::list<std::pair<watch_cb_k&, std::string> > fire_list;
-
+    typedef std::list<std::function<void(void)> > fire_list;
     typedef std::map<unsigned int, fire_list> transaction_database;
 
 private:
+    void callback(const std::string& key, watch_cb_k* cb, const std::string& path);
+
     void _fire(const std::string& path, const std::string& fire_path);
     void _tfire(unsigned int tid, const std::string& path, const std::string& fire_path);
     void _fire_parents(const std::string& path, const std::string& fire_path);
