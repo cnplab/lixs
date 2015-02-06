@@ -13,7 +13,8 @@ namespace lixs {
 
 class sock_client : public client<sock_conn> {
 public:
-    sock_client(std::function<void(sock_client*)> dead_cb, xenstore& xs, event_mgr& emgr, int fd);
+    sock_client(std::function<void(sock_client*)> dead_cb,
+            xenstore& xs, event_mgr& emgr, iomux& io, int fd);
     ~sock_client();
 
 private:

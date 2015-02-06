@@ -32,7 +32,8 @@ private:
 
 class domain : public client<ring_conn<foreign_ring_mapper> > {
 public:
-    domain(xenstore& xs, event_mgr& emgr, domid_t domid, evtchn_port_t port, unsigned int mfn);
+    domain(xenstore& xs, event_mgr& emgr, iomux& io,
+            domid_t domid, evtchn_port_t port, unsigned int mfn);
     ~domain();
 };
 

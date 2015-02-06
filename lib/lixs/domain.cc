@@ -26,9 +26,9 @@ lixs::foreign_ring_mapper::~foreign_ring_mapper()
 }
 
 
-lixs::domain::domain(xenstore& xs, event_mgr& emgr,
+lixs::domain::domain(xenstore& xs, event_mgr& emgr, iomux& io,
         domid_t domid, evtchn_port_t port, unsigned int mfn)
-    : client(xs, emgr, domid, port, mfn)
+    : client(xs, emgr, io, domid, port, mfn)
 {
 #ifdef DEBUG
     asprintf(&cid, "D%d", domid);

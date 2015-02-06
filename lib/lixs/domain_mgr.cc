@@ -1,6 +1,7 @@
 #include <lixs/domain.hh>
-#include <lixs/event_mgr.hh>
 #include <lixs/domain_mgr.hh>
+#include <lixs/event_mgr.hh>
+#include <lixs/iomux.hh>
 
 #include <cerrno>
 #include <map>
@@ -11,8 +12,8 @@ extern "C" {
 }
 
 
-lixs::domain_mgr::domain_mgr(xenstore& xs, event_mgr& emgr)
-    : xs(xs), emgr(emgr)
+lixs::domain_mgr::domain_mgr(xenstore& xs, event_mgr& emgr, iomux& io)
+    : xs(xs), emgr(emgr), io(io)
 {
 }
 
@@ -27,7 +28,7 @@ int lixs::domain_mgr::create(domid_t domid, evtchn_port_t port, unsigned int mfn
     it = domains.find(domid);
     if (it == domains.end()) {
         /* TODO: Consider using emplace when moving to gcc 4.8 is acceptable */
-        domains.insert(std::make_pair(domid, new domain(xs, emgr, domid, port, mfn)));
+        domains.insert(std::make_pair(domid, new domain(xs, emgr, io, domid, port, mfn)));
 
         return 0;
     } else {

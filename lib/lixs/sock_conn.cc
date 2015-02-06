@@ -1,5 +1,5 @@
 #include <lixs/events.hh>
-#include <lixs/event_mgr.hh>
+#include <lixs/iomux.hh>
 #include <lixs/sock_conn.hh>
 
 #include <fcntl.h>
@@ -9,18 +9,18 @@
 #include <unistd.h>
 
 
-lixs::sock_conn::sock_conn(event_mgr& emgr, int fd)
-    : alive(true), emgr(emgr)
+lixs::sock_conn::sock_conn(iomux& io, int fd)
+    : alive(true), io(io)
 {
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 
     fd_cb_k::fd = fd;
-    emgr.io_add(*this);
+    io.add(*this);
 }
 
 lixs::sock_conn::~sock_conn()
 {
-    emgr.io_remove(*this);
+    io.remove(*this);
     close(fd);
 }
 
@@ -49,7 +49,7 @@ bool lixs::sock_conn::read(char*& buff, int& bytes)
             /* need to wait */
             if (!ev_read) {
                 ev_read = true;
-                emgr.io_set(*this);
+                io.set(*this);
             }
         } else {
             /* error condition */
@@ -65,13 +65,13 @@ bool lixs::sock_conn::read(char*& buff, int& bytes)
 
             if (ev_read) {
                 ev_read = false;
-                emgr.io_set(*this);
+                io.set(*this);
             }
         } else {
             /* need to wait */
             if (!ev_read) {
                 ev_read = true;
-                emgr.io_set(*this);
+                io.set(*this);
             }
         }
     }
@@ -108,7 +108,7 @@ bool lixs::sock_conn::write(char*& buff, int& bytes)
             /* need to wait */
             if (!ev_write) {
                 ev_write = true;
-                emgr.io_set(*this);
+                io.set(*this);
             }
         } else {
             /* error condition */
@@ -124,13 +124,13 @@ bool lixs::sock_conn::write(char*& buff, int& bytes)
 
             if (ev_write) {
                 ev_write = false;
-                emgr.io_set(*this);
+                io.set(*this);
             }
         } else {
             /* need to wait */
             if (!ev_write) {
                 ev_write = true;
-                emgr.io_set(*this);
+                io.set(*this);
             }
         }
     }

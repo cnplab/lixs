@@ -5,8 +5,8 @@
 #include <string>
 
 
-lixs::xenstore::xenstore(store& st, event_mgr& emgr)
-    : st(st), emgr(emgr), wmgr(emgr), dmgr(*this, emgr)
+lixs::xenstore::xenstore(store& st, event_mgr& emgr, iomux& io)
+    : st(st), emgr(emgr), wmgr(emgr), dmgr(*this, emgr, io)
 {
     bool created;
 

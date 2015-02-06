@@ -14,7 +14,7 @@ namespace lixs {
 
 class xenstore {
 public:
-    xenstore(store& st, event_mgr& emgr);
+    xenstore(store& st, event_mgr& emgr, iomux& io);
     ~xenstore();
 
     int store_read(unsigned int tid, const std::string& path, std::string& val);

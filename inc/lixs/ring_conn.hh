@@ -2,7 +2,7 @@
 #define __LIXS_RING_CONN_HH__
 
 #include <lixs/events.hh>
-#include <lixs/event_mgr.hh>
+#include <lixs/iomux.hh>
 
 #include <cerrno>
 #include <cstring>
@@ -18,7 +18,7 @@ template < typename MAPPER >
 class ring_conn : public MAPPER, public fd_cb_k {
 protected:
     template < typename... ARGS >
-    ring_conn(event_mgr& emgr, domid_t domid, evtchn_port_t port, ARGS&&... args);
+    ring_conn(iomux& io, domid_t domid, evtchn_port_t port, ARGS&&... args);
     virtual ~ring_conn();
 
     bool read(char*& buff, int& bytes);
@@ -33,7 +33,7 @@ private:
     bool write_chunck(char*& buff, int& bytes);
 
 private:
-    event_mgr& emgr;
+    iomux& io;
 
     xc_evtchn *xce_handle;
 
@@ -45,8 +45,8 @@ private:
 
 template < typename MAPPER >
 template < typename... ARGS >
-ring_conn<MAPPER>::ring_conn(event_mgr& emgr, domid_t domid, evtchn_port_t port, ARGS&&... args)
-    : MAPPER(domid, std::forward<ARGS>(args)...), emgr(emgr),  domid(domid), remote_port(port)
+ring_conn<MAPPER>::ring_conn(iomux& io, domid_t domid, evtchn_port_t port, ARGS&&... args)
+    : MAPPER(domid, std::forward<ARGS>(args)...), io(io),  domid(domid), remote_port(port)
 {
     xce_handle = xc_evtchn_open(NULL, 0);
     local_port = xc_evtchn_bind_interdomain(xce_handle, domid, remote_port);
@@ -54,13 +54,13 @@ ring_conn<MAPPER>::ring_conn(event_mgr& emgr, domid_t domid, evtchn_port_t port,
     xc_evtchn_notify(xce_handle, local_port);
 
     fd = xc_evtchn_fd(xce_handle);
-    emgr.io_add(*this);
+    io.add(*this);
 }
 
 template < typename MAPPER >
 ring_conn<MAPPER>::~ring_conn()
 {
-    emgr.io_remove(*this);
+    io.remove(*this);
     xc_evtchn_close(xce_handle);
 }
 
@@ -80,12 +80,12 @@ bool ring_conn<MAPPER>::read(char*& buff, int& bytes)
 
     if (bytes > 0 && !ev_read) {
         ev_read = true;
-        emgr.io_set(*this);
+        io.set(*this);
     }
 
     if (bytes == 0 && ev_read) {
         ev_read = false;
-        emgr.io_set(*this);
+        io.set(*this);
     }
 
     if (notify) {
@@ -111,12 +111,12 @@ bool ring_conn<MAPPER>::write(char*& buff, int& bytes)
 
     if (bytes > 0 && !ev_write) {
         ev_write = true;
-        emgr.io_set(*this);
+        io.set(*this);
     }
 
     if (bytes == 0 && ev_write) {
         ev_write = false;
-        emgr.io_set(*this);
+        io.set(*this);
     }
 
     if (notify) {

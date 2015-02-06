@@ -59,6 +59,6 @@ void lixs::unix_sock_server::fd_cb_k::operator()(bool read, bool write)
     std::function<void(sock_client*)> cb = std::bind(
             &unix_sock_server::client_dead, &server, std::placeholders::_1);
 
-    new sock_client(cb, server.xs, server.emgr, accept(fd, NULL, NULL));
+    new sock_client(cb, server.xs, server.emgr, server.io, accept(fd, NULL, NULL));
 }
 

@@ -13,8 +13,8 @@
 
 
 lixs::sock_client::sock_client(std::function<void(sock_client*)> dead_cb,
-        xenstore& xs, event_mgr& emgr, int fd)
-    : client(xs, emgr, fd), emgr(emgr), dead_cb(dead_cb)
+        xenstore& xs, event_mgr& emgr, iomux& io, int fd)
+    : client(xs, emgr, io, fd), emgr(emgr), dead_cb(dead_cb)
 {
 #ifdef DEBUG
     asprintf(&cid, "C%d", fd);

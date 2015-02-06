@@ -2,14 +2,14 @@
 #define __LIXS_SOCK_CONN_HH__
 
 #include <lixs/events.hh>
-#include <lixs/event_mgr.hh>
+#include <lixs/iomux.hh>
 
 
 namespace lixs {
 
 class sock_conn : public fd_cb_k {
 protected:
-    sock_conn(event_mgr& emgr, int fd);
+    sock_conn(iomux& io, int fd);
     virtual ~sock_conn();
 
     bool read(char*& buff, int& bytes);
@@ -23,7 +23,7 @@ private:
 
 private:
     bool alive;
-    event_mgr& emgr;
+    iomux& io;
 };
 
 } /* namespace lixs */

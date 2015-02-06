@@ -141,7 +141,7 @@ private:
 template < typename CONNECTION >
 template < typename... ARGS >
 client<CONNECTION>::client(xenstore& xs, event_mgr& emgr, ARGS&&... args)
-    : client_base(xs, emgr), CONNECTION(emgr, std::forward<ARGS>(args)...)
+    : client_base(xs, emgr), CONNECTION(std::forward<ARGS>(args)...)
 {
 }
 

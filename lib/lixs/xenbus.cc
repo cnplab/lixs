@@ -39,8 +39,8 @@ lixs::xenbus_mapper::~xenbus_mapper(void)
 
 const std::string lixs::xenbus::xsd_port_path = "/proc/xen/xsd_port";
 
-lixs::xenbus::xenbus(xenstore& xs, event_mgr& emgr)
-    : client(xs, emgr, 0, xenbus_evtchn())
+lixs::xenbus::xenbus(xenstore& xs, event_mgr& emgr, iomux& io)
+    : client(xs, emgr, io, 0, xenbus_evtchn())
 {
 #ifdef DEBUG
     asprintf(&cid, "D%d", 0);
