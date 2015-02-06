@@ -134,7 +134,7 @@ void lixs::xenstore::domain_introduce(domid_t domid, unsigned int mfn , evtchn_p
 
 void lixs::xenstore::domain_release(domid_t domid)
 {
-    if (dmgr.destroy(domid)) {
+    if (dmgr.destroy(domid) == 0) {
         wmgr.fire(0, "@releaseDomain");
     }
 }
