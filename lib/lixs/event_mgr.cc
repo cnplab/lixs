@@ -1,6 +1,7 @@
 #include <lixs/event_mgr.hh>
 #include <lixs/iomux.hh>
 
+#include <list>
 #include <memory>
 
 
@@ -31,6 +32,8 @@ void lixs::event_mgr::fire_events(void)
     for(it = event_list.begin(); it != event_list.end(); it++) {
         it->operator()();
     }
+
+    /* FIXME: ensure enqueue_event is not called during this method */
 
     event_list.clear();
 }

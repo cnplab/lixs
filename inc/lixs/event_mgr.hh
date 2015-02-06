@@ -4,10 +4,7 @@
 #include <lixs/iomux.hh>
 
 #include <list>
-#include <map>
 #include <memory>
-#include <set>
-#include <string>
 
 
 namespace lixs {
