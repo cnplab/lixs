@@ -18,21 +18,6 @@ void lixs::event_mgr::run(void)
     io.handle();
 }
 
-void lixs::event_mgr::io_add(fd_cb_k& cb)
-{
-    io.add(cb);
-}
-
-void lixs::event_mgr::io_set(fd_cb_k& cb)
-{
-    io.set(cb);
-}
-
-void lixs::event_mgr::io_remove(fd_cb_k& cb)
-{
-    io.remove(cb);
-}
-
 void lixs::event_mgr::enqueue_event(std::function<void(void)> cb)
 {
     event_list.push_front(cb);

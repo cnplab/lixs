@@ -18,17 +18,12 @@ public:
     event_mgr(iomux& io);
     ~event_mgr();
 
-    /* FIXME: cleanup interface
+    /* FIXME: Remove watches
      *
-     * The event_mgr should only be aware of event callbacks (nullary function objects) to be
-     * called ASAP, and file descriptors to be polled.
+     * The event_mgr should only be aware of callbacks to be called ASAP
      */
 
     void run(void);
-
-    void io_add(fd_cb_k& cd);
-    void io_set(fd_cb_k& cb);
-    void io_remove(fd_cb_k& cb);
 
     void enqueue_event(std::function<void(void)> cb);
 
