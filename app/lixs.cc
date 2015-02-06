@@ -168,7 +168,7 @@ int main(int argc, char** argv)
     lixs::xenstore xs(store, emgr);
 
     lixs::unix_sock_server nix(xs, emgr, conf.unix_socket_path, conf.unix_socket_ro_path);
-    lixs::virq_handler dom_exc(xs, emgr);
+    lixs::virq_handler dom_exc(xs, epoll);
     lixs::xenbus xenbus(xs, emgr);
 
     server_stoped = false;

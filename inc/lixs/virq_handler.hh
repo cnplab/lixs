@@ -16,14 +16,14 @@ namespace lixs {
 
 class virq_handler : fd_cb_k {
 public:
-    virq_handler(xenstore& xs, event_mgr& emgr);
+    virq_handler(xenstore& xs, iomux& io);
     ~virq_handler();
 
     void operator()(bool ev_read, bool ev_write);
 
 private:
     xenstore& xs;
-    event_mgr& emgr;
+    iomux& io;
 
     xc_evtchn *xce_handle;
     evtchn_port_t virq_port;
