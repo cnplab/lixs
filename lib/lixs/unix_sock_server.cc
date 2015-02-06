@@ -42,9 +42,11 @@ lixs::unix_sock_server::unix_sock_server(xenstore& xs, event_mgr& emgr, iomux& i
 
 lixs::unix_sock_server::~unix_sock_server(void)
 {
+    io.remove(rw_cb);
     close(rw_cb.fd);
     unlink(rw_path.c_str());
 
+    io.remove(ro_cb);
     close(ro_cb.fd);
     unlink(ro_path.c_str());
 }
