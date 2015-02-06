@@ -1,5 +1,7 @@
-#include <lixs/unix_sock_server.hh>
+#include <lixs/event_mgr.hh>
+#include <lixs/iomux.hh>
 #include <lixs/sock_client.hh>
+#include <lixs/unix_sock_server.hh>
 #include <lixs/xenstore.hh>
 
 #include <cstddef>
@@ -10,9 +12,9 @@
 #include <unistd.h>
 
 
-lixs::unix_sock_server::unix_sock_server(xenstore& xs, event_mgr& emgr,
+lixs::unix_sock_server::unix_sock_server(xenstore& xs, event_mgr& emgr, iomux& io,
         std::string rw_path, std::string ro_path)
-    : xs(xs), emgr(emgr), rw_path(rw_path), rw_cb(*this), ro_path(ro_path), ro_cb(*this)
+    : xs(xs), emgr(emgr), io(io), rw_path(rw_path), rw_cb(*this), ro_path(ro_path), ro_cb(*this)
 {
     struct sockaddr_un sock_addr = { 0 };
     sock_addr.sun_family = AF_UNIX;
@@ -25,7 +27,7 @@ lixs::unix_sock_server::unix_sock_server(xenstore& xs, event_mgr& emgr,
     listen(rw_cb.fd, 1);
     rw_cb.ev_read = true;
     rw_cb.ev_write = false;
-    emgr.io_add(rw_cb);
+    io.add(rw_cb);
 
     /* ro socket */
     ro_cb.fd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -35,7 +37,7 @@ lixs::unix_sock_server::unix_sock_server(xenstore& xs, event_mgr& emgr,
     listen(ro_cb.fd, 1);
     ro_cb.ev_read = true;
     ro_cb.ev_write = false;
-    emgr.io_add(ro_cb);
+    io.add(ro_cb);
 }
 
 lixs::unix_sock_server::~unix_sock_server(void)

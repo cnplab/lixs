@@ -3,6 +3,7 @@
 
 #include <lixs/events.hh>
 #include <lixs/event_mgr.hh>
+#include <lixs/iomux.hh>
 #include <lixs/sock_client.hh>
 #include <lixs/xenstore.hh>
 
@@ -13,7 +14,8 @@ namespace lixs {
 
 class unix_sock_server {
 public:
-    unix_sock_server(xenstore& xs, event_mgr& emgr, std::string rw_path, std::string ro_path);
+    unix_sock_server(xenstore& xs, event_mgr& emgr, iomux& io,
+            std::string rw_path, std::string ro_path);
     ~unix_sock_server();
 
 private:
@@ -33,6 +35,7 @@ private:
 private:
     xenstore& xs;
     event_mgr& emgr;
+    iomux& io;
 
     std::string rw_path;
     fd_cb_k rw_cb;
