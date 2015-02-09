@@ -253,15 +253,20 @@ void lixs::client_base::op_restrict(void)
 
 void lixs::client_base::op_directory(void)
 {
+    int ret;
     std::set<std::string> resp;
     std::set<std::string>::iterator it;
 
-    xs.store_dir(msg.hdr.tx_id, get_path(), resp);
+    ret = xs.store_dir(msg.hdr.tx_id, get_path(), resp);
 
-    build_resp("");
-    for (it = resp.begin(); it != resp.end(); it++) {
-        append_resp((*it).c_str());
-        append_sep();
+    if (ret == 0) {
+        build_resp("");
+        for (it = resp.begin(); it != resp.end(); it++) {
+            append_resp((*it).c_str());
+            append_sep();
+        }
+    } else {
+        build_err(ret);
     }
 }
 
