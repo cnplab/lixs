@@ -139,7 +139,9 @@ void lixs::client_base::op_read(void)
     ret = xs.store_read(msg.hdr.tx_id, get_path(), res);
 
     if (ret == 0) {
-        build_resp(res.c_str());
+        if (!build_resp(res.c_str())) {
+            build_err(E2BIG);
+        }
     } else {
         build_err(ret);
     }
@@ -190,8 +192,9 @@ void lixs::client_base::op_transaction_start(void)
 
     xs.transaction_start(&tid);
 
-    build_resp(std::to_string(tid).c_str());
-    append_sep();
+    if (!build_resp(std::to_string(tid).c_str()) || !append_sep()) {
+        build_err(E2BIG);
+    }
 }
 
 void lixs::client_base::op_transaction_end(void)
@@ -213,7 +216,9 @@ void lixs::client_base::op_get_domain_path(void)
 
     xs.domain_path(std::stoi(get_arg1()), path);
 
-    build_resp(path.c_str());
+    if (!build_resp(path.c_str())) {
+        build_err(E2BIG);
+    }
 }
 
 void lixs::client_base::op_get_perms(void)
@@ -223,7 +228,9 @@ void lixs::client_base::op_get_perms(void)
      * Currently this implementation doesn't support permissions.
      * Return full permissions.
      */
-    build_resp("b0");
+    if (!build_resp("b0")) {
+        build_err(E2BIG);
+    }
 }
 
 void lixs::client_base::op_set_perms(void)
@@ -254,16 +261,20 @@ void lixs::client_base::op_restrict(void)
 void lixs::client_base::op_directory(void)
 {
     int ret;
+    bool ok;
     std::set<std::string> resp;
     std::set<std::string>::iterator it;
 
     ret = xs.store_dir(msg.hdr.tx_id, get_path(), resp);
 
     if (ret == 0) {
-        build_resp("");
-        for (it = resp.begin(); it != resp.end(); it++) {
-            append_resp((*it).c_str());
-            append_sep();
+        ok = build_resp("");
+        for (it = resp.begin(); it != resp.end() && ok; it++) {
+            ok = append_resp((*it).c_str()) && append_sep();
+        }
+
+        if (!ok) {
+            build_err(E2BIG);
         }
     } else {
         build_err(ret);
@@ -332,8 +343,9 @@ void lixs::client_base::op_is_domain_introduced(void)
 
     xs.domain_exists(atoi(get_arg1()), exists);
 
-    build_resp(exists ? "T" : "F");
-    append_sep();
+    if (!build_resp(exists ? "T" : "F") || !append_sep()) {
+        build_err(E2BIG);
+    }
 }
 
 void lixs::client_base::op_debug(void)
@@ -376,31 +388,56 @@ char* lixs::client_base::get_arg3(void)
     return arg2 + strlen(arg2) + 1;
 }
 
-void lixs::client_base::build_resp(const char* resp)
-{
-    /* FIXME: buffer will overflow if resp to big */
-
-    msg.hdr.len = strlen(resp);
-    memcpy(msg.body, resp, msg.hdr.len);
-}
-
-void lixs::client_base::append_resp(const char* resp)
+bool lixs::client_base::build_resp(const char* resp)
 {
     int len = strlen(resp);
 
+    if (len > XENSTORE_PAYLOAD_MAX) {
+        return false;
+    }
+
+    memcpy(msg.body, resp, len);
+    msg.hdr.len = len;
+
+    return true;
+}
+
+bool lixs::client_base::append_resp(const char* resp)
+{
+    int len = strlen(resp);
+
+    if (len > XENSTORE_PAYLOAD_MAX) {
+        return false;
+    }
+
     memcpy(msg.body + msg.hdr.len, resp, len);
     msg.hdr.len += len;
+
+    return true;
 }
 
-void lixs::client_base::append_sep(void)
+bool lixs::client_base::append_sep(void)
 {
+    int len = msg.hdr.len + 1;
+
+    if (len > XENSTORE_PAYLOAD_MAX) {
+        return false;
+    }
+
     msg.body[msg.hdr.len++] = '\0';
+
+    return true;
 }
 
-void lixs::client_base::build_watch(const char* path, const char* token)
+bool lixs::client_base::build_watch(const char* path, const char* token)
 {
     int path_len = strlen(path);
     int token_len = strlen(token);
+    int total_len = path_len + token_len + 2;
+
+    if (total_len > XENSTORE_PAYLOAD_MAX) {
+        return false;
+    }
 
     msg.hdr.type = XS_WATCH_EVENT;
     msg.hdr.req_id = 0;
@@ -411,7 +448,9 @@ void lixs::client_base::build_watch(const char* path, const char* token)
     memcpy(msg.body + path_len + 1, token, token_len);
     msg.body[path_len + 1 + token_len] = '\0';
 
-    msg.hdr.len = path_len + token_len + 2;
+    msg.hdr.len = total_len;
+
+    return true;
 }
 
 void lixs::client_base::build_err(int err)

@@ -95,10 +95,10 @@ protected:
     char* get_arg2(void);
     char* get_arg3(void);
 
-    void build_resp(const char* resp);
-    void append_resp(const char* resp);
-    void append_sep(void);
-    void build_watch(const char* path, const char* token);
+    bool build_resp(const char* resp);
+    bool append_resp(const char* resp);
+    bool append_sep(void);
+    bool build_watch(const char* path, const char* token);
     void build_err(int err);
     void build_ack(void);
 
