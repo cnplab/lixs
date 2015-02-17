@@ -1,6 +1,7 @@
 # lixs: LightweIght XenStore
 
-debug ?= n
+verbose	?= n
+debug	?= n
 
 
 APP	:=
@@ -26,29 +27,31 @@ CXXFLAGS	+= -DDEBUG
 endif
 
 
+include make.mk
+
 all: $(APP) $(TST)
 
 $(APP): % : %.o $(LIB)
-	$(CXX) $(LDFLAGS) $^ -o $@
+	$(call cxxlink, $^, $@)
 
 $(TST): % : %.o $(LIB)
-	$(CXX) $(LDFLAGS) $^ -o $@
+	$(call cxxlink, $^, $@)
 
 %.o: %.cc $(INC)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(call cxxcompile, $<, $@)
 
 %.o: %.c $(INC)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(call ccompile, $<, $@)
 
 
 clean:
-	rm -rf $(patsubst %, %.o, $(APP))
-	rm -rf $(patsubst %, %.o, $(TST))
-	rm -rf $(LIB)
+	$(call cmd, "CLN", "*.o [ app/  ]", rm -rf, $(patsubst %, %.o, $(APP)))
+	$(call cmd, "CLN", "*.o [ test/ ]", rm -rf, $(patsubst %, %.o, $(TST)))
+	$(call cmd, "CLN", "*.o [ lib/  ]", rm -rf, $(LIB))
 
 distclean: clean
-	rm -rf $(APP)
-	rm -rf $(TST)
+	$(call cmd, "CLN", "* [ app/  ]" , rm -rf, $(APP))
+	$(call cmd, "CLN", "* [ test/ ]", rm -rf, $(TST))
 
 
 .PHONY: all clean distclean
