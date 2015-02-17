@@ -12,6 +12,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <unistd.h>
 #include <utility>
@@ -212,9 +213,20 @@ void lixs::client_base::op_transaction_end(void)
 
 void lixs::client_base::op_get_domain_path(void)
 {
+    domid_t domid;
     std::string path;
 
-    xs.domain_path(std::stoi(get_arg1()), path);
+    try {
+        domid = std::stoi(get_arg1());
+    } catch(std::invalid_argument e) {
+        build_err(EINVAL);
+        return;
+    } catch(std::out_of_range e) {
+        build_err(EINVAL);
+        return;
+    }
+
+    xs.domain_path(domid, path);
 
     if (!build_resp(path.c_str())) {
         build_err(E2BIG);
