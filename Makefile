@@ -11,9 +11,11 @@ TST	:=
 TST	+= $(patsubst %.cc, %, $(shell find test/ -name "*.cc"))
 
 LIB	:=
+LIB	+= $(patsubst %.c, %.o, $(shell find lib/ -name "*.c"))
 LIB	+= $(patsubst %.cc, %.o, $(shell find lib/ -name "*.cc"))
 
 INC	:=
+INC	+= $(shell find inc/ -name "*.h")
 INC	+= $(shell find inc/ -name "*.hh")
 
 
