@@ -18,7 +18,7 @@ void lixs::mstore::store::branch(unsigned int& tid)
 
 int lixs::mstore::store::merge(unsigned int tid, bool& success)
 {
-    std::map<unsigned int, transaction>::iterator it;
+    transaction_db::iterator it;
 
     it = trans.find(tid);
     if (it != trans.end()) {
@@ -33,7 +33,7 @@ int lixs::mstore::store::merge(unsigned int tid, bool& success)
 
 int lixs::mstore::store::abort(unsigned int tid)
 {
-    std::map<unsigned int, transaction>::iterator it;
+    transaction_db::iterator it;
 
     it = trans.find(tid);
     if (it != trans.end()) {
@@ -55,7 +55,7 @@ int lixs::mstore::store::create(unsigned int tid, std::string path, bool& create
     if (tid == 0) {
         return access.create(path, created);
     } else {
-        std::map<unsigned int, transaction>::iterator it;
+        transaction_db::iterator it;
 
         it = trans.find(tid);
         if (it != trans.end()) {
@@ -75,7 +75,7 @@ int lixs::mstore::store::read(unsigned int tid, std::string path, std::string& v
     if (tid == 0) {
         return access.read(path, val);
     } else {
-        std::map<unsigned int, transaction>::iterator it;
+        transaction_db::iterator it;
 
         it = trans.find(tid);
         if (it != trans.end()) {
@@ -95,7 +95,7 @@ int lixs::mstore::store::update(unsigned int tid, std::string path, std::string 
     if (tid == 0) {
         return access.update(path, val);
     } else {
-        std::map<unsigned int, transaction>::iterator it;
+        transaction_db::iterator it;
 
         it = trans.find(tid);
         if (it != trans.end()) {
@@ -115,7 +115,7 @@ int lixs::mstore::store::del(unsigned int tid, std::string path)
     if (tid == 0) {
         return access.del(path);
     } else {
-        std::map<unsigned int, transaction>::iterator it;
+        transaction_db::iterator it;
 
         it = trans.find(tid);
         if (it != trans.end()) {
@@ -136,7 +136,7 @@ int lixs::mstore::store::get_children(unsigned int tid, std::string path,
     if (tid == 0) {
         return access.get_children(path, resp);
     } else {
-        std::map<unsigned int, transaction>::iterator it;
+        transaction_db::iterator it;
 
         it = trans.find(tid);
         if (it != trans.end()) {

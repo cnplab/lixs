@@ -31,12 +31,15 @@ public:
     int get_children(unsigned int tid, std::string key, std::set<std::string>& resp);
 
 private:
+    typedef std::map<unsigned int, transaction> transaction_db;
+
+
     database db;
 
     simple_access access;
 
     unsigned int next_tid;
-    std::map<unsigned int, transaction> trans;
+    transaction_db trans;
 };
 
 } /* namespace mstore */
