@@ -10,7 +10,6 @@
 #include <cstring>
 #include <cerrno>
 #include <list>
-#include <map>
 #include <memory>
 #include <stdexcept>
 #include <string>
