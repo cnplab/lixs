@@ -4,7 +4,6 @@
 #include <lixs/iomux.hh>
 
 #include <cerrno>
-#include <map>
 #include <utility>
 
 extern "C" {
