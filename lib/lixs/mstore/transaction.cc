@@ -2,7 +2,6 @@
 #include <lixs/mstore/transaction.hh>
 #include <lixs/util.hh>
 
-#include <map>
 #include <set>
 #include <string>
 

@@ -3,7 +3,6 @@
 
 #include <lixs/mstore/database.hh>
 
-#include <map>
 #include <set>
 #include <string>
 
