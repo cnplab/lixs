@@ -61,7 +61,7 @@ protected:
     typedef std::list<std::pair<std::string, std::string> > fire_list;
 
 
-    client_base(xenstore& xs, event_mgr& emgr);
+    client_base(const std::string& id, xenstore& xs, event_mgr& emgr);
     virtual ~client_base();
 
     virtual void process(void) = 0;
@@ -73,14 +73,13 @@ protected:
 
     xenstore& xs;
 
+    std::string id;
     enum state state;
 
     watch_map watches;
     fire_list to_fire;
 
     struct msg msg;
-
-    char* cid;
 
     char* read_buff;
     char* write_buff;
@@ -134,7 +133,7 @@ template < typename CONNECTION >
 class client : public client_base, public CONNECTION {
 public:
     template < typename... ARGS >
-    client(xenstore& xs, event_mgr& emgr, ARGS&&... args);
+    client(const std::string& id, xenstore& xs, event_mgr& emgr, ARGS&&... args);
     virtual ~client();
 
 private:
@@ -145,8 +144,8 @@ private:
 
 template < typename CONNECTION >
 template < typename... ARGS >
-client<CONNECTION>::client(xenstore& xs, event_mgr& emgr, ARGS&&... args)
-    : client_base(xs, emgr), CONNECTION(std::forward<ARGS>(args)...)
+client<CONNECTION>::client(const std::string& id, xenstore& xs, event_mgr& emgr, ARGS&&... args)
+    : client_base(id, xs, emgr), CONNECTION(std::forward<ARGS>(args)...)
 {
 }
 

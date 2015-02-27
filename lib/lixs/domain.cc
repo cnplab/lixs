@@ -28,11 +28,10 @@ lixs::foreign_ring_mapper::~foreign_ring_mapper()
 
 lixs::domain::domain(xenstore& xs, event_mgr& emgr, iomux& io,
         domid_t domid, evtchn_port_t port, unsigned int mfn)
-    : client(xs, emgr, io, domid, port, mfn)
+    : client(get_id(domid), xs, emgr, io, domid, port, mfn)
 {
 #ifdef DEBUG
-    asprintf(&cid, "D%d", domid);
-    printf("%4s = new conn\n", cid);
+    printf("%4s = new conn\n", id.c_str());
 #endif
 
     std::string path;
@@ -45,8 +44,12 @@ lixs::domain::domain(xenstore& xs, event_mgr& emgr, iomux& io,
 lixs::domain::~domain()
 {
 #ifdef DEBUG
-    printf("%4s = closed conn\n", cid);
-    free(cid);
+    printf("%4s = closed conn\n", id.c_str());
 #endif
+}
+
+std::string lixs::domain::get_id(domid_t domid)
+{
+    return "D" + std::to_string(domid);
 }
 

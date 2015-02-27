@@ -40,11 +40,10 @@ lixs::xenbus_mapper::~xenbus_mapper(void)
 const std::string lixs::xenbus::xsd_port_path = "/proc/xen/xsd_port";
 
 lixs::xenbus::xenbus(xenstore& xs, event_mgr& emgr, iomux& io)
-    : client(xs, emgr, io, 0, xenbus_evtchn())
+    : client("XB", xs, emgr, io, 0, xenbus_evtchn())
 {
 #ifdef DEBUG
-    asprintf(&cid, "D%d", 0);
-    printf("%4s = new conn\n", cid);
+    printf("%4s = new conn\n", id.c_str());
 #endif
 
     std::string path;
@@ -57,8 +56,7 @@ lixs::xenbus::xenbus(xenstore& xs, event_mgr& emgr, iomux& io)
 lixs::xenbus::~xenbus()
 {
 #ifdef DEBUG
-    printf("%4s = closed conn\n", cid);
-    free(cid);
+    printf("%4s = closed conn\n", id.c_str());
 #endif
 }
 

@@ -35,6 +35,9 @@ public:
     domain(xenstore& xs, event_mgr& emgr, iomux& io,
             domid_t domid, evtchn_port_t port, unsigned int mfn);
     ~domain();
+
+private:
+    static std::string get_id(domid_t domid);
 };
 
 } /* namespace lixs */

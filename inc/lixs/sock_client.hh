@@ -18,9 +18,11 @@ public:
     ~sock_client();
 
 private:
+    static std::string get_id(int id);
+
     void conn_dead(void);
 
-private:
+
     event_mgr& emgr;
     std::function<void(sock_client*)> dead_cb;
 };

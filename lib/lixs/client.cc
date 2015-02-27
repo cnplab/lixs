@@ -21,8 +21,8 @@ extern "C" {
 }
 
 
-lixs::client_base::client_base(xenstore& xs, event_mgr& emgr)
-    : xs(xs), state(p_rx), cid((char*)"X"), emgr(emgr)
+lixs::client_base::client_base(const std::string& id, xenstore& xs, event_mgr& emgr)
+    : xs(xs), id(id), state(p_rx), emgr(emgr)
 {
     emgr.enqueue_event(std::bind(&client_base::process, this));
 }
@@ -515,7 +515,7 @@ void lixs::client_base::print_msg(char* pre)
     msg.body[msg.hdr.len] = '\0';
 
     printf("%4s %s { type = %2d, req_id = %d, tx_id = %d, len = %d, msg = ",
-            cid, pre, msg.hdr.type, msg.hdr.req_id, msg.hdr.tx_id, msg.hdr.len);
+            id.c_str(), pre, msg.hdr.type, msg.hdr.req_id, msg.hdr.tx_id, msg.hdr.len);
 
     c = '"';
     for (i = 0; i < msg.hdr.len; i += strlen(msg.body + i) + 1) {
