@@ -192,13 +192,7 @@ void client<CONNECTION>::process(void)
                     break;
                 }
 
-#ifdef DEBUG
-                print_msg((char*)"<");
-#endif
                 handle_msg();
-#ifdef DEBUG
-                print_msg((char*)">");
-#endif
 
                 state = p_tx;
                 break;
@@ -239,10 +233,6 @@ void client<CONNECTION>::process(void)
                 prepare_watch(to_fire.front());
                 to_fire.pop_front();
 
-#ifdef DEBUG
-                print_msg((char*)">");
-#endif
-
                 state = p_tx;
                 break;
         }
@@ -256,10 +246,6 @@ void client<CONNECTION>::watch_fired(const std::string& path, const std::string&
 
     if (state == rx_hdr) {
         prepare_watch(watch);
-
-#ifdef DEBUG
-        print_msg((char*)">");
-#endif
 
         write_buff = reinterpret_cast<char*>(&msg.hdr);
         write_bytes = sizeof(msg.hdr);

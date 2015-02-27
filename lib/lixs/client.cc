@@ -44,6 +44,10 @@ void lixs::client_base::handle_msg(void)
     /* Ensure the body is null terminated */
     msg.body[msg.hdr.len] = '\0';
 
+#ifdef DEBUG
+    print_msg((char*)"<");
+#endif
+
     switch (msg.hdr.type) {
         case XS_DIRECTORY:
             op_directory();
@@ -129,11 +133,19 @@ void lixs::client_base::handle_msg(void)
             build_err(ENOSYS);
         break;
     }
+
+#ifdef DEBUG
+    print_msg((char*)">");
+#endif
 }
 
 void lixs::client_base::prepare_watch(const std::pair<std::string, std::string>& watch)
 {
     build_watch(watch.first.c_str(), watch.second.c_str());
+
+#ifdef DEBUG
+    print_msg((char*)">");
+#endif
 }
 
 void lixs::client_base::op_read(void)
