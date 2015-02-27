@@ -42,10 +42,6 @@ const std::string lixs::xenbus::xsd_port_path = "/proc/xen/xsd_port";
 lixs::xenbus::xenbus(xenstore& xs, event_mgr& emgr, iomux& io)
     : client("XB", xs, emgr, io, 0, xenbus_evtchn())
 {
-#ifdef DEBUG
-    printf("%4s = new conn\n", id.c_str());
-#endif
-
     std::string path;
     xs.domain_path(0, path);
 
@@ -55,9 +51,6 @@ lixs::xenbus::xenbus(xenstore& xs, event_mgr& emgr, iomux& io)
 
 lixs::xenbus::~xenbus()
 {
-#ifdef DEBUG
-    printf("%4s = closed conn\n", id.c_str());
-#endif
 }
 
 evtchn_port_t lixs::xenbus::xenbus_evtchn(void)

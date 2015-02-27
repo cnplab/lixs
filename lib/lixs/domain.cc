@@ -30,10 +30,6 @@ lixs::domain::domain(xenstore& xs, event_mgr& emgr, iomux& io,
         domid_t domid, evtchn_port_t port, unsigned int mfn)
     : client(get_id(domid), xs, emgr, io, domid, port, mfn)
 {
-#ifdef DEBUG
-    printf("%4s = new conn\n", id.c_str());
-#endif
-
     std::string path;
     xs.domain_path(domid, path);
 
@@ -43,9 +39,6 @@ lixs::domain::domain(xenstore& xs, event_mgr& emgr, iomux& io,
 
 lixs::domain::~domain()
 {
-#ifdef DEBUG
-    printf("%4s = closed conn\n", id.c_str());
-#endif
 }
 
 std::string lixs::domain::get_id(domid_t domid)

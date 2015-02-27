@@ -73,7 +73,6 @@ protected:
 
     xenstore& xs;
 
-    std::string id;
     enum state state;
 
     watch_map watches;
@@ -124,6 +123,8 @@ private:
     void print_msg(char* pre);
 #endif
 
+
+    std::string id;
 
     event_mgr& emgr;
 };

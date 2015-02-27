@@ -22,13 +22,20 @@ extern "C" {
 
 
 lixs::client_base::client_base(const std::string& id, xenstore& xs, event_mgr& emgr)
-    : xs(xs), id(id), state(p_rx), emgr(emgr)
+    : xs(xs), state(p_rx), id(id), emgr(emgr)
 {
+#ifdef DEBUG
+    printf("%4s = new conn\n", id.c_str());
+#endif
+
     emgr.enqueue_event(std::bind(&client_base::process, this));
 }
 
 lixs::client_base::~client_base()
 {
+#ifdef DEBUG
+    printf("%4s = closed conn\n", id.c_str());
+#endif
 }
 
 void lixs::client_base::watch_cb_k::operator()(const std::string& path)
