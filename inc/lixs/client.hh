@@ -70,6 +70,24 @@ protected:
     void handle_msg(void);
     void prepare_watch(const std::pair<std::string, std::string>& watch);
 
+
+    xenstore& xs;
+
+    client_base::state state;
+
+    watch_map watches;
+    fire_list to_fire;
+
+    struct msg msg;
+
+    char* cid;
+
+    char* read_buff;
+    char* write_buff;
+    int read_bytes;
+    int write_bytes;
+
+private:
     void op_read(void);
     void op_write(void);
     void op_mkdir(void);
@@ -107,22 +125,8 @@ protected:
     void print_msg(char* pre);
 #endif
 
-    xenstore& xs;
+
     event_mgr& emgr;
-
-    client_base::state state;
-
-    watch_map watches;
-    fire_list to_fire;
-
-    struct msg msg;
-
-    char* cid;
-
-    char* read_buff;
-    char* write_buff;
-    int read_bytes;
-    int write_bytes;
 };
 
 

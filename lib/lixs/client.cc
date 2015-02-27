@@ -22,7 +22,7 @@ extern "C" {
 
 
 lixs::client_base::client_base(xenstore& xs, event_mgr& emgr)
-    : xs(xs), emgr(emgr), state(p_rx), cid((char*)"X")
+    : xs(xs), state(p_rx), cid((char*)"X"), emgr(emgr)
 {
     emgr.enqueue_event(std::bind(&client_base::process, this));
 }
