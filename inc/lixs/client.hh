@@ -73,7 +73,7 @@ protected:
 
     xenstore& xs;
 
-    client_base::state state;
+    enum state state;
 
     watch_map watches;
     fire_list to_fire;
