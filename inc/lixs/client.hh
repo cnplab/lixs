@@ -68,6 +68,7 @@ protected:
     virtual void watch_fired(const std::string& path, const std::string& token) = 0;
 
     void handle_msg(void);
+    void prepare_watch(const std::pair<std::string, std::string>& watch);
 
     void op_read(void);
     void op_write(void);
@@ -235,8 +236,7 @@ void client<CONNECTION>::process(void)
                 break;
 
             case p_watch:
-                std::pair<std::string, std::string>& e = to_fire.front();
-                build_watch(e.first.c_str(), e.second.c_str());
+                prepare_watch(to_fire.front());
                 to_fire.pop_front();
 
 #ifdef DEBUG
@@ -252,8 +252,11 @@ void client<CONNECTION>::process(void)
 template < typename CONNECTION >
 void client<CONNECTION>::watch_fired(const std::string& path, const std::string& token)
 {
+    std::pair<std::string, std::string> watch(path, token);
+
     if (state == rx_hdr) {
-        build_watch(path.c_str(), token.c_str());
+        prepare_watch(watch);
+
 #ifdef DEBUG
         print_msg((char*)">");
 #endif
@@ -271,7 +274,7 @@ void client<CONNECTION>::watch_fired(const std::string& path, const std::string&
             state = tx_body;
         }
     } else {
-        to_fire.push_back(std::pair<std::string, std::string>(path, token));
+        to_fire.push_back(watch);
     }
 }
 

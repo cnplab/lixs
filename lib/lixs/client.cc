@@ -131,6 +131,11 @@ void lixs::client_base::handle_msg(void)
     }
 }
 
+void lixs::client_base::prepare_watch(const std::pair<std::string, std::string>& watch)
+{
+    build_watch(watch.first.c_str(), watch.second.c_str());
+}
+
 void lixs::client_base::op_read(void)
 {
     int ret;
