@@ -21,7 +21,7 @@ namespace lixs {
 class client_base {
 protected:
     struct msg {
-        msg()
+        msg(void)
             : abs_path(buff), body(buff)
         { }
 
@@ -190,7 +190,6 @@ void client<CONNECTION>::process(void)
 
             case rx_body:
                 ret = CONNECTION::read(read_buff, read_bytes);
-
                 if (ret == false) {
                     yield = true;
                     break;
@@ -210,7 +209,6 @@ void client<CONNECTION>::process(void)
 
             case tx_hdr:
                 ret = CONNECTION::write(write_buff, write_bytes);
-
                 if (ret == false) {
                     yield = true;
                     break;
@@ -224,7 +222,6 @@ void client<CONNECTION>::process(void)
 
             case tx_body:
                 ret = CONNECTION::write(write_buff, write_bytes);
-
                 if (ret == false) {
                     yield = true;
                     break;
@@ -253,6 +250,7 @@ void client<CONNECTION>::watch_fired(const std::string& path, const std::string&
 
         write_buff = reinterpret_cast<char*>(&msg.hdr);
         write_bytes = sizeof(msg.hdr);
+
         if (!CONNECTION::write(write_buff, write_bytes)) {
             state = tx_hdr;
             return;
@@ -260,6 +258,7 @@ void client<CONNECTION>::watch_fired(const std::string& path, const std::string&
 
         write_buff = msg.body;
         write_bytes = msg.hdr.len;
+
         if (!CONNECTION::write(write_buff, write_bytes)) {
             state = tx_body;
         }
