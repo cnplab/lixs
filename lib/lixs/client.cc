@@ -160,7 +160,7 @@ void lixs::client_base::op_read(void)
     int ret;
     std::string res;
 
-    ret = xs.store_read(msg.hdr.tx_id, get_path(), res);
+    ret = xs.store_read(domid, msg.hdr.tx_id, get_path(), res);
 
     if (ret == 0) {
         if (!build_resp(res.c_str())) {
@@ -175,7 +175,7 @@ void lixs::client_base::op_write(void)
 {
     int ret;
 
-    ret = xs.store_write(msg.hdr.tx_id, get_path(), get_arg2());
+    ret = xs.store_write(domid, msg.hdr.tx_id, get_path(), get_arg2());
 
     if (ret == 0) {
         build_ack();
@@ -188,7 +188,7 @@ void lixs::client_base::op_mkdir(void)
 {
     int ret;
 
-    ret = xs.store_mkdir(msg.hdr.tx_id, get_path());
+    ret = xs.store_mkdir(domid, msg.hdr.tx_id, get_path());
 
     if (ret == 0) {
         build_ack();
@@ -201,7 +201,7 @@ void lixs::client_base::op_rm(void)
 {
     int ret;
 
-    ret = xs.store_rm(msg.hdr.tx_id, get_path());
+    ret = xs.store_rm(domid, msg.hdr.tx_id, get_path());
 
     if (ret == 0) {
         build_ack();
@@ -214,7 +214,7 @@ void lixs::client_base::op_transaction_start(void)
 {
     unsigned int tid;
 
-    xs.transaction_start(&tid);
+    xs.transaction_start(domid, &tid);
 
     if (!build_resp(std::to_string(tid).c_str()) || !append_sep()) {
         build_err(E2BIG);
@@ -225,7 +225,7 @@ void lixs::client_base::op_transaction_end(void)
 {
     int ret;
 
-    ret = xs.transaction_end(msg.hdr.tx_id, strcmp(get_arg1(), "T") == 0);
+    ret = xs.transaction_end(domid, msg.hdr.tx_id, strcmp(get_arg1(), "T") == 0);
 
     if (ret == 0) {
         build_ack();
@@ -300,7 +300,7 @@ void lixs::client_base::op_directory(void)
     std::set<std::string> resp;
     std::set<std::string>::iterator it;
 
-    ret = xs.store_dir(msg.hdr.tx_id, get_path(), resp);
+    ret = xs.store_dir(domid, msg.hdr.tx_id, get_path(), resp);
 
     if (ret == 0) {
         ok = build_resp("");

@@ -17,12 +17,14 @@ lixs::xenstore::~xenstore()
 {
 }
 
-int lixs::xenstore::store_read(unsigned int tid, const std::string& path, std::string& val)
+int lixs::xenstore::store_read(cid_t cid, unsigned int tid,
+        const std::string& path, std::string& val)
 {
     return st.read(tid, path, val);
 }
 
-int lixs::xenstore::store_write(unsigned int tid, const std::string& path, const std::string& val)
+int lixs::xenstore::store_write(cid_t cid, unsigned int tid,
+        const std::string& path, const std::string& val)
 {
     int ret;
 
@@ -35,7 +37,8 @@ int lixs::xenstore::store_write(unsigned int tid, const std::string& path, const
     return ret;
 }
 
-int lixs::xenstore::store_mkdir(unsigned int tid, const std::string& path)
+int lixs::xenstore::store_mkdir(cid_t cid, unsigned int tid,
+        const std::string& path)
 {
     int ret;
     bool created;
@@ -49,7 +52,8 @@ int lixs::xenstore::store_mkdir(unsigned int tid, const std::string& path)
     return ret;
 }
 
-int lixs::xenstore::store_rm(unsigned int tid, const std::string& path)
+int lixs::xenstore::store_rm(cid_t cid, unsigned int tid,
+        const std::string& path)
 {
     int ret;
 
@@ -63,19 +67,34 @@ int lixs::xenstore::store_rm(unsigned int tid, const std::string& path)
     return ret;
 }
 
-int lixs::xenstore::store_dir(unsigned int tid, const std::string& path, std::set<std::string>& res)
+int lixs::xenstore::store_dir(cid_t cid, unsigned int tid,
+        const std::string& path, std::set<std::string>& res)
 {
     return st.get_children(tid, path, res);
 }
 
-int lixs::xenstore::transaction_start(unsigned int* tid)
+int lixs::xenstore::store_get_perms(cid_t cid, unsigned int tid,
+        const std::string& path, permission_list& resp)
+{
+    /* FIXME: implement */
+    return 0;
+}
+
+int lixs::xenstore::store_set_perms(cid_t cid, unsigned int tid,
+        const std::string& path, const permission_list& resp)
+{
+    /* FIXME: implement */
+    return 0;
+}
+
+int lixs::xenstore::transaction_start(cid_t cid, unsigned int* tid)
 {
     st.branch(*tid);
 
     return 0;
 }
 
-int lixs::xenstore::transaction_end(unsigned int tid, bool commit)
+int lixs::xenstore::transaction_end(cid_t cid, unsigned int tid, bool commit)
 {
     int ret;
     bool success;
