@@ -12,6 +12,7 @@
 #include <utility>
 
 extern "C" {
+#include <xen/xen.h>
 #include <xen/io/xs_wire.h>
 }
 
@@ -61,7 +62,7 @@ protected:
     typedef std::list<std::pair<std::string, std::string> > fire_list;
 
 
-    client_base(const std::string& id, xenstore& xs, event_mgr& emgr);
+    client_base(domid_t domid, const std::string& id, xenstore& xs, event_mgr& emgr);
     virtual ~client_base();
 
     virtual void process(void) = 0;
@@ -124,6 +125,7 @@ private:
 #endif
 
 
+    domid_t domid;
     std::string id;
 
     event_mgr& emgr;
@@ -134,7 +136,7 @@ template < typename CONNECTION >
 class client : public client_base, public CONNECTION {
 public:
     template < typename... ARGS >
-    client(const std::string& id, xenstore& xs, event_mgr& emgr, ARGS&&... args);
+    client(domid_t domid, const std::string& id, xenstore& xs, event_mgr& emgr, ARGS&&... args);
     virtual ~client();
 
 private:
@@ -145,8 +147,9 @@ private:
 
 template < typename CONNECTION >
 template < typename... ARGS >
-client<CONNECTION>::client(const std::string& id, xenstore& xs, event_mgr& emgr, ARGS&&... args)
-    : client_base(id, xs, emgr), CONNECTION(std::forward<ARGS>(args)...)
+client<CONNECTION>::client(domid_t domid, const std::string& id,
+        xenstore& xs, event_mgr& emgr, ARGS&&... args)
+    : client_base(domid, id, xs, emgr), CONNECTION(std::forward<ARGS>(args)...)
 {
 }
 

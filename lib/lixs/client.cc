@@ -21,8 +21,8 @@ extern "C" {
 }
 
 
-lixs::client_base::client_base(const std::string& id, xenstore& xs, event_mgr& emgr)
-    : xs(xs), state(p_rx), id(id), emgr(emgr)
+lixs::client_base::client_base(domid_t domid, const std::string& id, xenstore& xs, event_mgr& emgr)
+    : xs(xs), state(p_rx), domid(domid), id(id), emgr(emgr)
 {
 #ifdef DEBUG
     printf("%4s = new conn\n", id.c_str());
@@ -236,11 +236,11 @@ void lixs::client_base::op_transaction_end(void)
 
 void lixs::client_base::op_get_domain_path(void)
 {
-    domid_t domid;
+    domid_t req_domid;
     std::string path;
 
     try {
-        domid = std::stoi(get_arg1());
+        req_domid = std::stoi(get_arg1());
     } catch(std::invalid_argument e) {
         build_err(EINVAL);
         return;
@@ -249,7 +249,7 @@ void lixs::client_base::op_get_domain_path(void)
         return;
     }
 
-    xs.domain_path(domid, path);
+    xs.domain_path(req_domid, path);
 
     if (!build_resp(path.c_str())) {
         build_err(E2BIG);
