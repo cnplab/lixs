@@ -18,10 +18,12 @@ public:
     ~sock_client();
 
 private:
-    static std::string get_id(int id);
+    static std::string get_id(void);
 
     void conn_dead(void);
 
+
+    static unsigned int next_id;
 
     event_mgr& emgr;
     std::function<void(sock_client*)> dead_cb;

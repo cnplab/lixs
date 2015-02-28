@@ -12,9 +12,11 @@
 #include <unistd.h>
 
 
+unsigned int lixs::sock_client::next_id = 0;
+
 lixs::sock_client::sock_client(std::function<void(sock_client*)> dead_cb,
         xenstore& xs, event_mgr& emgr, iomux& io, int fd)
-    : client(get_id(fd), xs, emgr, io, fd), emgr(emgr), dead_cb(dead_cb)
+    : client(get_id(), xs, emgr, io, fd), emgr(emgr), dead_cb(dead_cb)
 {
     std::string path = "/local/domain/0/";
 
@@ -31,8 +33,8 @@ void lixs::sock_client::conn_dead(void)
     emgr.enqueue_event(std::bind(dead_cb, this));
 }
 
-std::string lixs::sock_client::get_id(int id)
+std::string lixs::sock_client::get_id(void)
 {
-    return "S" + std::to_string(id);
+    return "S" + std::to_string(next_id++);
 }
 
