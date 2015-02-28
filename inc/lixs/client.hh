@@ -36,15 +36,15 @@ protected:
         char buff[35 + XENSTORE_PAYLOAD_MAX + 1];
     };
 
-    class watch_cb_k : public lixs::watch_cb_k {
-    public:
-        watch_cb_k(client_base& client, const std::string& path, const std::string& token, bool relative)
-            : lixs::watch_cb_k(path, token, relative), _client(client)
-        { };
+    struct watch_cb_k : public lixs::watch_cb_k {
+        watch_cb_k(client_base& client,
+                const std::string& path, const std::string& token, bool relative)
+            : lixs::watch_cb_k(path, token, relative), client(client)
+        { }
 
         void operator()(const std::string& path);
 
-        client_base& _client;
+        client_base& client;
     };
 
     enum state {

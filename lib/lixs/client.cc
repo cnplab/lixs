@@ -40,9 +40,9 @@ lixs::client_base::~client_base()
 
 void lixs::client_base::watch_cb_k::operator()(const std::string& path)
 {
-    std::string fire_path = path.substr(relative ? _client.msg.body - _client.msg.abs_path : 0);
+    std::string fire_path = path.substr(relative ? client.msg.body - client.msg.abs_path : 0);
 
-    _client.watch_fired(fire_path, token);
+    client.watch_fired(fire_path, token);
 }
 
 void lixs::client_base::handle_msg(void)
