@@ -11,9 +11,9 @@ lixs::mstore::transaction::transaction(unsigned int id, database& db)
 {
 }
 
-int lixs::mstore::transaction::create(const std::string& path, bool& created)
+int lixs::mstore::transaction::create(cid_t cid, const std::string& path, bool& created)
 {
-    ensure_branch(path);
+    ensure_branch(cid, path);
 
     record& rec = db[path];
 
@@ -34,6 +34,7 @@ int lixs::mstore::transaction::create(const std::string& path, bool& created)
 
             te.write_seq = rec.next_seq++;
             te.delete_seq = 0;
+            get_parent_perms(path, te.perms);
 
             created = true;
         }
@@ -42,7 +43,7 @@ int lixs::mstore::transaction::create(const std::string& path, bool& created)
     return 0;
 }
 
-int lixs::mstore::transaction::read(const std::string& path, std::string& val)
+int lixs::mstore::transaction::read(cid_t cid, const std::string& path, std::string& val)
 {
     record& rec = db[path];
     entry& te = rec.te[id];
@@ -57,9 +58,17 @@ int lixs::mstore::transaction::read(const std::string& path, std::string& val)
     }
 
     if (te.write_seq) {
+        if (!has_read_access(cid, te.perms)) {
+            return EACCES;
+        }
+
         val = te.value;
         return 0;
     } else if (rec.e.write_seq) {
+        if (!has_read_access(cid, rec.e.perms)) {
+            return EACCES;
+        }
+
         val = rec.e.value;
         return 0;
     } else {
@@ -67,10 +76,8 @@ int lixs::mstore::transaction::read(const std::string& path, std::string& val)
     }
 }
 
-int lixs::mstore::transaction::update(const std::string& path, const std::string& val)
+int lixs::mstore::transaction::update(cid_t cid, const std::string& path, const std::string& val)
 {
-    ensure_branch(path);
-
     record& rec = db[path];
     entry& te = rec.te[id];
 
@@ -79,8 +86,20 @@ int lixs::mstore::transaction::update(const std::string& path, const std::string
         records.insert(path);
     }
 
+    if (!can_write(cid, rec, te)) {
+        return EACCES;
+    }
+
+    ensure_branch(cid, path);
+
     if (!te.write_seq) {
         register_with_parent(path);
+
+        if (rec.e.write_seq) {
+            te.perms = rec.e.perms;
+        } else {
+            get_parent_perms(path, te.perms);
+        }
     }
 
     te.value = val;
@@ -90,7 +109,7 @@ int lixs::mstore::transaction::update(const std::string& path, const std::string
     return 0;
 }
 
-int lixs::mstore::transaction::del(const std::string& path)
+int lixs::mstore::transaction::del(cid_t cid, const std::string& path)
 {
     database::iterator it;
 
@@ -100,6 +119,10 @@ int lixs::mstore::transaction::del(const std::string& path)
     if (!te.init_seq) {
         te.init_seq = rec.next_seq++;
         records.insert(path);
+    }
+
+    if (!can_write(cid, rec, te)) {
+        return EACCES;
     }
 
     if (te.write_seq || rec.e.write_seq) {
@@ -122,7 +145,7 @@ int lixs::mstore::transaction::del(const std::string& path)
     }
 }
 
-int lixs::mstore::transaction::get_children(const std::string& path, std::set<std::string>& resp)
+int lixs::mstore::transaction::get_children(cid_t cid, const std::string& path, std::set<std::string>& resp)
 {
     record& rec = db[path];
     entry& te = rec.te[id];
@@ -136,11 +159,19 @@ int lixs::mstore::transaction::get_children(const std::string& path, std::set<st
         te.read_seq = rec.next_seq++;
     }
 
-    std::set<std::string>::iterator i;
-
-    if (!(te.write_seq || rec.e.write_seq)) {
+    if (te.write_seq) {
+        if (!has_read_access(cid, te.perms)) {
+            return EACCES;
+        }
+    } else if (rec.e.write_seq) {
+        if (!has_read_access(cid, rec.e.perms)) {
+            return EACCES;
+        }
+    } else {
         return ENOENT;
     }
+
+    std::set<std::string>::iterator i;
 
     if (te.write_seq) {
         for (i = te.children.begin(); i != te.children.end(); i++) {
@@ -157,6 +188,78 @@ int lixs::mstore::transaction::get_children(const std::string& path, std::set<st
     }
 
     return 0;
+}
+
+int lixs::mstore::transaction::get_perms(cid_t cid,
+        const std::string& path, permission_list& perms)
+{
+    record& rec = db[path];
+    entry& te = rec.te[id];
+
+    if (!te.init_seq) {
+        te.init_seq = rec.next_seq++;
+        records.insert(path);
+    }
+
+    if (!te.read_seq) {
+        te.read_seq = rec.next_seq++;
+    }
+
+    if (te.write_seq) {
+        if (!has_read_access(cid, te.perms)) {
+            return EACCES;
+        }
+
+        perms = te.perms;
+        return 0;
+    } else if (rec.e.write_seq) {
+        if (!has_read_access(cid, rec.e.perms)) {
+            return EACCES;
+        }
+
+        perms = rec.e.perms;
+        return 0;
+    } else {
+        return ENOENT;
+    }
+}
+
+int lixs::mstore::transaction::set_perms(cid_t cid,
+        const std::string& path, const permission_list& perms)
+{
+    record& rec = db[path];
+    entry& te = rec.te[id];
+
+    if (!te.init_seq) {
+        te.init_seq = rec.next_seq++;
+        records.insert(path);
+    }
+
+    if (te.write_seq) {
+        if (!has_write_access(cid, te.perms)) {
+            return EACCES;
+        }
+
+        te.perms = perms;
+        te.write_seq = rec.next_seq++;
+        return 0;
+    } else if (rec.e.write_seq) {
+        if (!has_write_access(cid, rec.e.perms)) {
+            return EACCES;
+        }
+
+        te.value = rec.e.value;
+        te.perms = perms;
+        te.write_seq = rec.next_seq++;
+        te.delete_seq = 0;
+        return 0;
+    } else {
+        if (!te.read_seq) {
+            te.read_seq = rec.next_seq++;
+        }
+
+        return ENOENT;
+    }
 }
 
 void lixs::mstore::transaction::abort()
@@ -213,6 +316,7 @@ void lixs::mstore::transaction::_merge()
 
         if (te.write_seq) {
             rec.e.value = te.value;
+            rec.e.perms = te.perms;
             rec.e.write_seq = te.write_seq;
         }
 
@@ -259,7 +363,7 @@ void lixs::mstore::transaction::unregister_from_parent(const std::string& path)
     }
 }
 
-void lixs::mstore::transaction::ensure_branch(const std::string& path)
+void lixs::mstore::transaction::ensure_branch(cid_t cid, const std::string& path)
 {
     size_t pos;
     bool created;
@@ -270,7 +374,7 @@ void lixs::mstore::transaction::ensure_branch(const std::string& path)
         record& rec = db[parent];
 
         if (!(rec.e.write_seq || rec.te[id].write_seq)) {
-            create(parent, created);
+            create(cid, parent, created);
         }
     }
 }
@@ -289,8 +393,67 @@ void lixs::mstore::transaction::delete_branch(const std::string& path)
         children.insert(rec.e.children.begin(), rec.e.children.end());
     }
 
+    /* Delete a subtree doesn't require access permissions. Only access to the
+     * root node, so we delete as 0.
+     */
     for (it = children.begin(); it != children.end(); it++) {
-        del(path + "/" + *it);
+        del(0, path + "/" + *it);
     }
+}
+
+bool lixs::mstore::transaction::can_write(cid_t cid, record& rec, entry& te)
+{
+    if (te.write_seq) {
+        if (has_write_access(cid, te.perms)) {
+            return true;
+        }
+    } else if (rec.e.write_seq) {
+        if (has_write_access(cid, rec.e.perms)) {
+            return true;
+        }
+    } else {
+        return true;
+    }
+
+    if (!te.read_seq) {
+        te.read_seq = rec.next_seq++;
+    }
+
+    return false;
+}
+
+void lixs::mstore::transaction::get_parent_perms(const std::string& path, permission_list& perms)
+{
+    size_t pos;
+    database::iterator it;
+    std::map<unsigned int, entry>::iterator t_it;
+
+    pos = path.rfind('/');
+    if (pos != std::string::npos) {
+        std::string parent = path.substr(0, pos);
+
+        it = db.find(parent);
+        if (it != db.end()) {
+            record& rec = it->second;
+
+            t_it = rec.te.find(id);
+            if (t_it != rec.te.end()) {
+                entry& te = t_it->second;
+
+                if (te.write_seq) {
+                    perms = te.perms;
+                    return;
+                }
+            }
+
+            if (rec.e.write_seq) {
+                perms = rec.e.perms;
+                return;
+            }
+        }
+    }
+
+    perms.clear();
+    perms.push_back(permission(0, false, false));
 }
 
