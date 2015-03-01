@@ -76,15 +76,14 @@ int lixs::xenstore::store_dir(cid_t cid, unsigned int tid,
 int lixs::xenstore::store_get_perms(cid_t cid, unsigned int tid,
         const std::string& path, permission_list& resp)
 {
-    /* FIXME: implement */
-    return 0;
+    return st.get_perms(cid, tid, path, resp);
 }
 
 int lixs::xenstore::store_set_perms(cid_t cid, unsigned int tid,
         const std::string& path, const permission_list& resp)
 {
-    /* FIXME: implement */
-    return 0;
+    /* FIXME: should we fire a watch upon setting permissions? */
+    return st.set_perms(cid, tid, path, resp);
 }
 
 int lixs::xenstore::transaction_start(cid_t cid, unsigned int* tid)
