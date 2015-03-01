@@ -46,7 +46,7 @@ int lixs::mstore::store::abort(unsigned int tid)
     }
 }
 
-int lixs::mstore::store::create(unsigned int tid, std::string path, bool& created)
+int lixs::mstore::store::create(cid_t cid, unsigned int tid, std::string path, bool& created)
 {
     if (path.back() == '/') {
         path.pop_back();
@@ -66,7 +66,7 @@ int lixs::mstore::store::create(unsigned int tid, std::string path, bool& create
     }
 }
 
-int lixs::mstore::store::read(unsigned int tid, std::string path, std::string& val)
+int lixs::mstore::store::read(cid_t cid, unsigned int tid, std::string path, std::string& val)
 {
     if (path.back() == '/') {
         path.pop_back();
@@ -86,7 +86,7 @@ int lixs::mstore::store::read(unsigned int tid, std::string path, std::string& v
     }
 }
 
-int lixs::mstore::store::update(unsigned int tid, std::string path, std::string val)
+int lixs::mstore::store::update(cid_t cid, unsigned int tid, std::string path, std::string val)
 {
     if (path.back() == '/') {
         path.pop_back();
@@ -106,7 +106,7 @@ int lixs::mstore::store::update(unsigned int tid, std::string path, std::string 
     }
 }
 
-int lixs::mstore::store::del(unsigned int tid, std::string path)
+int lixs::mstore::store::del(cid_t cid, unsigned int tid, std::string path)
 {
     if (path.back() == '/') {
         path.pop_back();
@@ -126,7 +126,7 @@ int lixs::mstore::store::del(unsigned int tid, std::string path)
     }
 }
 
-int lixs::mstore::store::get_children(unsigned int tid, std::string path,
+int lixs::mstore::store::get_children(cid_t cid, unsigned int tid, std::string path,
         std::set<std::string>& resp)
 {
     if (path.back() == '/') {
@@ -145,5 +145,19 @@ int lixs::mstore::store::get_children(unsigned int tid, std::string path,
             return EINVAL;
         }
     }
+}
+
+int lixs::mstore::store::get_perms(cid_t cid, unsigned int tid,
+        std::string path, permission_list& perms)
+{
+    /* FIXME: implement */
+    return 0;
+}
+
+int lixs::mstore::store::set_perms(cid_t cid, unsigned int tid,
+        std::string path, const permission_list& perms)
+{
+    /* FIXME: implement */
+    return 0;
 }
 

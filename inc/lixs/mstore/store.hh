@@ -23,12 +23,22 @@ public:
     int merge(unsigned int tid, bool& success);
     int abort(unsigned int tid);
 
-    int create(unsigned int tid, std::string path, bool& created);
-    int read(unsigned int tid, std::string key, std::string& val);
-    int update(unsigned int tid, std::string key, std::string val);
-    int del(unsigned int tid, std::string key);
+    int create(cid_t cid, unsigned int tid,
+            std::string path, bool& created);
+    int read(cid_t cid, unsigned int tid,
+            std::string key, std::string& val);
+    int update(cid_t cid, unsigned int tid,
+            std::string key, std::string val);
+    int del(cid_t cid, unsigned int tid,
+            std::string key);
 
-    int get_children(unsigned int tid, std::string key, std::set<std::string>& resp);
+    int get_children(cid_t cid, unsigned int tid,
+            std::string key, std::set<std::string>& resp);
+
+    int get_perms(cid_t cid, unsigned int tid,
+            std::string path, permission_list& perms);
+    int set_perms(cid_t cid, unsigned int tid,
+            std::string path, const permission_list& perms);
 
 private:
     typedef std::map<unsigned int, transaction> transaction_db;
