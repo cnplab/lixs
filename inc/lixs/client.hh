@@ -108,10 +108,14 @@ private:
     void op_debug(void);
     void op_resume(void);
 
+    void perm2str(const permission& perm, std::string& str);
+    bool str2perm(const std::string& str, permission& perm);
+
     char* get_path(void);
     char* get_arg1(void);
     char* get_arg2(void);
     char* get_arg3(void);
+    char* get_next_arg(char* curr);
 
     bool build_resp(const char* resp);
     bool append_resp(const char* resp);
