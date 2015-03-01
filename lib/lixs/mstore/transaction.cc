@@ -114,7 +114,9 @@ int lixs::mstore::transaction::del(const std::string& path)
 
         return 0;
     } else {
-        te.read_seq = rec.next_seq++;
+        if (!te.read_seq) {
+            te.read_seq = rec.next_seq++;
+        }
 
         return ENOENT;
     }
