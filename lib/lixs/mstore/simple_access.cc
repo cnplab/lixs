@@ -121,7 +121,6 @@ void lixs::mstore::simple_access::ensure_branch(const std::string& path)
 {
     size_t pos;
     bool created;
-    database::iterator it;
 
     pos = path.rfind('/');
     if (pos != std::string::npos) {
