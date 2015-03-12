@@ -19,7 +19,7 @@ INC	+= $(shell find inc/ -name "*.h")
 INC	+= $(shell find inc/ -name "*.hh")
 
 
-CFLAGS		+= -Iinc -Wall -g -O3
+CFLAGS		+= -Iinc -Wall -g -O3 -std=gnu11
 CXXFLAGS	+= -Iinc -Wall -g -O3 -std=gnu++11
 LDFLAGS		+= -lxenctrl -lxenstore
 
