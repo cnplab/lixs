@@ -33,10 +33,7 @@ include make.mk
 
 all: $(APP) $(TST)
 
-$(APP): % : %.o $(LIB)
-	$(call cxxlink, $^, $@)
-
-$(TST): % : %.o $(LIB)
+$(APP) $(TST): % : %.o $(LIB)
 	$(call cxxlink, $^, $@)
 
 %.o: %.cc $(INC)
