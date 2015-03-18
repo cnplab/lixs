@@ -46,87 +46,87 @@ int lixs::mstore::store::abort(unsigned int tid)
     }
 }
 
-int lixs::mstore::store::create(unsigned int tid, std::string path, bool& created)
+int lixs::mstore::store::create(cid_t cid, unsigned int tid, std::string path, bool& created)
 {
     if (path.back() == '/') {
         path.pop_back();
     }
 
     if (tid == 0) {
-        return access.create(path, created);
+        return access.create(cid, path, created);
     } else {
         transaction_db::iterator it;
 
         it = trans.find(tid);
         if (it != trans.end()) {
-            return it->second.create(path, created);
+            return it->second.create(cid, path, created);
         } else {
             return EINVAL;
         }
     }
 }
 
-int lixs::mstore::store::read(unsigned int tid, std::string path, std::string& val)
+int lixs::mstore::store::read(cid_t cid, unsigned int tid, std::string path, std::string& val)
 {
     if (path.back() == '/') {
         path.pop_back();
     }
 
     if (tid == 0) {
-        return access.read(path, val);
+        return access.read(cid, path, val);
     } else {
         transaction_db::iterator it;
 
         it = trans.find(tid);
         if (it != trans.end()) {
-            return it->second.read(path, val);
+            return it->second.read(cid, path, val);
         } else {
             return EINVAL;
         }
     }
 }
 
-int lixs::mstore::store::update(unsigned int tid, std::string path, std::string val)
+int lixs::mstore::store::update(cid_t cid, unsigned int tid, std::string path, std::string val)
 {
     if (path.back() == '/') {
         path.pop_back();
     }
 
     if (tid == 0) {
-        return access.update(path, val);
+        return access.update(cid, path, val);
     } else {
         transaction_db::iterator it;
 
         it = trans.find(tid);
         if (it != trans.end()) {
-            return it->second.update(path, val);
+            return it->second.update(cid, path, val);
         } else {
             return EINVAL;
         }
     }
 }
 
-int lixs::mstore::store::del(unsigned int tid, std::string path)
+int lixs::mstore::store::del(cid_t cid, unsigned int tid, std::string path)
 {
     if (path.back() == '/') {
         path.pop_back();
     }
 
     if (tid == 0) {
-        return access.del(path);
+        return access.del(cid, path);
     } else {
         transaction_db::iterator it;
 
         it = trans.find(tid);
         if (it != trans.end()) {
-            return it->second.del(path);
+            return it->second.del(cid, path);
         } else {
             return EINVAL;
         }
     }
 }
 
-int lixs::mstore::store::get_children(unsigned int tid, std::string path,
+int lixs::mstore::store::get_children(cid_t cid, unsigned int tid, std::string path,
         std::set<std::string>& resp)
 {
     if (path.back() == '/') {
@@ -134,13 +134,55 @@ int lixs::mstore::store::get_children(unsigned int tid, std::string path,
     }
 
     if (tid == 0) {
-        return access.get_children(path, resp);
+        return access.get_children(cid, path, resp);
     } else {
         transaction_db::iterator it;
 
         it = trans.find(tid);
         if (it != trans.end()) {
-            return it->second.get_children(path, resp);
+            return it->second.get_children(cid, path, resp);
+        } else {
+            return EINVAL;
+        }
+    }
+}
+
+int lixs::mstore::store::get_perms(cid_t cid, unsigned int tid,
+        std::string path, permission_list& perms)
+{
+    if (path.back() == '/') {
+        path.pop_back();
+    }
+
+    if (tid == 0) {
+        return access.get_perms(cid, path, perms);
+    } else {
+        transaction_db::iterator it;
+
+        it = trans.find(tid);
+        if (it != trans.end()) {
+            return it->second.get_perms(cid, path, perms);
+        } else {
+            return EINVAL;
+        }
+    }
+}
+
+int lixs::mstore::store::set_perms(cid_t cid, unsigned int tid,
+        std::string path, const permission_list& perms)
+{
+    if (path.back() == '/') {
+        path.pop_back();
+    }
+
+    if (tid == 0) {
+        return access.set_perms(cid, path, perms);
+    } else {
+        transaction_db::iterator it;
+
+        it = trans.find(tid);
+        if (it != trans.end()) {
+            return it->second.set_perms(cid, path, perms);
         } else {
             return EINVAL;
         }

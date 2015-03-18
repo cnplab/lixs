@@ -17,12 +17,15 @@ public:
     void abort();
     void merge(bool& success);
 
-    int create(const std::string& path, bool& created);
-    int read(const std::string& path, std::string& val);
-    int update(const std::string& path, const std::string& val);
-    int del(const std::string& path);
+    int create(cid_t cid, const std::string& path, bool& created);
+    int read(cid_t cid, const std::string& path, std::string& val);
+    int update(cid_t cid, const std::string& path, const std::string& val);
+    int del(cid_t cid, const std::string& path);
 
-    int get_children(const std::string& path, std::set<std::string>& resp);
+    int get_children(cid_t cid, const std::string& path, std::set<std::string>& resp);
+
+    int get_perms(cid_t cid, const std::string& path, permission_list& perms);
+    int set_perms(cid_t cid, const std::string& path, const permission_list& perms);
 
 private:
     bool can_merge();
@@ -30,8 +33,10 @@ private:
 
     void register_with_parent(const std::string& path);
     void unregister_from_parent(const std::string& path);
-    void ensure_branch(const std::string& path);
+    void ensure_branch(cid_t cid, const std::string& path);
     void delete_branch(const std::string& path);
+    void get_parent_perms(const std::string& path, permission_list& perms);
+    bool can_write(cid_t cid, record& rec, entry& te);
 
     unsigned int id;
     std::set<std::string> records;

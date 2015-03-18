@@ -10,23 +10,25 @@ lixs::xenstore::xenstore(store& st, event_mgr& emgr, iomux& io)
 {
     bool created;
 
-    st.create(0, "/", created);
+    st.create(0, 0, "/", created);
 }
 
 lixs::xenstore::~xenstore()
 {
 }
 
-int lixs::xenstore::store_read(unsigned int tid, const std::string& path, std::string& val)
+int lixs::xenstore::store_read(cid_t cid, unsigned int tid,
+        const std::string& path, std::string& val)
 {
-    return st.read(tid, path, val);
+    return st.read(cid, tid, path, val);
 }
 
-int lixs::xenstore::store_write(unsigned int tid, const std::string& path, const std::string& val)
+int lixs::xenstore::store_write(cid_t cid, unsigned int tid,
+        const std::string& path, const std::string& val)
 {
     int ret;
 
-    ret = st.update(tid, path, val);
+    ret = st.update(cid, tid, path, val);
     if (ret == 0) {
         wmgr.fire(tid, path);
         wmgr.fire_parents(tid, path);
@@ -35,12 +37,13 @@ int lixs::xenstore::store_write(unsigned int tid, const std::string& path, const
     return ret;
 }
 
-int lixs::xenstore::store_mkdir(unsigned int tid, const std::string& path)
+int lixs::xenstore::store_mkdir(cid_t cid, unsigned int tid,
+        const std::string& path)
 {
     int ret;
     bool created;
 
-    ret = st.create(tid, path, created);
+    ret = st.create(cid, tid, path, created);
     if (ret == 0 && created) {
         wmgr.fire(tid, path);
         wmgr.fire_parents(tid, path);
@@ -49,11 +52,12 @@ int lixs::xenstore::store_mkdir(unsigned int tid, const std::string& path)
     return ret;
 }
 
-int lixs::xenstore::store_rm(unsigned int tid, const std::string& path)
+int lixs::xenstore::store_rm(cid_t cid, unsigned int tid,
+        const std::string& path)
 {
     int ret;
 
-    ret = st.del(tid, path);
+    ret = st.del(cid, tid, path);
     if (ret == 0) {
         wmgr.fire(tid, path);
         wmgr.fire_parents(tid, path);
@@ -63,19 +67,33 @@ int lixs::xenstore::store_rm(unsigned int tid, const std::string& path)
     return ret;
 }
 
-int lixs::xenstore::store_dir(unsigned int tid, const std::string& path, std::set<std::string>& res)
+int lixs::xenstore::store_dir(cid_t cid, unsigned int tid,
+        const std::string& path, std::set<std::string>& res)
 {
-    return st.get_children(tid, path, res);
+    return st.get_children(cid, tid, path, res);
 }
 
-int lixs::xenstore::transaction_start(unsigned int* tid)
+int lixs::xenstore::store_get_perms(cid_t cid, unsigned int tid,
+        const std::string& path, permission_list& resp)
+{
+    return st.get_perms(cid, tid, path, resp);
+}
+
+int lixs::xenstore::store_set_perms(cid_t cid, unsigned int tid,
+        const std::string& path, const permission_list& resp)
+{
+    /* FIXME: should we fire a watch upon setting permissions? */
+    return st.set_perms(cid, tid, path, resp);
+}
+
+int lixs::xenstore::transaction_start(cid_t cid, unsigned int* tid)
 {
     st.branch(*tid);
 
     return 0;
 }
 
-int lixs::xenstore::transaction_end(unsigned int tid, bool commit)
+int lixs::xenstore::transaction_end(cid_t cid, unsigned int tid, bool commit)
 {
     int ret;
     bool success;

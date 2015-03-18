@@ -21,8 +21,8 @@ extern "C" {
 }
 
 
-lixs::client_base::client_base(const std::string& id, xenstore& xs, event_mgr& emgr)
-    : xs(xs), state(p_rx), id(id), emgr(emgr)
+lixs::client_base::client_base(domid_t domid, const std::string& id, xenstore& xs, event_mgr& emgr)
+    : xs(xs), state(p_rx), domid(domid), id(id), emgr(emgr)
 {
 #ifdef DEBUG
     printf("%4s = new conn\n", id.c_str());
@@ -160,7 +160,7 @@ void lixs::client_base::op_read(void)
     int ret;
     std::string res;
 
-    ret = xs.store_read(msg.hdr.tx_id, get_path(), res);
+    ret = xs.store_read(domid, msg.hdr.tx_id, get_path(), res);
 
     if (ret == 0) {
         if (!build_resp(res.c_str())) {
@@ -175,7 +175,7 @@ void lixs::client_base::op_write(void)
 {
     int ret;
 
-    ret = xs.store_write(msg.hdr.tx_id, get_path(), get_arg2());
+    ret = xs.store_write(domid, msg.hdr.tx_id, get_path(), get_arg2());
 
     if (ret == 0) {
         build_ack();
@@ -188,7 +188,7 @@ void lixs::client_base::op_mkdir(void)
 {
     int ret;
 
-    ret = xs.store_mkdir(msg.hdr.tx_id, get_path());
+    ret = xs.store_mkdir(domid, msg.hdr.tx_id, get_path());
 
     if (ret == 0) {
         build_ack();
@@ -201,7 +201,7 @@ void lixs::client_base::op_rm(void)
 {
     int ret;
 
-    ret = xs.store_rm(msg.hdr.tx_id, get_path());
+    ret = xs.store_rm(domid, msg.hdr.tx_id, get_path());
 
     if (ret == 0) {
         build_ack();
@@ -214,7 +214,7 @@ void lixs::client_base::op_transaction_start(void)
 {
     unsigned int tid;
 
-    xs.transaction_start(&tid);
+    xs.transaction_start(domid, &tid);
 
     if (!build_resp(std::to_string(tid).c_str()) || !append_sep()) {
         build_err(E2BIG);
@@ -225,7 +225,7 @@ void lixs::client_base::op_transaction_end(void)
 {
     int ret;
 
-    ret = xs.transaction_end(msg.hdr.tx_id, strcmp(get_arg1(), "T") == 0);
+    ret = xs.transaction_end(domid, msg.hdr.tx_id, strcmp(get_arg1(), "T") == 0);
 
     if (ret == 0) {
         build_ack();
@@ -236,11 +236,11 @@ void lixs::client_base::op_transaction_end(void)
 
 void lixs::client_base::op_get_domain_path(void)
 {
-    domid_t domid;
+    domid_t req_domid;
     std::string path;
 
     try {
-        domid = std::stoi(get_arg1());
+        req_domid = std::stoi(get_arg1());
     } catch(std::invalid_argument e) {
         build_err(EINVAL);
         return;
@@ -249,7 +249,7 @@ void lixs::client_base::op_get_domain_path(void)
         return;
     }
 
-    xs.domain_path(domid, path);
+    xs.domain_path(req_domid, path);
 
     if (!build_resp(path.c_str())) {
         build_err(E2BIG);
@@ -258,25 +258,63 @@ void lixs::client_base::op_get_domain_path(void)
 
 void lixs::client_base::op_get_perms(void)
 {
-    /* FIXME: implement
-     *
-     * Currently this implementation doesn't support permissions.
-     * Return full permissions.
-     */
-    if (!build_resp("b0")) {
-        build_err(E2BIG);
+    int ret;
+    bool ok;
+    std::string str;
+    permission_list resp;
+    permission_list::iterator it;
+
+    ret = xs.store_get_perms(domid, msg.hdr.tx_id, get_path(), resp);
+
+    if (ret == 0) {
+        ok = build_resp("");
+        for (it = resp.begin(); it != resp.end() && ok; it++) {
+            perm2str(*it, str);
+            ok = append_resp(str.c_str()) && append_sep();
+        }
+
+        if (!ok) {
+            build_err(E2BIG);
+        }
+    } else {
+        build_err(ret);
     }
 }
 
 void lixs::client_base::op_set_perms(void)
 {
-    /* FIXME: implement
-     *
-     * Currently this implementation doesn't support permissions.
-     * Acknowledge the change.
-     */
+    int ret;
+    bool ok;
+    char* arg;
+    char* path;
+    permission perm;
+    permission_list perms;
 
-    build_ack();
+    path = get_path();
+
+    ok = true;
+    arg = path;
+    while ((arg = get_next_arg(arg))) {
+        ok = str2perm(arg, perm);
+
+        if (!ok) {
+            break;
+        }
+
+        perms.push_back(perm);
+    }
+
+    if (ok) {
+        ret = xs.store_set_perms(domid, msg.hdr.tx_id, path, perms);
+
+        if (ret == 0) {
+            build_ack();
+        } else {
+            build_err(ret);
+        }
+    } else {
+        build_err(EINVAL);
+    }
 }
 
 void lixs::client_base::op_set_target(void)
@@ -300,7 +338,7 @@ void lixs::client_base::op_directory(void)
     std::set<std::string> resp;
     std::set<std::string>::iterator it;
 
-    ret = xs.store_dir(msg.hdr.tx_id, get_path(), resp);
+    ret = xs.store_dir(domid, msg.hdr.tx_id, get_path(), resp);
 
     if (ret == 0) {
         ok = build_resp("");
@@ -397,6 +435,71 @@ void lixs::client_base::op_resume(void)
     build_err(ENOSYS);
 }
 
+void lixs::client_base::perm2str(const permission& perm, std::string& str)
+{
+    if (perm.read && perm.write) {
+        str = "b";
+    } else if (perm.read) {
+        str = "r";
+    } else if (perm.write) {
+        str = "w";
+    } else {
+        str = "n";
+    }
+
+    str += std::to_string(perm.cid);
+}
+
+bool lixs::client_base::str2perm(const std::string& str, permission& perm)
+{
+    int domid;
+
+    if (str.length() < 2) {
+        return false;
+    }
+
+    switch (str[0]) {
+        case 'b':
+            perm.read = true;
+            perm.write = true;
+            break;
+
+        case 'r':
+            perm.read = true;
+            perm.write = false;
+            break;
+
+        case 'w':
+            perm.read = false;
+            perm.write = true;
+            break;
+
+        case 'n':
+            perm.read = false;
+            perm.write = false;
+            break;
+
+        default:
+            return false;
+    }
+
+    try {
+        domid = std::stoi(str.substr(1));
+    } catch(std::invalid_argument e) {
+        return false;
+    } catch(std::out_of_range e) {
+        return false;
+    }
+
+    if (domid < 0) {
+        return false;
+    }
+
+    perm.cid = (cid_t) domid;
+
+    return true;
+}
+
 char* lixs::client_base::get_path(void)
 {
     if (msg.body[0] == '/' || msg.body[0] == '@') {
@@ -421,6 +524,13 @@ char* lixs::client_base::get_arg3(void)
     char* arg2 = get_arg2();
 
     return arg2 + strlen(arg2) + 1;
+}
+
+char* lixs::client_base::get_next_arg(char* curr)
+{
+    char* next = curr + strlen(curr) + 1;
+
+    return (next - msg.body) >= msg.hdr.len ? NULL : next;
 }
 
 bool lixs::client_base::build_resp(const char* resp)

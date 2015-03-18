@@ -14,9 +14,10 @@
 
 unsigned int lixs::sock_client::next_id = 0;
 
+/* FIXME: What is the correct domid when running in a stub domain? */
 lixs::sock_client::sock_client(std::function<void(sock_client*)> dead_cb,
         xenstore& xs, event_mgr& emgr, iomux& io, int fd)
-    : client(get_id(), xs, emgr, io, fd), emgr(emgr), dead_cb(dead_cb)
+    : client(0, get_id(), xs, emgr, io, fd), emgr(emgr), dead_cb(dead_cb)
 {
     std::string path = "/local/domain/0/";
 
