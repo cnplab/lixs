@@ -293,7 +293,7 @@ bool lixs::mstore::transaction::can_merge()
 
     for (it = records.begin(); it != records.end(); it++) {
         record& rec = db[*it];
-        unsigned int read_seq = rec.te[id].read_seq;
+        long int read_seq = rec.te[id].read_seq;
 
         if (read_seq && (rec.e.write_seq > read_seq || rec.e.delete_seq > read_seq)) {
             return false;
