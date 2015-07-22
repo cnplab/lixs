@@ -1,14 +1,18 @@
 #ifndef __LIXS_XENSTORE_HH__
 #define __LIXS_XENSTORE_HH__
 
-#include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/permissions.hh>
 #include <lixs/store.hh>
 #include <lixs/watch_mgr.hh>
 
+#include <cerrno>
 #include <string>
 #include <set>
+
+extern "C" {
+#include <xenctrl.h>
+}
 
 
 namespace lixs {
@@ -41,15 +45,13 @@ public:
 
     /* FIXME: should domain operations also receive a client id? */
     void domain_path(domid_t domid, std::string& path);
-    void domain_introduce(domid_t domid, unsigned int mfn, evtchn_port_t port);
+    void domain_introduce(domid_t domid);
     void domain_release(domid_t domid);
-    void domain_exists(domid_t domid, bool& exists);
 
 private:
     store& st;
 
     watch_mgr wmgr;
-    domain_mgr dmgr;
 };
 
 } /* namespace lixs */

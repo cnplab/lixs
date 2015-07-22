@@ -411,7 +411,7 @@ void lixs::client_base::op_introduce(void)
 
     ret = dmgr.create(domid, port, mfn);
     if (ret == 0) {
-        xs.domain_introduce(domid, port, mfn);
+        xs.domain_introduce(domid);
         build_ack();
     } else {
         build_err(ret);

@@ -6,7 +6,7 @@
 
 
 lixs::xenstore::xenstore(store& st, event_mgr& emgr, iomux& io)
-    : st(st), wmgr(emgr), dmgr(*this, emgr, io)
+    : st(st), wmgr(emgr)
 {
     bool created;
 
@@ -143,7 +143,7 @@ void lixs::xenstore::domain_path(domid_t domid, std::string& path)
     path = std::string(numstr);
 }
 
-void lixs::xenstore::domain_introduce(domid_t domid, unsigned int mfn , evtchn_port_t port)
+void lixs::xenstore::domain_introduce(domid_t domid)
 {
     wmgr.fire(0, "@introduceDomain");
 }
@@ -151,10 +151,5 @@ void lixs::xenstore::domain_introduce(domid_t domid, unsigned int mfn , evtchn_p
 void lixs::xenstore::domain_release(domid_t domid)
 {
     wmgr.fire(0, "@releaseDomain");
-}
-
-void lixs::xenstore::domain_exists(domid_t domid, bool& exists)
-{
-    dmgr.exists(domid, exists);
 }
 

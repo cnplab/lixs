@@ -3,6 +3,7 @@
 
 #include <lixs/event_mgr.hh>
 #include <lixs/iomux.hh>
+#include <lixs/xenstore.hh>
 
 #include <cerrno>
 #include <map>
@@ -15,7 +16,6 @@ extern "C" {
 namespace lixs {
 
 class domain;
-class xenstore;
 
 class domain_mgr {
 public:
