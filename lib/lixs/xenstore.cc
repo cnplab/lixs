@@ -145,16 +145,12 @@ void lixs::xenstore::domain_path(domid_t domid, std::string& path)
 
 void lixs::xenstore::domain_introduce(domid_t domid, unsigned int mfn , evtchn_port_t port)
 {
-    if (dmgr.create(domid, port, mfn) == 0) {
-        wmgr.fire(0, "@introduceDomain");
-    }
+    wmgr.fire(0, "@introduceDomain");
 }
 
 void lixs::xenstore::domain_release(domid_t domid)
 {
-    if (dmgr.destroy(domid) == 0) {
-        wmgr.fire(0, "@releaseDomain");
-    }
+    wmgr.fire(0, "@releaseDomain");
 }
 
 void lixs::xenstore::domain_exists(domid_t domid, bool& exists)

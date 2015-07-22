@@ -400,23 +400,45 @@ void lixs::client_base::op_reset_watches(void)
 
 void lixs::client_base::op_introduce(void)
 {
-    xs.domain_introduce(atoi(get_arg1()), atoi(get_arg2()), atoi(get_arg3()));
+    int ret;
+    domid_t domid;
+    unsigned int mfn;
+    evtchn_port_t port;
 
-    build_ack();
+    domid = atoi(get_arg1());
+    mfn = atoi(get_arg2());
+    port = atoi(get_arg3());
+
+    ret = dmgr.create(domid, port, mfn);
+    if (ret == 0) {
+        xs.domain_introduce(domid, port, mfn);
+        build_ack();
+    } else {
+        build_err(ret);
+    }
 }
 
 void lixs::client_base::op_release(void)
 {
-    xs.domain_release(atoi(get_arg1()));
+    int ret;
+    domid_t domid;
 
-    build_ack();
+    domid = atoi(get_arg1());
+
+    ret = dmgr.destroy(domid);
+    if (ret == 0) {
+        xs.domain_release(domid);
+        build_ack();
+    } else {
+        build_err(ret);
+    }
 }
 
 void lixs::client_base::op_is_domain_introduced(void)
 {
     bool exists;
 
-    xs.domain_exists(atoi(get_arg1()), exists);
+    dmgr.exists(atoi(get_arg1()), exists);
 
     if (!build_resp(exists ? "T" : "F") || !append_sep()) {
         build_err(E2BIG);
