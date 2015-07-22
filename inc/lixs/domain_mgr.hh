@@ -29,7 +29,7 @@ public:
 private:
     typedef std::map<domid_t, domain*> domain_map;
 
-
+private:
     xenstore& xs;
     event_mgr& emgr;
     iomux& io;
