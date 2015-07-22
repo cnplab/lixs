@@ -1,4 +1,5 @@
 #include <lixs/client.hh>
+#include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/watch.hh>
 #include <lixs/xenstore.hh>
@@ -21,8 +22,9 @@ extern "C" {
 }
 
 
-lixs::client_base::client_base(domid_t domid, const std::string& id, xenstore& xs, event_mgr& emgr)
-    : xs(xs), state(p_rx), domid(domid), id(id), emgr(emgr)
+lixs::client_base::client_base(domid_t domid, const std::string& id,
+        xenstore& xs, domain_mgr& dmgr, event_mgr& emgr)
+    : xs(xs), state(p_rx), domid(domid), id(id), dmgr(dmgr), emgr(emgr)
 {
 #ifdef DEBUG
     printf("%4s = new conn\n", id.c_str());

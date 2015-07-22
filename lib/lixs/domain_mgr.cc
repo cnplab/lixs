@@ -27,7 +27,7 @@ int lixs::domain_mgr::create(domid_t domid, evtchn_port_t port, unsigned int mfn
     it = domains.find(domid);
     if (it == domains.end()) {
         /* TODO: Consider using emplace when moving to gcc 4.8 is acceptable */
-        domains.insert(std::make_pair(domid, new domain(xs, emgr, io, domid, port, mfn)));
+        domains.insert(std::make_pair(domid, new domain(xs, *this, emgr, io, domid, port, mfn)));
 
         return 0;
     } else {

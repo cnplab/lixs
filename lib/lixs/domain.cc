@@ -1,4 +1,5 @@
 #include <lixs/domain.hh>
+#include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/xenstore.hh>
 
@@ -26,9 +27,9 @@ lixs::foreign_ring_mapper::~foreign_ring_mapper()
 }
 
 
-lixs::domain::domain(xenstore& xs, event_mgr& emgr, iomux& io,
+lixs::domain::domain(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io,
         domid_t domid, evtchn_port_t port, unsigned int mfn)
-    : client(domid, get_id(domid), xs, emgr, io, domid, port, mfn)
+    : client(domid, get_id(domid), xs, dmgr, emgr, io, domid, port, mfn),
     active(true), domid(domid)
 {
     std::string path;

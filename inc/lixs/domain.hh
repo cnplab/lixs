@@ -2,6 +2,7 @@
 #define __LIXS_DOMAIN_HH__
 
 #include <lixs/client.hh>
+#include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/ring_conn.hh>
 #include <lixs/xenstore.hh>
@@ -32,7 +33,7 @@ private:
 
 class domain : public client<ring_conn<foreign_ring_mapper> > {
 public:
-    domain(xenstore& xs, event_mgr& emgr, iomux& io,
+    domain(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io,
             domid_t domid, evtchn_port_t port, unsigned int mfn);
     ~domain();
 

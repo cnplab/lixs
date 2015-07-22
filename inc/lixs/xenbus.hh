@@ -2,6 +2,7 @@
 #define __LIXS_XENBUS_HH__
 
 #include <lixs/client.hh>
+#include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/iomux.hh>
 #include <lixs/ring_conn.hh>
@@ -32,7 +33,7 @@ private:
 
 class xenbus : public client<ring_conn<xenbus_mapper> > {
 public:
-    xenbus(xenstore& xs, event_mgr& emgr, iomux& io);
+    xenbus(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io);
     ~xenbus();
 
 private:

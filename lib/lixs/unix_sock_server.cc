@@ -1,3 +1,4 @@
+#include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/iomux.hh>
 #include <lixs/sock_client.hh>
@@ -12,9 +13,11 @@
 #include <unistd.h>
 
 
-lixs::unix_sock_server::unix_sock_server(xenstore& xs, event_mgr& emgr, iomux& io,
+lixs::unix_sock_server::unix_sock_server(xenstore& xs, domain_mgr& dmgr,
+        event_mgr& emgr, iomux& io,
         std::string rw_path, std::string ro_path)
-    : xs(xs), emgr(emgr), io(io), rw_path(rw_path), rw_cb(*this), ro_path(ro_path), ro_cb(*this)
+    : xs(xs), dmgr(dmgr), emgr(emgr), io(io),
+    rw_path(rw_path), rw_cb(*this), ro_path(ro_path), ro_cb(*this)
 {
     struct sockaddr_un sock_addr = { 0 };
     sock_addr.sun_family = AF_UNIX;
@@ -61,6 +64,6 @@ void lixs::unix_sock_server::fd_cb_k::operator()(bool read, bool write)
     std::function<void(sock_client*)> cb = std::bind(
             &unix_sock_server::client_dead, &server, std::placeholders::_1);
 
-    new sock_client(cb, server.xs, server.emgr, server.io, accept(fd, NULL, NULL));
+    new sock_client(cb, server.xs, server.dmgr, server.emgr, server.io, accept(fd, NULL, NULL));
 }
 
