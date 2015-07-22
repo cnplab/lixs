@@ -55,3 +55,13 @@ void lixs::domain_mgr::exists(domid_t domid, bool& exists)
     exists = (domains.find(domid) != domains.end());
 }
 
+lixs::domain_mgr::iterator lixs::domain_mgr::begin()
+{
+    return domains.begin();
+}
+
+lixs::domain_mgr::iterator lixs::domain_mgr::end()
+{
+    return domains.end();
+}
+
