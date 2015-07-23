@@ -1,6 +1,7 @@
 #ifndef __LIXS_VIRQ_HANDLER_HH__
 #define __LIXS_VIRQ_HANDLER_HH__
 
+#include <lixs/domain_mgr.hh>
 #include <lixs/iomux.hh>
 #include <lixs/xenstore.hh>
 
@@ -15,15 +16,17 @@ namespace lixs {
 
 class virq_handler : fd_cb_k {
 public:
-    virq_handler(xenstore& xs, iomux& io);
+    virq_handler(xenstore& xs, domain_mgr& dmgr, iomux& io);
     ~virq_handler();
 
     void operator()(bool ev_read, bool ev_write);
 
 private:
     xenstore& xs;
+    domain_mgr& dmgr;
     iomux& io;
 
+    xc_interface* xc_handle;
     xc_evtchn *xce_handle;
     evtchn_port_t virq_port;
 };
