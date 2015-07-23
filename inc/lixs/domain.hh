@@ -36,12 +36,15 @@ public:
             domid_t domid, evtchn_port_t port, unsigned int mfn);
     ~domain();
 
+    bool is_active(void);
+    void set_inactive(void);
     domid_t get_domid(void);
 
 private:
     static std::string get_id(domid_t domid);
 
 private:
+    bool active;
     domid_t domid;
 };
 

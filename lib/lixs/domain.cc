@@ -28,7 +28,8 @@ lixs::foreign_ring_mapper::~foreign_ring_mapper()
 
 lixs::domain::domain(xenstore& xs, event_mgr& emgr, iomux& io,
         domid_t domid, evtchn_port_t port, unsigned int mfn)
-    : client(domid, get_id(domid), xs, emgr, io, domid, port, mfn), domid(domid)
+    : client(domid, get_id(domid), xs, emgr, io, domid, port, mfn)
+    active(true), domid(domid)
 {
     std::string path;
     xs.domain_path(domid, path);
@@ -39,6 +40,16 @@ lixs::domain::domain(xenstore& xs, event_mgr& emgr, iomux& io,
 
 lixs::domain::~domain()
 {
+}
+
+bool lixs::domain::is_active(void)
+{
+    return active;
+}
+
+void lixs::domain::set_inactive(void)
+{
+    active = false;
 }
 
 domid_t lixs::domain::get_domid(void)
