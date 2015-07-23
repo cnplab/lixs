@@ -36,8 +36,13 @@ public:
             domid_t domid, evtchn_port_t port, unsigned int mfn);
     ~domain();
 
+    domid_t get_domid(void);
+
 private:
     static std::string get_id(domid_t domid);
+
+private:
+    domid_t domid;
 };
 
 } /* namespace lixs */
