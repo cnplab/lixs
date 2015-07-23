@@ -1,5 +1,5 @@
-#include <lixs/xenbus.hh>
 #include <lixs/event_mgr.hh>
+#include <lixs/xenbus.hh>
 #include <lixs/xenstore.hh>
 
 #include <cerrno>
