@@ -20,6 +20,7 @@ struct lixs_conf {
         : error(false),
         help(false),
         daemonize(false),
+        virq_dom_exc(false),
         log_to_file(false),
         write_pid_file(false),
 
@@ -36,6 +37,7 @@ struct lixs_conf {
         const struct option long_opts[] = {
             { "help"               , no_argument       , NULL , 'h' },
             { "daemon"             , no_argument       , NULL , 'D' },
+            { "virq-dom-exc"       , no_argument       , NULL , 'i' },
             { "pid-file"           , required_argument , NULL , 'p' },
             { "log-file"           , required_argument , NULL , 'l' },
             { NULL , 0 , NULL , 0 }
@@ -60,6 +62,10 @@ struct lixs_conf {
                     daemonize = true;
                     log_to_file = true;
                     write_pid_file = true;
+                    break;
+
+                case 'i':
+                    virq_dom_exc = true;
                     break;
 
                 case 'p':
@@ -91,6 +97,8 @@ struct lixs_conf {
         printf("\n");
         printf("Options:\n");
         printf("  -D, --daemon           Run in background\n");
+        printf("      --virq-dom-exc     Enable handling of VIRQ_DOM_EXC\n");
+        printf("                         [default: Disabled]\n");
         printf("      --pid-file <file>  Write process pid to file\n");
         printf("                         [default: /var/run/xenstored.pid]\n");
         printf("      --log-file <file>  Write log output to file\n");
@@ -103,6 +111,7 @@ struct lixs_conf {
 
     bool help;
     bool daemonize;
+    bool virq_dom_exc;
     bool log_to_file;
     bool write_pid_file;
 
@@ -171,8 +180,11 @@ int main(int argc, char** argv)
 
     lixs::unix_sock_server nix(xs, dmgr, emgr, epoll,
             conf.unix_socket_path, conf.unix_socket_ro_path);
-    lixs::virq_handler dom_exc(xs, dmgr, epoll);
     lixs::xenbus xenbus(xs, dmgr, emgr, epoll);
+
+    if (conf.virq_dom_exc) {
+        lixs::virq_handler dom_exc_handler(xs, dmgr, epoll);
+    }
 
     server_stoped = false;
     while(!server_stoped) {
