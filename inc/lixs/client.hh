@@ -1,6 +1,7 @@
 #ifndef __LIXS_CLIENT_HH__
 #define __LIXS_CLIENT_HH__
 
+#include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/watch.hh>
 #include <lixs/xenstore.hh>
@@ -62,7 +63,8 @@ protected:
     typedef std::list<std::pair<std::string, std::string> > fire_list;
 
 
-    client_base(domid_t domid, const std::string& id, xenstore& xs, event_mgr& emgr);
+    client_base(domid_t domid, const std::string& id,
+            xenstore& xs, domain_mgr& dmgr, event_mgr& emgr);
     virtual ~client_base();
 
     virtual void process(void) = 0;
@@ -132,6 +134,7 @@ private:
     domid_t domid;
     std::string id;
 
+    domain_mgr& dmgr;
     event_mgr& emgr;
 };
 
@@ -140,7 +143,8 @@ template < typename CONNECTION >
 class client : public client_base, public CONNECTION {
 public:
     template < typename... ARGS >
-    client(domid_t domid, const std::string& id, xenstore& xs, event_mgr& emgr, ARGS&&... args);
+    client(domid_t domid, const std::string& id,
+            xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, ARGS&&... args);
     virtual ~client();
 
 private:
@@ -152,8 +156,8 @@ private:
 template < typename CONNECTION >
 template < typename... ARGS >
 client<CONNECTION>::client(domid_t domid, const std::string& id,
-        xenstore& xs, event_mgr& emgr, ARGS&&... args)
-    : client_base(domid, id, xs, emgr), CONNECTION(std::forward<ARGS>(args)...)
+        xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, ARGS&&... args)
+    : client_base(domid, id, xs, dmgr, emgr), CONNECTION(std::forward<ARGS>(args)...)
 {
 }
 

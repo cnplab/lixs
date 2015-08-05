@@ -1,4 +1,5 @@
 #include <lixs/client.hh>
+#include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/watch.hh>
 #include <lixs/xenstore.hh>
@@ -21,8 +22,9 @@ extern "C" {
 }
 
 
-lixs::client_base::client_base(domid_t domid, const std::string& id, xenstore& xs, event_mgr& emgr)
-    : xs(xs), state(p_rx), domid(domid), id(id), emgr(emgr)
+lixs::client_base::client_base(domid_t domid, const std::string& id,
+        xenstore& xs, domain_mgr& dmgr, event_mgr& emgr)
+    : xs(xs), state(p_rx), domid(domid), id(id), dmgr(dmgr), emgr(emgr)
 {
 #ifdef DEBUG
     printf("%4s = new conn\n", id.c_str());
@@ -398,23 +400,45 @@ void lixs::client_base::op_reset_watches(void)
 
 void lixs::client_base::op_introduce(void)
 {
-    xs.domain_introduce(atoi(get_arg1()), atoi(get_arg2()), atoi(get_arg3()));
+    int ret;
+    domid_t domid;
+    unsigned int mfn;
+    evtchn_port_t port;
 
-    build_ack();
+    domid = atoi(get_arg1());
+    mfn = atoi(get_arg2());
+    port = atoi(get_arg3());
+
+    ret = dmgr.create(domid, port, mfn);
+    if (ret == 0) {
+        xs.domain_introduce(domid);
+        build_ack();
+    } else {
+        build_err(ret);
+    }
 }
 
 void lixs::client_base::op_release(void)
 {
-    xs.domain_release(atoi(get_arg1()));
+    int ret;
+    domid_t domid;
 
-    build_ack();
+    domid = atoi(get_arg1());
+
+    ret = dmgr.destroy(domid);
+    if (ret == 0) {
+        xs.domain_release(domid);
+        build_ack();
+    } else {
+        build_err(ret);
+    }
 }
 
 void lixs::client_base::op_is_domain_introduced(void)
 {
     bool exists;
 
-    xs.domain_exists(atoi(get_arg1()), exists);
+    dmgr.exists(atoi(get_arg1()), exists);
 
     if (!build_resp(exists ? "T" : "F") || !append_sep()) {
         build_err(E2BIG);

@@ -167,9 +167,12 @@ int main(int argc, char** argv)
     lixs::mstore::store store;
     lixs::xenstore xs(store, emgr, epoll);
 
-    lixs::unix_sock_server nix(xs, emgr, epoll, conf.unix_socket_path, conf.unix_socket_ro_path);
+    lixs::domain_mgr dmgr(xs, emgr, epoll);
+
+    lixs::unix_sock_server nix(xs, dmgr, emgr, epoll,
+            conf.unix_socket_path, conf.unix_socket_ro_path);
     lixs::virq_handler dom_exc(xs, epoll);
-    lixs::xenbus xenbus(xs, emgr, epoll);
+    lixs::xenbus xenbus(xs, dmgr, emgr, epoll);
 
     server_stoped = false;
     while(!server_stoped) {
