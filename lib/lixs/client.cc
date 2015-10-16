@@ -554,7 +554,7 @@ char* lixs::client_base::get_next_arg(char* curr)
 {
     char* next = curr + strlen(curr) + 1;
 
-    return (next - msg.body) >= msg.hdr.len ? NULL : next;
+    return ((uint32_t) (next - msg.body)) >= msg.hdr.len ? NULL : next;
 }
 
 bool lixs::client_base::build_resp(const char* resp)
