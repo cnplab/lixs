@@ -163,7 +163,11 @@ int main(int argc, char** argv)
     }
 
     if (conf.daemonize) {
-        daemon(1, 1);
+        int err = daemon(1, 1);
+        if (err) {
+            printf("Cannot daemonize.");
+            return err;
+        }
     }
 
     printf("========== LightWeIght XenStore ==========\n");
