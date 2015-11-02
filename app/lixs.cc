@@ -129,7 +129,7 @@ static bool server_stoped;
 static void signal_handler(int sig)
 {
     if (sig == SIGINT) {
-        printf("lixs: got SIGINT\n");
+        printf("[LiXS]: Got SIGINT, stopping...\n");
         server_stoped = true;
     }
 }
@@ -203,7 +203,7 @@ int main(int argc, char** argv)
         }
     }
 
-    printf("========== LightWeIght XenStore ==========\n");
+    printf("[LiXS]: Starting server...\n");
 
     signal(SIGINT, signal_handler);
     signal(SIGPIPE, SIG_IGN);
@@ -227,6 +227,8 @@ int main(int argc, char** argv)
     while(!server_stoped) {
         emgr.run();
     }
+
+    printf("[LiXS]: Server stoped!\n");
 
     return 0;
 }
