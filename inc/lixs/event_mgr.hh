@@ -16,12 +16,17 @@ public:
 
     void run(void);
 
+    void enable(void);
+    void disable(void);
+
     void enqueue_event(std::function<void(void)> cb);
 
 private:
     void fire_events(void);
 
 private:
+    bool active;
+
     iomux& io;
     std::list<std::function<void(void)> > event_list;
 };

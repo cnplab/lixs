@@ -124,13 +124,14 @@ private:
     std::string cmd;
 };
 
-static bool server_stoped;
+
+static lixs::event_mgr* emgr_ptr;
 
 static void signal_handler(int sig)
 {
     if (sig == SIGINT) {
         printf("[LiXS]: Got SIGINT, stopping...\n");
-        server_stoped = true;
+        emgr_ptr->disable();
     }
 }
 
@@ -205,7 +206,6 @@ int main(int argc, char** argv)
 
     printf("[LiXS]: Starting server...\n");
 
-    signal(SIGINT, signal_handler);
     signal(SIGPIPE, SIG_IGN);
 
     lixs::os_linux::epoll epoll;
@@ -223,10 +223,14 @@ int main(int argc, char** argv)
         lixs::virq_handler dom_exc_handler(xs, dmgr, epoll);
     }
 
-    server_stoped = false;
-    while(!server_stoped) {
-        emgr.run();
-    }
+
+    emgr.enable();
+    emgr_ptr = &emgr;
+    signal(SIGINT, signal_handler);
+
+    printf("[LiXS]: Entering main loop...\n");
+
+    emgr.run();
 
     printf("[LiXS]: Server stoped!\n");
 

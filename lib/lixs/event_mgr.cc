@@ -6,7 +6,7 @@
 
 
 lixs::event_mgr::event_mgr(iomux& io)
-    : io(io)
+    : active(false), io(io)
 {
 }
 
@@ -16,8 +16,20 @@ lixs::event_mgr::~event_mgr()
 
 void lixs::event_mgr::run(void)
 {
-    fire_events();
-    io.handle();
+    while (active) {
+        fire_events();
+        io.handle();
+    }
+}
+
+void lixs::event_mgr::enable(void)
+{
+    active = true;
+}
+
+void lixs::event_mgr::disable(void)
+{
+    active = false;
 }
 
 void lixs::event_mgr::enqueue_event(std::function<void(void)> cb)
