@@ -134,6 +134,43 @@ static void signal_handler(int sig)
     }
 }
 
+static bool setup_logging(lixs_conf& conf)
+{
+    /* Reopen stdout first so that worst case we can still log to stderr */
+    if (freopen(conf.log_file.c_str(), "w", stdout) == NULL) {
+        goto out_err;
+    }
+    setvbuf(stdout, NULL, _IOLBF, 0);
+
+    if (freopen(conf.log_file.c_str(), "w", stderr) == NULL) {
+        goto out_err;
+    }
+    setvbuf(stderr, NULL, _IOLBF, 0);
+
+    return false;
+
+out_err:
+    fprintf(stderr, "[LiXS]: Failed to redirect output to file: %d\n", errno);
+    return true;
+}
+
+static int daemonize(lixs_conf& conf)
+{
+    /* If log to file is enabled we cannot let daemon() handle file descriptors
+     * (it would close the log files) but we still need to close stdin
+     */
+    if (conf.log_to_file) {
+        fclose(stdin);
+    }
+
+    if (daemon(1, conf.log_to_file ? 1 : 0)) {
+        fprintf(stderr, "[LiXS]: Failed to daemonize: %d\n", errno);
+        return true;
+    }
+
+    return false;
+}
+
 int main(int argc, char** argv)
 {
     lixs_conf conf(argc, argv);
@@ -148,25 +185,21 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    if (conf.log_to_file) {
-        fclose(stdin);
-        freopen(conf.log_file.c_str(), "w", stderr);
-        freopen(conf.log_file.c_str(), "w", stdout);
-        setvbuf(stdout, NULL, _IOLBF, 0);
-        setvbuf(stderr, NULL, _IOLBF, 0);
-    }
-
     if (conf.write_pid_file) {
         FILE* pidf = fopen(conf.pid_file.c_str(), "w");
         fprintf(pidf, "%d", getpid());
         fclose(pidf);
     }
 
+    if (conf.log_to_file) {
+        if (setup_logging(conf)) {
+            return -1;
+        }
+    }
+
     if (conf.daemonize) {
-        int err = daemon(1, 1);
-        if (err) {
-            printf("Cannot daemonize.");
-            return err;
+        if (daemonize(conf)) {
+            return -1;
         }
     }
 
