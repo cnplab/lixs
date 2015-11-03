@@ -20,6 +20,7 @@ struct lixs_conf {
         : error(false),
         help(false),
         daemonize(false),
+        xenbus(false),
         virq_dom_exc(false),
         log_to_file(false),
         write_pid_file(false),
@@ -37,6 +38,7 @@ struct lixs_conf {
         const struct option long_opts[] = {
             { "help"               , no_argument       , NULL , 'h' },
             { "daemon"             , no_argument       , NULL , 'D' },
+            { "xenbus"             , no_argument       , NULL , 'x' },
             { "virq-dom-exc"       , no_argument       , NULL , 'i' },
             { "pid-file"           , required_argument , NULL , 'p' },
             { "log-file"           , required_argument , NULL , 'l' },
@@ -62,6 +64,10 @@ struct lixs_conf {
                     daemonize = true;
                     log_to_file = true;
                     write_pid_file = true;
+                    break;
+
+                case 'x':
+                    xenbus = true;
                     break;
 
                 case 'i':
@@ -97,6 +103,8 @@ struct lixs_conf {
         printf("\n");
         printf("Options:\n");
         printf("  -D, --daemon           Run in background\n");
+        printf("      --xenbus           Enable attaching to xenbus\n");
+        printf("                         [default: Disabled]\n");
         printf("      --virq-dom-exc     Enable handling of VIRQ_DOM_EXC\n");
         printf("                         [default: Disabled]\n");
         printf("      --pid-file <file>  Write process pid to file\n");
@@ -111,6 +119,7 @@ struct lixs_conf {
 
     bool help;
     bool daemonize;
+    bool xenbus;
     bool virq_dom_exc;
     bool log_to_file;
     bool write_pid_file;
@@ -217,9 +226,13 @@ int main(int argc, char** argv)
 
     lixs::unix_sock_server nix(xs, dmgr, emgr, epoll,
             conf.unix_socket_path, conf.unix_socket_ro_path);
-    lixs::xenbus xenbus(xs, dmgr, emgr, epoll);
 
+    lixs::xenbus* xenbus = NULL;
     lixs::virq_handler* dom_exc = NULL;
+
+    if (conf.xenbus) {
+        xenbus = new lixs::xenbus(xs, dmgr, emgr, epoll);
+    }
 
     if (conf.virq_dom_exc) {
         dom_exc = new lixs::virq_handler(xs, dmgr, epoll);
@@ -233,6 +246,10 @@ int main(int argc, char** argv)
     printf("[LiXS]: Entering main loop...\n");
 
     emgr.run();
+
+    if (xenbus) {
+        delete xenbus;
+    }
 
     if (dom_exc) {
         delete dom_exc;
