@@ -27,8 +27,8 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
     const struct option long_opts[] = {
         { "help"               , no_argument       , NULL , 'h' },
         { "daemon"             , no_argument       , NULL , 'D' },
-        { "pid-file"           , required_argument , NULL , 'p' },
-        { "log-file"           , required_argument , NULL , 'l' },
+        { "pid-file"           , optional_argument , NULL , 'p' },
+        { "log-file"           , optional_argument , NULL , 'l' },
         { "xenbus"             , no_argument       , NULL , 'x' },
         { "virq-dom-exc"       , no_argument       , NULL , 'i' },
         { "unix-sockets"       , no_argument       , NULL , 'u' },
@@ -60,12 +60,16 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
 
             case 'p':
                 write_pid_file = true;
-                pid_file = std::string(optarg);
+                if (optarg) {
+                    pid_file = std::string(optarg);
+                }
                 break;
 
             case 'l':
                 log_to_file = true;
-                log_file = std::string(optarg);
+                if (optarg) {
+                    log_file = std::string(optarg);
+                }
                 break;
 
             case 'x':
@@ -109,9 +113,9 @@ void app::lixs_conf::print_usage() {
     printf("\n");
     printf("General configuration:\n");
     printf("  -D, --daemon           Run in application in background.\n");
-    printf("      --pid-file <file>  Write pid to file. Daemonizing automatically enables this\n"
+    printf("      --pid-file=[file]  Write pid to file. Daemonizing automatically enables this\n"
            "                         option. Default value: '/var/run/xenstored.pid'.\n");
-    printf("      --log-file <file>  Redirect output to file. Daemonizing automatically enables\n"
+    printf("      --log-file=[file]  Redirect output to file. Daemonizing automatically enables\n"
            "                         this options. Default value: '/var/log/xen/lixs.log'.\n");
     printf("\n");
     printf("Communication mechanisms:\n");
