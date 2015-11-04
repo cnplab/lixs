@@ -88,16 +88,17 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
 void app::lixs_conf::print_usage() {
     printf("Usage: %s [OPTION]...\n", cmd.c_str());
     printf("\n");
-    printf("Options:\n");
-    printf("  -D, --daemon           Run in background\n");
-    printf("      --xenbus           Enable attaching to xenbus\n");
-    printf("                         [default: Disabled]\n");
-    printf("      --virq-dom-exc     Enable handling of VIRQ_DOM_EXC\n");
-    printf("                         [default: Disabled]\n");
-    printf("      --pid-file <file>  Write process pid to file\n");
-    printf("                         [default: /var/run/xenstored.pid]\n");
-    printf("      --log-file <file>  Write log output to file\n");
-    printf("                         [default: /var/log/xen/lixs.log]\n");
-    printf("  -h, --help             Display this help and exit\n");
+    printf("  -h, --help             Display this help and exit.\n");
+    printf("\n");
+    printf("General configuration:\n");
+    printf("  -D, --daemon           Run in application in background.\n");
+    printf("      --pid-file <file>  Write pid to file. Daemonizing automatically enables this\n"
+           "                         option. Default value: '/var/run/xenstored.pid'.\n");
+    printf("      --log-file <file>  Redirect output to file. Daemonizing automatically enables\n"
+           "                         this options. Default value: '/var/log/xen/lixs.log'.\n");
+    printf("\n");
+    printf("Communication mechanisms:\n");
+    printf("      --xenbus           Enable communication with Linux's xenbus driver.\n");
+    printf("      --virq-dom-exc     Enable handling of VIRQ_DOM_EXC.\n");
 }
 
