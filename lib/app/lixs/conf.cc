@@ -5,17 +5,21 @@
 
 
 app::lixs_conf::lixs_conf(int argc, char** argv)
-    : error(false),
-    help(false),
+    : help(false),
+
     daemonize(false),
-    xenbus(false),
-    virq_dom_exc(false),
-    log_to_file(false),
     write_pid_file(false),
     pid_file("/var/run/xenstored.pid"),
+    log_to_file(false),
     log_file("/var/log/xen/lixs.log"),
+
+    xenbus(false),
+    virq_dom_exc(false),
     unix_socket_path("/run/xenstored/socket"),
     unix_socket_ro_path("/run/xenstored/socket_ro"),
+
+    error(false),
+
     cmd(argv[0])
 {
     /* FIXME: allow to specify socket paths */
@@ -25,10 +29,10 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
     const struct option long_opts[] = {
         { "help"               , no_argument       , NULL , 'h' },
         { "daemon"             , no_argument       , NULL , 'D' },
-        { "xenbus"             , no_argument       , NULL , 'x' },
-        { "virq-dom-exc"       , no_argument       , NULL , 'i' },
         { "pid-file"           , required_argument , NULL , 'p' },
         { "log-file"           , required_argument , NULL , 'l' },
+        { "xenbus"             , no_argument       , NULL , 'x' },
+        { "virq-dom-exc"       , no_argument       , NULL , 'i' },
         { NULL , 0 , NULL , 0 }
     };
 
@@ -53,14 +57,6 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
                 write_pid_file = true;
                 break;
 
-            case 'x':
-                xenbus = true;
-                break;
-
-            case 'i':
-                virq_dom_exc = true;
-                break;
-
             case 'p':
                 write_pid_file = true;
                 pid_file = std::string(optarg);
@@ -69,6 +65,14 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
             case 'l':
                 log_to_file = true;
                 log_file = std::string(optarg);
+                break;
+
+            case 'x':
+                xenbus = true;
+                break;
+
+            case 'i':
+                virq_dom_exc = true;
                 break;
 
             default:

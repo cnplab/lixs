@@ -14,17 +14,20 @@ public:
     void print_usage();
 
 public:
-    bool error;
     bool help;
+
     bool daemonize;
-    bool xenbus;
-    bool virq_dom_exc;
-    bool log_to_file;
     bool write_pid_file;
     std::string pid_file;
+    bool log_to_file;
     std::string log_file;
+
+    bool xenbus;
+    bool virq_dom_exc;
     std::string unix_socket_path;
     std::string unix_socket_ro_path;
+
+    bool error;
 
 private:
     std::string cmd;
