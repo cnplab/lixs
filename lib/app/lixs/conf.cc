@@ -25,7 +25,7 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
     /* FIXME: allow to specify socket paths */
     /* TODO: Improve configurability */
 
-    const char *short_opts = "hD";
+    const char *short_opts = "hDxi";
     const struct option long_opts[] = {
         { "help"               , no_argument       , NULL , 'h' },
         { "daemon"             , no_argument       , NULL , 'D' },
@@ -102,7 +102,7 @@ void app::lixs_conf::print_usage() {
            "                         this options. Default value: '/var/log/xen/lixs.log'.\n");
     printf("\n");
     printf("Communication mechanisms:\n");
-    printf("      --xenbus           Enable communication with Linux's xenbus driver.\n");
-    printf("      --virq-dom-exc     Enable handling of VIRQ_DOM_EXC.\n");
+    printf("  -x, --xenbus           Enable communication with Linux's xenbus driver.\n");
+    printf("  -i, --virq-dom-exc     Enable handling of VIRQ_DOM_EXC.\n");
 }
 
