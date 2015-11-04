@@ -24,6 +24,7 @@ public:
 
     bool xenbus;
     bool virq_dom_exc;
+    bool unix_sockets;
     std::string unix_socket_path;
     std::string unix_socket_ro_path;
 

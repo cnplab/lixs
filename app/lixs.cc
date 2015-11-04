@@ -104,11 +104,14 @@ int main(int argc, char** argv)
 
     lixs::domain_mgr dmgr(xs, emgr, epoll);
 
-    lixs::unix_sock_server nix(xs, dmgr, emgr, epoll,
-            conf.unix_socket_path, conf.unix_socket_ro_path);
-
+    lixs::unix_sock_server* nix = NULL;
     lixs::xenbus* xenbus = NULL;
     lixs::virq_handler* dom_exc = NULL;
+
+    if (conf.unix_sockets) {
+        nix = new lixs::unix_sock_server(xs, dmgr, emgr, epoll,
+                conf.unix_socket_path, conf.unix_socket_ro_path);
+    }
 
     if (conf.xenbus) {
         xenbus = new lixs::xenbus(xs, dmgr, emgr, epoll);
@@ -126,6 +129,10 @@ int main(int argc, char** argv)
     printf("[LiXS]: Entering main loop...\n");
 
     emgr.run();
+
+    if (nix) {
+        delete nix;
+    }
 
     if (xenbus) {
         delete xenbus;

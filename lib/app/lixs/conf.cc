@@ -15,6 +15,7 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
 
     xenbus(false),
     virq_dom_exc(false),
+    unix_sockets(false),
     unix_socket_path("/run/xenstored/socket"),
     unix_socket_ro_path("/run/xenstored/socket_ro"),
 
@@ -22,10 +23,7 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
 
     cmd(argv[0])
 {
-    /* FIXME: allow to specify socket paths */
-    /* TODO: Improve configurability */
-
-    const char *short_opts = "hDxi";
+    const char *short_opts = "hDxiu";
     const struct option long_opts[] = {
         { "help"               , no_argument       , NULL , 'h' },
         { "daemon"             , no_argument       , NULL , 'D' },
@@ -33,6 +31,9 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
         { "log-file"           , required_argument , NULL , 'l' },
         { "xenbus"             , no_argument       , NULL , 'x' },
         { "virq-dom-exc"       , no_argument       , NULL , 'i' },
+        { "unix-sockets"       , no_argument       , NULL , 'u' },
+        { "socket-path"        , required_argument , NULL , 's' },
+        { "socket_ro-path"     , required_argument , NULL , 'r' },
         { NULL , 0 , NULL , 0 }
     };
 
@@ -75,6 +76,18 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
                 virq_dom_exc = true;
                 break;
 
+            case 'u':
+                unix_sockets = true;
+                break;
+
+            case 's':
+                unix_socket_path = std::string(optarg);
+                break;
+
+            case 'r':
+                unix_socket_ro_path = std::string(optarg);
+                break;
+
             default:
                 error = true;
                 break;
@@ -104,5 +117,10 @@ void app::lixs_conf::print_usage() {
     printf("Communication mechanisms:\n");
     printf("  -x, --xenbus           Enable communication with Linux's xenbus driver.\n");
     printf("  -i, --virq-dom-exc     Enable handling of VIRQ_DOM_EXC.\n");
+    printf("  -u, --unix-sockets     Enable connections through unix sockets.\n");
+    printf("      --socket-path <file>\n"
+           "                         Read/write socket path. Default: /run/xenstored/socket.\n");
+    printf("      --socket_ro-path <file>\n"
+           "                         Read-only socket path. Default: /run/xenstored/socket_ro.\n");
 }
 
