@@ -1,4 +1,4 @@
-# lixs: LightweIght XenStore
+# LiXS: Lightweight XenStore
 
 verbose	?= n
 debug	?= n
