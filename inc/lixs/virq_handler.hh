@@ -17,7 +17,7 @@ namespace lixs {
 class virq_handler : fd_cb_k {
 public:
     virq_handler(xenstore& xs, domain_mgr& dmgr, iomux& io);
-    ~virq_handler();
+    virtual ~virq_handler();
 
     void operator()(bool ev_read, bool ev_write);
 
