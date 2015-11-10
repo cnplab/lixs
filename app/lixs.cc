@@ -219,8 +219,10 @@ int main(int argc, char** argv)
             conf.unix_socket_path, conf.unix_socket_ro_path);
     lixs::xenbus xenbus(xs, dmgr, emgr, epoll);
 
+    lixs::virq_handler* dom_exc = NULL;
+
     if (conf.virq_dom_exc) {
-        lixs::virq_handler dom_exc_handler(xs, dmgr, epoll);
+        dom_exc = new lixs::virq_handler(xs, dmgr, epoll);
     }
 
 
@@ -231,6 +233,10 @@ int main(int argc, char** argv)
     printf("[LiXS]: Entering main loop...\n");
 
     emgr.run();
+
+    if (dom_exc) {
+        delete dom_exc;
+    }
 
     printf("[LiXS]: Server stoped!\n");
 
