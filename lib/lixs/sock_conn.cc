@@ -10,7 +10,7 @@
 
 
 lixs::sock_conn::sock_conn(iomux& io, int fd)
-    : alive(true), io(io)
+    : io(io), alive(true)
 {
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 

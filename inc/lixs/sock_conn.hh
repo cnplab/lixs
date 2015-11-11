@@ -11,6 +11,7 @@ protected:
     sock_conn(iomux& io, int fd);
     virtual ~sock_conn();
 
+protected:
     bool read(char*& buff, int& bytes);
     bool write(char*& buff, int& bytes);
 
@@ -21,8 +22,9 @@ private:
     void operator()(bool read, bool write);
 
 private:
-    bool alive;
     iomux& io;
+
+    bool alive;
 };
 
 } /* namespace lixs */
