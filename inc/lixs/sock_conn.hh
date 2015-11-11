@@ -15,7 +15,8 @@ protected:
     bool read(char*& buff, int& bytes);
     bool write(char*& buff, int& bytes);
 
-    virtual void process(void) = 0;
+    virtual void process_rx(void) = 0;
+    virtual void process_tx(void) = 0;
     virtual void conn_dead(void) = 0;
 
 private:

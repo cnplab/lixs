@@ -93,7 +93,13 @@ void lixs::ring_conn_base::operator()(bool read, bool write)
     evtchn_port_t port = xc_evtchn_pending(xce_handle);
     xc_evtchn_unmask(xce_handle, port);
 
-    process();
+    if (read) {
+        process_rx();
+    }
+
+    if (write) {
+        process_tx();
+    }
 }
 
 bool lixs::ring_conn_base::read_chunck(char*& buff, int& bytes)

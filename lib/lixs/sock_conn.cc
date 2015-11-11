@@ -144,6 +144,12 @@ bool lixs::sock_conn::write(char*& buff, int& bytes)
 
 void lixs::sock_conn::operator()(bool read, bool write)
 {
-    process();
+    if (read) {
+        process_rx();
+    }
+
+    if (write) {
+        process_tx();
+    }
 }
 

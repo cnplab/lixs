@@ -68,6 +68,8 @@ protected:
     virtual ~client_base();
 
     virtual void process(void) = 0;
+    virtual void process_rx(void) = 0;
+    virtual void process_tx(void) = 0;
     virtual void watch_fired(const std::string& path, const std::string& token) = 0;
 
     void handle_msg(void);
@@ -149,6 +151,8 @@ public:
 
 private:
     void process(void);
+    void process_rx(void);
+    void process_tx(void);
     void watch_fired(const std::string& path, const std::string& token);
 };
 
@@ -249,6 +253,16 @@ void client<CONNECTION>::process(void)
                 break;
         }
     }
+}
+
+template < typename CONNECTION >
+void client<CONNECTION>::process_rx(void)
+{
+}
+
+template < typename CONNECTION >
+void client<CONNECTION>::process_tx(void)
+{
 }
 
 template < typename CONNECTION >
