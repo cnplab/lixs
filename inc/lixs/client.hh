@@ -1,295 +1,46 @@
 #ifndef __LIXS_CLIENT_HH__
 #define __LIXS_CLIENT_HH__
 
-#include <lixs/domain_mgr.hh>
-#include <lixs/event_mgr.hh>
-#include <lixs/watch.hh>
-#include <lixs/xenstore.hh>
-
-#include <cerrno>
-#include <list>
-#include <map>
+#include <cstdio>
 #include <string>
 #include <utility>
-
-extern "C" {
-#include <xen/xen.h>
-#include <xen/io/xs_wire.h>
-}
 
 
 namespace lixs {
 
-class client_base {
-protected:
-    struct msg {
-        msg(void)
-            : abs_path(buff), body(buff)
-        { }
-
-        struct xsd_sockmsg hdr;
-
-        char* abs_path;
-        char* body;
-
-        /*
-         * buff: [/local/domain/<id>][BODY][/0]
-         */
-        char buff[35 + XENSTORE_PAYLOAD_MAX + 1];
-    };
-
-    struct watch_cb_k : public lixs::watch_cb_k {
-        watch_cb_k(client_base& client,
-                const std::string& path, const std::string& token, bool relative)
-            : lixs::watch_cb_k(path, token, relative), client(client)
-        { }
-
-        void operator()(const std::string& path);
-
-        client_base& client;
-    };
-
-    enum state {
-        p_rx,
-        rx_hdr,
-        rx_body,
-        p_tx,
-        tx_hdr,
-        tx_body,
-        p_watch,
-    };
-
-    typedef std::map<std::string, watch_cb_k> watch_map;
-    typedef std::list<std::pair<std::string, std::string> > fire_list;
-
-
-    client_base(domid_t domid, const std::string& id,
-            xenstore& xs, domain_mgr& dmgr, event_mgr& emgr);
-    virtual ~client_base();
-
-    virtual void process(void) = 0;
-    virtual void process_rx(void) = 0;
-    virtual void process_tx(void) = 0;
-    virtual void watch_fired(const std::string& path, const std::string& token) = 0;
-
-    void handle_msg(void);
-    void prepare_watch(const std::pair<std::string, std::string>& watch);
-
-
-    xenstore& xs;
-
-    enum state state;
-
-    watch_map watches;
-    fire_list to_fire;
-
-    struct msg msg;
-
-    char* read_buff;
-    char* write_buff;
-    int read_bytes;
-    int write_bytes;
-
-private:
-    void op_read(void);
-    void op_write(void);
-    void op_mkdir(void);
-    void op_rm(void);
-    void op_transaction_start(void);
-    void op_transaction_end(void);
-    void op_get_domain_path(void);
-    void op_get_perms(void);
-    void op_set_perms(void);
-    void op_set_target(void);
-    void op_restrict(void);
-    void op_directory(void);
-    void op_watch(void);
-    void op_unwatch(void);
-    void op_reset_watches(void);
-    void op_introduce(void);
-    void op_release(void);
-    void op_is_domain_introduced(void);
-    void op_debug(void);
-    void op_resume(void);
-
-    void perm2str(const permission& perm, std::string& str);
-    bool str2perm(const std::string& str, permission& perm);
-
-    char* get_path(void);
-    char* get_arg1(void);
-    char* get_arg2(void);
-    char* get_arg3(void);
-    char* get_next_arg(char* curr);
-
-    bool build_resp(const char* resp);
-    bool append_resp(const char* resp);
-    bool append_sep(void);
-    bool build_watch(const char* path, const char* token);
-    void build_err(int err);
-    void build_ack(void);
-
-#ifdef DEBUG
-    void print_msg(char* pre);
-#endif
-
-
-    domid_t domid;
-    std::string id;
-
-    domain_mgr& dmgr;
-    event_mgr& emgr;
-};
-
-
-template < typename CONNECTION >
-class client : public client_base, public CONNECTION {
+template < typename PROTOCOL >
+class client : public PROTOCOL {
 public:
     template < typename... ARGS >
-    client(domid_t domid, const std::string& id,
-            xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, ARGS&&... args);
+    client(const std::string& cid, ARGS&&... args);
     virtual ~client();
 
 private:
-    void process(void);
-    void process_rx(void);
-    void process_tx(void);
-    void watch_fired(const std::string& path, const std::string& token);
+    std::string cid(void);
+
+private:
+    std::string client_id;
 };
 
 
-template < typename CONNECTION >
+template < typename PROTOCOL >
 template < typename... ARGS >
-client<CONNECTION>::client(domid_t domid, const std::string& id,
-        xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, ARGS&&... args)
-    : client_base(domid, id, xs, dmgr, emgr), CONNECTION(std::forward<ARGS>(args)...)
+client<PROTOCOL>::client(const std::string& cid, ARGS&&... args)
+    : PROTOCOL(std::forward<ARGS>(args)...), client_id(cid)
 {
+    printf("LiXS: [%4s] New client registered\n", client_id.c_str());
 }
 
 template < typename CONNECTION >
 client<CONNECTION>::~client()
 {
-    watch_map::iterator it;
-
-    for (it = watches.begin(); it != watches.end(); it++) {
-        xs.watch_del(it->second);
-    }
+    printf("LiXS: [%4s] Client connection closed\n", client_id.c_str());
 }
 
 template < typename CONNECTION >
-void client<CONNECTION>::process(void)
+std::string client<CONNECTION>::cid(void)
 {
-    bool ret;
-    bool yield = false;
-
-    while (!yield) {
-        switch(state) {
-            case p_rx:
-                read_buff = reinterpret_cast<char*>(&(msg.hdr));
-                read_bytes = sizeof(msg.hdr);
-
-                state = rx_hdr;
-                break;
-
-            case rx_hdr:
-                ret = CONNECTION::read(read_buff, read_bytes);
-                if (ret == false) {
-                    yield = true;
-                    break;
-                }
-
-                read_buff = msg.body;
-                read_bytes = msg.hdr.len;
-
-                state = rx_body;
-                break;
-
-            case rx_body:
-                ret = CONNECTION::read(read_buff, read_bytes);
-                if (ret == false) {
-                    yield = true;
-                    break;
-                }
-
-                handle_msg();
-
-                state = p_tx;
-                break;
-
-            case p_tx:
-                write_buff = reinterpret_cast<char*>((&msg.hdr));
-                write_bytes = sizeof(msg.hdr);
-
-                state = tx_hdr;
-                break;
-
-            case tx_hdr:
-                ret = CONNECTION::write(write_buff, write_bytes);
-                if (ret == false) {
-                    yield = true;
-                    break;
-                }
-
-                write_buff = msg.body;
-                write_bytes = msg.hdr.len;
-
-                state = tx_body;
-                break;
-
-            case tx_body:
-                ret = CONNECTION::write(write_buff, write_bytes);
-                if (ret == false) {
-                    yield = true;
-                    break;
-                }
-
-                state = to_fire.empty() ? p_rx : p_watch;
-                break;
-
-            case p_watch:
-                prepare_watch(to_fire.front());
-                to_fire.pop_front();
-
-                state = p_tx;
-                break;
-        }
-    }
-}
-
-template < typename CONNECTION >
-void client<CONNECTION>::process_rx(void)
-{
-}
-
-template < typename CONNECTION >
-void client<CONNECTION>::process_tx(void)
-{
-}
-
-template < typename CONNECTION >
-void client<CONNECTION>::watch_fired(const std::string& path, const std::string& token)
-{
-    std::pair<std::string, std::string> watch(path, token);
-
-    if (state == rx_hdr) {
-        prepare_watch(watch);
-
-        write_buff = reinterpret_cast<char*>(&msg.hdr);
-        write_bytes = sizeof(msg.hdr);
-
-        if (!CONNECTION::write(write_buff, write_bytes)) {
-            state = tx_hdr;
-            return;
-        }
-
-        write_buff = msg.body;
-        write_bytes = msg.hdr.len;
-
-        if (!CONNECTION::write(write_buff, write_bytes)) {
-            state = tx_body;
-        }
-    } else {
-        to_fire.push_back(watch);
-    }
+    return client_id;
 }
 
 } /* namespace lixs */

@@ -6,6 +6,7 @@
 #include <lixs/event_mgr.hh>
 #include <lixs/ring_conn.hh>
 #include <lixs/xenstore.hh>
+#include <lixs/xs_proto_v1/xs_proto.hh>
 
 #include <cerrno>
 #include <sys/mman.h>
@@ -31,7 +32,7 @@ private:
 };
 
 
-class domain : public client<ring_conn<foreign_ring_mapper> > {
+class domain : public client<xs_proto_v1::xs_proto<ring_conn<foreign_ring_mapper> > > {
 public:
     domain(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io,
             domid_t domid, evtchn_port_t port, unsigned int mfn);
