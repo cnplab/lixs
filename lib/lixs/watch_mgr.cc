@@ -86,7 +86,7 @@ void lixs::watch_mgr::callback(const std::string& key, watch_cb_k* cb, const std
     if (it != db.end()) {
         record& rec = it->second;
 
-        if (rec.path.find(cb) != rec.path.end()) {
+        if (rec.path.find(cb) != rec.path.end() || rec.children.find(cb) != rec.children.end()) {
             cb->operator()(path);
         }
     }
