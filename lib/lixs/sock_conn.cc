@@ -142,8 +142,30 @@ bool lixs::sock_conn::write(char*& buff, int& bytes)
     return done;
 }
 
+void lixs::sock_conn::need_rx(void)
+{
+    if (!ev_read) {
+        ev_read = true;
+        io.set(*this);
+    }
+}
+
+void lixs::sock_conn::need_tx(void)
+{
+    if (!ev_write) {
+        ev_write = true;
+        io.set(*this);
+    }
+}
+
 void lixs::sock_conn::operator()(bool read, bool write)
 {
-    process();
+    if (read) {
+        process_rx();
+    }
+
+    if (write) {
+        process_tx();
+    }
 }
 

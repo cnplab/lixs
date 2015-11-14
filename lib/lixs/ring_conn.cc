@@ -88,12 +88,34 @@ bool lixs::ring_conn_base::write(char*& buff, int& bytes)
     return bytes == 0;
 }
 
+void lixs::ring_conn_base::need_rx(void)
+{
+    if (!ev_read) {
+        ev_read = true;
+        io.set(*this);
+    }
+}
+
+void lixs::ring_conn_base::need_tx(void)
+{
+    if (!ev_write) {
+        ev_write = true;
+        io.set(*this);
+    }
+}
+
 void lixs::ring_conn_base::operator()(bool read, bool write)
 {
     evtchn_port_t port = xc_evtchn_pending(xce_handle);
     xc_evtchn_unmask(xce_handle, port);
 
-    process();
+    if (read) {
+        process_rx();
+    }
+
+    if (write) {
+        process_tx();
+    }
 }
 
 bool lixs::ring_conn_base::read_chunck(char*& buff, int& bytes)

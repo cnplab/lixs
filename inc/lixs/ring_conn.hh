@@ -24,7 +24,11 @@ protected:
     bool read(char*& buff, int& bytes);
     bool write(char*& buff, int& bytes);
 
-    virtual void process(void) = 0;
+    void need_rx(void);
+    void need_tx(void);
+
+    virtual void process_rx(void) = 0;
+    virtual void process_tx(void) = 0;
 
 private:
     void operator()(bool read, bool write);
