@@ -20,9 +20,6 @@ public:
     void enqueue_event(std::function<void(void)> cb);
 
 private:
-    void fire_events(void);
-
-private:
     bool active;
 
     std::list<std::function<void(void)> > event_list;

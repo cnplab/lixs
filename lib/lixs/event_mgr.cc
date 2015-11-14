@@ -16,8 +16,13 @@ lixs::event_mgr::~event_mgr()
 
 void lixs::event_mgr::run(void)
 {
-    while (active) {
-        fire_events();
+    std::list<std::function<void(void)> >::iterator it;
+    std::list<std::function<void(void)> >::iterator nit;
+
+    for(it = event_list.begin(); active && it != event_list.end(); it = nit) {
+        it->operator()();
+        nit = std::next(it);
+        event_list.erase(it);
     }
 }
 
@@ -34,17 +39,5 @@ void lixs::event_mgr::disable(void)
 void lixs::event_mgr::enqueue_event(std::function<void(void)> cb)
 {
     event_list.push_back(cb);
-}
-
-void lixs::event_mgr::fire_events(void)
-{
-    std::list<std::function<void(void)> >::iterator it;
-    std::list<std::function<void(void)> >::iterator nit;
-
-    for(it = event_list.begin(); it != event_list.end(); it = nit) {
-        it->operator()();
-        nit = std::next(it);
-        event_list.erase(it);
-    }
 }
 
