@@ -181,7 +181,7 @@ int lixs::mstore::transaction::get_children(cid_t cid, const std::string& path, 
 
     if (rec.e.write_seq) {
         for (i = rec.e.children.begin(); i != rec.e.children.end(); i++) {
-            if (!db[path + *i].te[id].delete_seq) {
+            if (!db[path + "/" + *i].te[id].delete_seq) {
                 resp.insert(*i);
             }
         }
