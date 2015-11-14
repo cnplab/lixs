@@ -27,7 +27,12 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
     const struct option long_opts[] = {
         { "help"               , no_argument       , NULL , 'h' },
         { "daemon"             , no_argument       , NULL , 'D' },
-        { "pid-file"           , optional_argument , NULL , 'p' },
+        /* NOTE: For now keep this required so that lixs is compatible with the
+         * upstream sysV init script. If the argument is optional a value would
+         * need to be specified with --pid-file=<argument> which doesn't happen
+         * in the init script, where we find --pid-file <argument>.
+         */
+        { "pid-file"           , required_argument , NULL , 'p' },
         { "log-file"           , optional_argument , NULL , 'l' },
         { "xenbus"             , no_argument       , NULL , 'x' },
         { "virq-dom-exc"       , no_argument       , NULL , 'i' },
@@ -115,8 +120,10 @@ void app::lixs_conf::print_usage() {
     printf("  -D, --daemon           Run in application in background.\n");
     printf("      --pid-file=[file]  Write pid to file. Daemonizing automatically enables this\n"
            "                         option. Default value: '/var/run/xenstored.pid'.\n");
-    printf("      --log-file=[file]  Redirect output to file. Daemonizing automatically enables\n"
-           "                         this options. Default value: '/var/log/xen/lixs.log'.\n");
+    printf("      --log-file <file>  Redirect output to file. Daemonizing automatically enables\n"
+           "                         this options. Default value: '/var/log/xen/lixs.log'. This\n"
+           "                         option is required for compatibility with the upstream sysV\n"
+           "                         init script.\n");
     printf("\n");
     printf("Communication mechanisms:\n");
     printf("  -x, --xenbus           Enable communication with Linux's xenbus driver.\n");
