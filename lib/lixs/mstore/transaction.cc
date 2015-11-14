@@ -64,7 +64,7 @@ int lixs::mstore::transaction::read(cid_t cid, const std::string& path, std::str
 
         val = te.value;
         return 0;
-    } else if (rec.e.write_seq) {
+    } else if (!te.delete_seq && rec.e.write_seq) {
         if (!has_read_access(cid, rec.e.perms)) {
             return EACCES;
         }
@@ -163,7 +163,7 @@ int lixs::mstore::transaction::get_children(cid_t cid, const std::string& path, 
         if (!has_read_access(cid, te.perms)) {
             return EACCES;
         }
-    } else if (rec.e.write_seq) {
+    } else if (!te.delete_seq && rec.e.write_seq) {
         if (!has_read_access(cid, rec.e.perms)) {
             return EACCES;
         }
@@ -212,7 +212,7 @@ int lixs::mstore::transaction::get_perms(cid_t cid,
 
         perms = te.perms;
         return 0;
-    } else if (rec.e.write_seq) {
+    } else if (!te.delete_seq && rec.e.write_seq) {
         if (!has_read_access(cid, rec.e.perms)) {
             return EACCES;
         }
@@ -243,7 +243,7 @@ int lixs::mstore::transaction::set_perms(cid_t cid,
         te.perms = perms;
         te.write_seq = rec.next_seq++;
         return 0;
-    } else if (rec.e.write_seq) {
+    } else if (!te.delete_seq && rec.e.write_seq) {
         if (!has_write_access(cid, rec.e.perms)) {
             return EACCES;
         }
