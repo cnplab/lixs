@@ -98,7 +98,7 @@ bool lixs::sock_conn::write(char*& buff, int& bytes)
 
     done = false;
 
-    len = send(fd, buff, bytes, 0);
+    len = send(fd, buff, bytes, MSG_NOSIGNAL);
 
     if (len == 0) {
         /* socket is closed */

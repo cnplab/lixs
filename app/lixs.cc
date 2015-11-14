@@ -95,8 +95,6 @@ int main(int argc, char** argv)
 
     printf("LiXS: Starting server...\n");
 
-    signal(SIGPIPE, SIG_IGN);
-
     lixs::os_linux::epoll epoll;
     lixs::event_mgr emgr(epoll);
     lixs::mstore::store store;
