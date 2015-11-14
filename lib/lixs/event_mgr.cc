@@ -1,13 +1,12 @@
 #include <lixs/event_mgr.hh>
-#include <lixs/iomux.hh>
 
 #include <iterator>
 #include <list>
 #include <memory>
 
 
-lixs::event_mgr::event_mgr(iomux& io)
-    : active(false), io(io)
+lixs::event_mgr::event_mgr(void)
+    : active(false)
 {
 }
 
@@ -19,7 +18,6 @@ void lixs::event_mgr::run(void)
 {
     while (active) {
         fire_events();
-        io.handle();
     }
 }
 

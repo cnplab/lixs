@@ -2,6 +2,7 @@
 #define __LIXS_XENSTORE_HH__
 
 #include <lixs/event_mgr.hh>
+#include <lixs/iomux.hh>
 #include <lixs/permissions.hh>
 #include <lixs/store.hh>
 #include <lixs/watch_mgr.hh>

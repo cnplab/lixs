@@ -6,9 +6,10 @@
 #include <sys/epoll.h>
 
 
-lixs::os_linux::epoll::epoll(void)
-    : epfd(epoll_create(0x7E57))
+lixs::os_linux::epoll::epoll(event_mgr& emgr)
+    : iomux(emgr), epfd(epoll_create(0x7E57))
 {
+    emgr.enqueue_event(std::bind(&epoll::handle, this));
 }
 
 lixs::os_linux::epoll::~epoll()
@@ -44,10 +45,19 @@ void lixs::os_linux::epoll::handle(void)
 
     for (int i = 0; i < n_events; i++) {
         if (!is_err(epev[i].events)) {
+            /* TODO: A better design would be to enqueue each of the callbacks
+             * on the event_mgr. However it's possible the object the callback
+             * refers to is deleted after enqueue and before being fired
+             * leading to a crash. Therefore we need to come up with a way to
+             * invalidate this pointers before doing that move. Probably this
+             * can be done through the use of smart pointers.
+             */
             cb = reinterpret_cast<fd_cb_k*>(epev[i].data.ptr);
             cb->operator()(is_read(epev[i].events), is_write(epev[i].events));
         }
     }
+
+    emgr.enqueue_event(std::bind(&epoll::handle, this));
 }
 
 uint32_t inline lixs::os_linux::epoll::get_events(const fd_cb_k& cb)

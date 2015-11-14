@@ -1,8 +1,6 @@
 #ifndef __LIXS_EVENT_MGR_HH__
 #define __LIXS_EVENT_MGR_HH__
 
-#include <lixs/iomux.hh>
-
 #include <list>
 #include <memory>
 
@@ -11,7 +9,7 @@ namespace lixs {
 
 class event_mgr {
 public:
-    event_mgr(iomux& io);
+    event_mgr(void);
     ~event_mgr();
 
     void run(void);
@@ -27,7 +25,6 @@ private:
 private:
     bool active;
 
-    iomux& io;
     std::list<std::function<void(void)> > event_list;
 };
 

@@ -11,16 +11,16 @@ namespace os_linux {
 
 class epoll : public iomux {
 public:
-    epoll(void);
+    epoll(event_mgr& emgr);
     ~epoll();
 
     void add(fd_cb_k& cb);
     void set(fd_cb_k& cb);
     void remove(fd_cb_k& cb);
 
+private:
     void handle(void);
 
-private:
     uint32_t inline get_events(const fd_cb_k& cb);
     bool inline is_read(const uint32_t ev);
     bool inline is_write(const uint32_t ev);
