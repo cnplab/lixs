@@ -64,7 +64,6 @@ public:
 };
 
 
-/* FIXME: relative shouldn't go to lixs::watch_cb_k */
 class watch_cb : public lixs::watch_cb_k {
 public:
     watch_cb(xs_proto_base& proto,
@@ -75,6 +74,7 @@ public:
 
 private:
     xs_proto_base& proto;
+    const bool relative;
 };
 
 typedef std::pair<std::string, std::string> watch_key;

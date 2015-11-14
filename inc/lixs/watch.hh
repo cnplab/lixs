@@ -8,8 +8,8 @@ namespace lixs {
 
 class watch_cb_k {
 public:
-    watch_cb_k(const std::string& path, const std::string& token, bool relative)
-        : path(path), token(token), relative(relative)
+    watch_cb_k(const std::string& path, const std::string& token)
+        : path(path), token(token)
     { }
 
 public:
@@ -18,7 +18,6 @@ public:
 public:
     const std::string path;
     const std::string token;
-    const bool relative;
 };
 
 } /* namespace lixs */

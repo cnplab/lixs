@@ -3,7 +3,7 @@
 
 lixs::xs_proto_v1::watch_cb::watch_cb(xs_proto_base& proto,
         const std::string& path, const std::string& token, bool relative)
-    : lixs::watch_cb_k(path, token, relative), proto(proto)
+    : lixs::watch_cb_k(path, token), proto(proto), relative(relative)
 {
 }
 
