@@ -19,7 +19,7 @@ static lixs::event_mgr* emgr_ptr;
 static void signal_handler(int sig)
 {
     if (sig == SIGINT) {
-        printf("[LiXS]: Got SIGINT, stopping...\n");
+        printf("LiXS: Got SIGINT, stopping...\n");
         emgr_ptr->disable();
     }
 }
@@ -40,7 +40,7 @@ static bool setup_logging(app::lixs_conf& conf)
     return false;
 
 out_err:
-    fprintf(stderr, "[LiXS]: Failed to redirect output to file: %d\n", errno);
+    fprintf(stderr, "LiXS: Failed to redirect output to file: %d\n", errno);
     return true;
 }
 
@@ -54,7 +54,7 @@ static int daemonize(app::lixs_conf& conf)
     }
 
     if (daemon(1, conf.log_to_file ? 1 : 0)) {
-        fprintf(stderr, "[LiXS]: Failed to daemonize: %d\n", errno);
+        fprintf(stderr, "LiXS: Failed to daemonize: %d\n", errno);
         return true;
     }
 
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
         }
     }
 
-    printf("[LiXS]: Starting server...\n");
+    printf("LiXS: Starting server...\n");
 
     signal(SIGPIPE, SIG_IGN);
 
@@ -126,7 +126,7 @@ int main(int argc, char** argv)
     emgr_ptr = &emgr;
     signal(SIGINT, signal_handler);
 
-    printf("[LiXS]: Entering main loop...\n");
+    printf("LiXS: Entering main loop...\n");
 
     emgr.run();
 
@@ -142,7 +142,7 @@ int main(int argc, char** argv)
         delete dom_exc;
     }
 
-    printf("[LiXS]: Server stoped!\n");
+    printf("LiXS: Server stoped!\n");
 
     return 0;
 }
