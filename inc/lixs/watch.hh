@@ -6,9 +6,9 @@
 
 namespace lixs {
 
-class watch_cb_k {
+class watch_cb {
 public:
-    watch_cb_k(const std::string& path, const std::string& token)
+    watch_cb(const std::string& path, const std::string& token)
         : path(path), token(token)
     { }
 

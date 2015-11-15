@@ -14,7 +14,7 @@ lixs::watch_mgr::~watch_mgr()
 {
 }
 
-void lixs::watch_mgr::add(watch_cb_k& cb)
+void lixs::watch_mgr::add(watch_cb& cb)
 {
     db[cb.path].path.insert(&cb);
 
@@ -23,7 +23,7 @@ void lixs::watch_mgr::add(watch_cb_k& cb)
     emgr.enqueue_event(std::bind(&watch_mgr::callback, this, cb.path, &cb, cb.path));
 }
 
-void lixs::watch_mgr::del(watch_cb_k& cb)
+void lixs::watch_mgr::del(watch_cb& cb)
 {
     record& rec = db[cb.path];
     rec.path.erase(&cb);
@@ -78,7 +78,7 @@ void lixs::watch_mgr::abort_transaction(unsigned int tid)
     tdb.erase(tid);
 }
 
-void lixs::watch_mgr::callback(const std::string& key, watch_cb_k* cb, const std::string& path)
+void lixs::watch_mgr::callback(const std::string& key, watch_cb* cb, const std::string& path)
 {
     database::iterator it;
 
@@ -158,7 +158,7 @@ void lixs::watch_mgr::_tfire_children(unsigned int tid, const std::string& path)
     }
 }
 
-void lixs::watch_mgr::register_with_parents(const std::string& path, watch_cb_k& cb)
+void lixs::watch_mgr::register_with_parents(const std::string& path, watch_cb& cb)
 {
     std::string name;
     std::string parent;
@@ -170,7 +170,7 @@ void lixs::watch_mgr::register_with_parents(const std::string& path, watch_cb_k&
     }
 }
 
-void lixs::watch_mgr::unregister_from_parents(const std::string& path, watch_cb_k& cb)
+void lixs::watch_mgr::unregister_from_parents(const std::string& path, watch_cb& cb)
 {
     std::string name;
     std::string parent;

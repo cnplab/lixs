@@ -125,12 +125,12 @@ int lixs::xenstore::transaction_end(cid_t cid, unsigned int tid, bool commit)
     }
 }
 
-void lixs::xenstore::watch_add(watch_cb_k& cb)
+void lixs::xenstore::watch_add(watch_cb& cb)
 {
     wmgr.add(cb);
 }
 
-void lixs::xenstore::watch_del(watch_cb_k& cb)
+void lixs::xenstore::watch_del(watch_cb& cb)
 {
     wmgr.del(cb);
 }

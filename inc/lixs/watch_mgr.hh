@@ -18,8 +18,8 @@ public:
     watch_mgr(event_mgr& emgr);
     ~watch_mgr();
 
-    void add(watch_cb_k& cb);
-    void del(watch_cb_k& cb);
+    void add(watch_cb& cb);
+    void del(watch_cb& cb);
 
     void fire(unsigned int tid, const std::string& path);
     void fire_parents(unsigned int tid, const std::string& path);
@@ -29,7 +29,7 @@ public:
     void abort_transaction(unsigned int tid);
 
 private:
-    typedef std::set<watch_cb_k*> watch_set;
+    typedef std::set<watch_cb*> watch_set;
     struct record {
         watch_set path;
         watch_set children;
@@ -41,7 +41,7 @@ private:
     typedef std::map<unsigned int, fire_list> transaction_database;
 
 private:
-    void callback(const std::string& key, watch_cb_k* cb, const std::string& path);
+    void callback(const std::string& key, watch_cb* cb, const std::string& path);
 
     void _fire(const std::string& path, const std::string& fire_path);
     void _tfire(unsigned int tid, const std::string& path, const std::string& fire_path);
@@ -49,8 +49,8 @@ private:
     void _tfire_parents(unsigned int tid, const std::string& path, const std::string& fire_path);
     void _fire_children(const std::string& path);
     void _tfire_children(unsigned int tid, const std::string& path);
-    void register_with_parents(const std::string& path, watch_cb_k& cb);
-    void unregister_from_parents(const std::string& path, watch_cb_k& cb);
+    void register_with_parents(const std::string& path, watch_cb& cb);
+    void unregister_from_parents(const std::string& path, watch_cb& cb);
 
 private:
     event_mgr& emgr;

@@ -41,8 +41,8 @@ public:
     int transaction_start(cid_t cid, unsigned int* tid);
     int transaction_end(cid_t cid, unsigned int tid, bool commit);
 
-    void watch_add(watch_cb_k& cb);
-    void watch_del(watch_cb_k& cb);
+    void watch_add(watch_cb& cb);
+    void watch_del(watch_cb& cb);
 
     /* FIXME: should domain operations also receive a client id? */
     void domain_path(domid_t domid, std::string& path);

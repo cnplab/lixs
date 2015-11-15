@@ -64,7 +64,7 @@ public:
 };
 
 
-class watch_cb : public lixs::watch_cb_k {
+class watch_cb : public lixs::watch_cb {
 public:
     watch_cb(xs_proto_base& proto,
             const std::string& path, const std::string& token, bool relative);
