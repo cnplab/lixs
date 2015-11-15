@@ -14,7 +14,7 @@ lixs::sock_conn::sock_conn(iomux& io, int fd)
 {
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 
-    fd_cb_k::fd = fd;
+    io_cb::fd = fd;
     io.add(*this);
 }
 

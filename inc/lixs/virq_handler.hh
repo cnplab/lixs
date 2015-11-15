@@ -14,7 +14,7 @@ extern "C" {
 
 namespace lixs {
 
-class virq_handler : fd_cb_k {
+class virq_handler : io_cb {
 public:
     virq_handler(xenstore& xs, domain_mgr& dmgr, iomux& io);
     virtual ~virq_handler();

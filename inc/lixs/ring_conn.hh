@@ -14,7 +14,7 @@ extern "C" {
 
 namespace lixs {
 
-class ring_conn_base : public fd_cb_k {
+class ring_conn_base : public io_cb {
 protected:
     ring_conn_base(iomux& io, domid_t domid,
             evtchn_port_t port, xenstore_domain_interface* interface);

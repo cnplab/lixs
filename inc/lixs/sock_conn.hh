@@ -6,7 +6,7 @@
 
 namespace lixs {
 
-class sock_conn : public fd_cb_k {
+class sock_conn : public io_cb {
 protected:
     sock_conn(iomux& io, int fd);
     virtual ~sock_conn();

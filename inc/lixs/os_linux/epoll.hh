@@ -14,14 +14,14 @@ public:
     epoll(event_mgr& emgr);
     ~epoll();
 
-    void add(fd_cb_k& cb);
-    void set(fd_cb_k& cb);
-    void remove(fd_cb_k& cb);
+    void add(io_cb& cb);
+    void set(io_cb& cb);
+    void remove(io_cb& cb);
 
 private:
     void handle(void);
 
-    uint32_t inline get_events(const fd_cb_k& cb);
+    uint32_t inline get_events(const io_cb& cb);
     bool inline is_read(const uint32_t ev);
     bool inline is_write(const uint32_t ev);
     bool inline is_err(const uint32_t ev);

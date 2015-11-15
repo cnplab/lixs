@@ -16,21 +16,21 @@ lixs::os_linux::epoll::~epoll()
 {
 }
 
-void lixs::os_linux::epoll::add(fd_cb_k& cb)
+void lixs::os_linux::epoll::add(io_cb& cb)
 {
     struct epoll_event event = { get_events(cb), { reinterpret_cast<void*>(&cb) } };
 
     epoll_ctl(epfd, EPOLL_CTL_ADD, cb.fd, &event);
 }
 
-void lixs::os_linux::epoll::set(fd_cb_k& cb)
+void lixs::os_linux::epoll::set(io_cb& cb)
 {
     struct epoll_event event = { get_events(cb), { reinterpret_cast<void*>(&cb) } };
 
     epoll_ctl(epfd, EPOLL_CTL_MOD, cb.fd, &event);
 }
 
-void lixs::os_linux::epoll::remove(fd_cb_k& cb)
+void lixs::os_linux::epoll::remove(io_cb& cb)
 {
     /* Passing event == NULL requires linux > 2.6.9, see BUGS */
     epoll_ctl(epfd, EPOLL_CTL_DEL, cb.fd, NULL);
@@ -38,7 +38,7 @@ void lixs::os_linux::epoll::remove(fd_cb_k& cb)
 
 void lixs::os_linux::epoll::handle(void)
 {
-    fd_cb_k* cb;
+    io_cb* cb;
     int n_events;
 
     n_events = epoll_wait(epfd, epev, epoll_max_events, timeout);
@@ -52,7 +52,7 @@ void lixs::os_linux::epoll::handle(void)
              * invalidate this pointers before doing that move. Probably this
              * can be done through the use of smart pointers.
              */
-            cb = reinterpret_cast<fd_cb_k*>(epev[i].data.ptr);
+            cb = reinterpret_cast<io_cb*>(epev[i].data.ptr);
             cb->operator()(is_read(epev[i].events), is_write(epev[i].events));
         }
     }
@@ -60,7 +60,7 @@ void lixs::os_linux::epoll::handle(void)
     emgr.enqueue_event(std::bind(&epoll::handle, this));
 }
 
-uint32_t inline lixs::os_linux::epoll::get_events(const fd_cb_k& cb)
+uint32_t inline lixs::os_linux::epoll::get_events(const io_cb& cb)
 {
     return (cb.ev_read ? EPOLLIN : 0) | (cb.ev_write ? EPOLLOUT : 0);
 }

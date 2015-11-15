@@ -59,7 +59,7 @@ void lixs::unix_sock_server::client_dead(sock_client* client)
     delete client;
 }
 
-void lixs::unix_sock_server::fd_cb_k::operator()(bool read, bool write)
+void lixs::unix_sock_server::io_cb::operator()(bool read, bool write)
 {
     std::function<void(sock_client*)> cb = std::bind(
             &unix_sock_server::client_dead, &server, std::placeholders::_1);

@@ -6,8 +6,8 @@
 
 namespace lixs {
 
-struct fd_cb_k {
-    fd_cb_k(void)
+struct io_cb {
+    io_cb(void)
         : fd(-1), ev_read(false), ev_write(false)
     { }
 
@@ -26,9 +26,9 @@ public:
     { }
 
 public:
-    virtual void add(fd_cb_k& cb) = 0;
-    virtual void set(fd_cb_k& cb) = 0;
-    virtual void remove(fd_cb_k& cb) = 0;
+    virtual void add(io_cb& cb) = 0;
+    virtual void set(io_cb& cb) = 0;
+    virtual void remove(io_cb& cb) = 0;
 
     virtual void handle(void) = 0;
 

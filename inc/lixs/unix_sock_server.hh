@@ -19,8 +19,8 @@ public:
     ~unix_sock_server();
 
 private:
-    struct fd_cb_k : public lixs::fd_cb_k {
-        fd_cb_k (unix_sock_server& server)
+    struct io_cb : public lixs::io_cb {
+        io_cb (unix_sock_server& server)
             : server(server)
         { }
 
@@ -39,10 +39,10 @@ private:
     iomux& io;
 
     std::string rw_path;
-    fd_cb_k rw_cb;
+    io_cb rw_cb;
 
     std::string ro_path;
-    fd_cb_k ro_cb;
+    io_cb ro_cb;
 };
 
 } /* namespace lixs */
