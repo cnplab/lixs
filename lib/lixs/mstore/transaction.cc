@@ -281,7 +281,7 @@ void lixs::mstore::transaction::merge(bool& success)
     success = can_merge();
 
     if (success) {
-        _merge();
+        do_merge();
     } else {
         abort();
     }
@@ -303,7 +303,7 @@ bool lixs::mstore::transaction::can_merge()
     return true;
 }
 
-void lixs::mstore::transaction::_merge()
+void lixs::mstore::transaction::do_merge()
 {
     std::string parent;
     std::string name;

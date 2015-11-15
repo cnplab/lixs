@@ -29,7 +29,7 @@ public:
 
 private:
     bool can_merge();
-    void _merge();
+    void do_merge();
 
     void register_with_parent(const std::string& path);
     void unregister_from_parent(const std::string& path);
