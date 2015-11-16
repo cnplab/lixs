@@ -54,9 +54,7 @@ $(APP) $(TST): % : %.o $(LIB)
 
 
 clean:
-	$(call cmd, "CLN", "*.o [ app/  ]", rm -rf, $(patsubst %, %.o, $(APP)))
-	$(call cmd, "CLN", "*.o [ test/ ]", rm -rf, $(patsubst %, %.o, $(TST)))
-	$(call cmd, "CLN", "*.o [ lib/  ]", rm -rf, $(LIB))
+	$(call cmd, "CLN", "*.o", rm -rf, $(shell find -name "*.o"))
 
 distclean: clean
 	$(call cmd, "CLN", "* [ app/  ]" , rm -rf, $(APP))
