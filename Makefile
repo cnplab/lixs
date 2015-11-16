@@ -54,8 +54,8 @@ clean:
 	$(call cmd, "CLN", "*.d", rm -rf, $(shell find -name "*.d"))
 
 distclean: clean
-	$(call cmd, "CLN", "* [ app/  ]" , rm -rf, $(APP))
-	$(call cmd, "CLN", "* [ test/ ]", rm -rf, $(TST))
+	$(call cmd, "CLN", "app/" , rm -rf, $(APP))
+	$(call cmd, "CLN", "test/", rm -rf, $(TST))
 
 
 .PHONY: all clean distclean
