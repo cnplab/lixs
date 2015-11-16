@@ -14,17 +14,13 @@ LIB	:=
 LIB	+= $(patsubst %.c, %.o, $(shell find lib/ -name "*.c" -not -path "lib/app/*"))
 LIB	+= $(patsubst %.cc, %.o, $(shell find lib/ -name "*.cc" -not -path "lib/app/*"))
 
-INC	:=
-INC	+= $(shell find inc/ -name "*.h")
-INC	+= $(shell find inc/ -name "*.hh")
-
 app_lib  =
 app_lib += $(patsubst %.c, %.o, $(shell find lib/$1/ -name "*.c" 2>/dev/null))
 app_lib += $(patsubst %.cc, %.o, $(shell find lib/$1/ -name "*.cc" 2>/dev/null))
 
 
-CFLAGS		+= -Iinc -Wall -g -O3 -std=gnu11
-CXXFLAGS	+= -Iinc -Wall -g -O3 -std=gnu++11
+CFLAGS		+= -Iinc -Wall -MD -MP -g -O3 -std=gnu11
+CXXFLAGS	+= -Iinc -Wall -MD -MP -g -O3 -std=gnu++11
 LDFLAGS		+= -lxenctrl -lxenstore
 
 ifeq ($(debug),y)
@@ -46,15 +42,16 @@ app/lixs: $(call app_lib,app/lixs)
 $(APP) $(TST): % : %.o $(LIB)
 	$(call cxxlink, $^, $@)
 
-%.o: %.cc $(INC)
+%.o: %.cc
 	$(call cxxcompile, $<, $@)
 
-%.o: %.c $(INC)
+%.o: %.c
 	$(call ccompile, $<, $@)
 
 
 clean:
 	$(call cmd, "CLN", "*.o", rm -rf, $(shell find -name "*.o"))
+	$(call cmd, "CLN", "*.d", rm -rf, $(shell find -name "*.d"))
 
 distclean: clean
 	$(call cmd, "CLN", "* [ app/  ]" , rm -rf, $(APP))
@@ -63,3 +60,7 @@ distclean: clean
 
 .PHONY: all clean distclean
 
+-include $(APP:%=%.d)
+-include $(TST:%=%.d)
+-include $(patsubst %.c, %.d, $(shell find lib/ -name "*.c"))
+-include $(patsubst %.cc, %.d, $(shell find lib/ -name "*.cc"))
