@@ -82,8 +82,15 @@ int lixs::xenstore::store_get_perms(cid_t cid, unsigned int tid,
 int lixs::xenstore::store_set_perms(cid_t cid, unsigned int tid,
         const std::string& path, const permission_list& resp)
 {
-    /* FIXME: should we fire a watch upon setting permissions? */
-    return st.set_perms(cid, tid, path, resp);
+    int ret;
+
+    ret = st.set_perms(cid, tid, path, resp);
+    if (ret == 0) {
+        wmgr.fire(tid, path);
+        wmgr.fire_parents(tid, path);
+    }
+
+    return ret;
 }
 
 int lixs::xenstore::transaction_start(cid_t cid, unsigned int* tid)
