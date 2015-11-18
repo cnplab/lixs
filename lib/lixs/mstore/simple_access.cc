@@ -195,15 +195,17 @@ void lixs::mstore::simple_access::ensure_branch(cid_t cid, const std::string& pa
 
 void lixs::mstore::simple_access::delete_branch(const std::string& path)
 {
-    std::set<std::string>::iterator it;
-
     record& rec = db[path];
 
     /* Delete a subtree doesn't require access permissions. Only access to the
      * root node, so we delete as 0.
      */
-    for (it = rec.e.children.begin(); it != rec.e.children.end(); it++) {
-        del(0, path + "/" + *it);
+    /* del will eventually call unregister_from_parent which will update
+     * rec.e.children, deleting the element we're currently iterating on,
+     * therefore don't use an iterator here.
+     */
+    while (!rec.e.children.empty()) {
+        del(0, path + "/" + *(rec.e.children.begin()));
     }
 }
 
