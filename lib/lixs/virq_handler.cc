@@ -32,7 +32,7 @@ lixs::virq_handler::virq_handler(xenstore& xs, domain_mgr& dmgr, iomux& io)
 
     fd = xc_evtchn_fd(xce_handle);
     io.add(fd, true, false, std::bind(&virq_handler::callback, this,
-                std::placeholders::_1, std::placeholders::_2));
+                std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 lixs::virq_handler::~virq_handler()
@@ -45,7 +45,7 @@ lixs::virq_handler::~virq_handler()
     xc_interface_close(xc_handle);
 }
 
-void lixs::virq_handler::callback(bool read, bool write)
+void lixs::virq_handler::callback(bool read, bool write, bool error)
 {
     int ret;
     evtchn_port_t port;
@@ -58,6 +58,11 @@ void lixs::virq_handler::callback(bool read, bool write)
     std::list<domid_t>::iterator id_it;
 
     if (!alive) {
+        return;
+    }
+
+    if (error) {
+        /* FIXME: handle error */
         return;
     }
 

@@ -28,7 +28,7 @@ private:
     uint32_t inline get_events(bool read, bool write);
     bool inline is_read(const uint32_t ev);
     bool inline is_write(const uint32_t ev);
-    bool inline is_err(const uint32_t ev);
+    bool inline is_error(const uint32_t ev);
 
 private:
     /* TODO: make this configurable */

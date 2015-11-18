@@ -35,9 +35,9 @@ lixs::unix_sock_server::unix_sock_server(xenstore& xs, domain_mgr& dmgr,
     }
 
     io.add(rw_fd, true, false, std::bind(&unix_sock_server::callback, this,
-                std::placeholders::_1, std::placeholders::_2, rw_fd));
+                std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, rw_fd));
     io.add(ro_fd, true, false, std::bind(&unix_sock_server::callback, this,
-                std::placeholders::_1, std::placeholders::_2, ro_fd));
+                std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, ro_fd));
 
     return;
 
@@ -109,9 +109,14 @@ void lixs::unix_sock_server::client_dead(sock_client* client)
     delete client;
 }
 
-void lixs::unix_sock_server::callback(bool read, bool write, int fd)
+void lixs::unix_sock_server::callback(bool read, bool write, bool error, int fd)
 {
     int client_fd;
+
+    if (error) {
+        /* FIXME: handle error */
+        return;
+    }
 
     client_fd = accept(fd, NULL, NULL);
     if (client_fd == -1) {

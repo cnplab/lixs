@@ -8,8 +8,7 @@
 
 namespace lixs {
 
-/* FIXME: Provide information about errors (e.g. EPOLLERR) */
-typedef std::function<void(bool, bool)> io_cb;
+typedef std::function<void(bool, bool, bool)> io_cb;
 
 class iomux {
 public:

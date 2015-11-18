@@ -23,7 +23,7 @@ lixs::sock_conn::sock_conn(iomux& io, int fd)
     cb = std::shared_ptr<sock_conn_cb>(new sock_conn_cb(*this));
 
     io.add(fd, ev_read, ev_write, std::bind(sock_conn_cb::callback,
-                std::placeholders::_1, std::placeholders::_2,
+                std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
                 std::weak_ptr<sock_conn_cb>(cb)));
 }
 
@@ -184,8 +184,14 @@ lixs::sock_conn_cb::sock_conn_cb(sock_conn& conn)
 {
 }
 
-void lixs::sock_conn_cb::callback(bool read, bool write, std::weak_ptr<sock_conn_cb> ptr)
+void lixs::sock_conn_cb::callback(bool read, bool write, bool error,
+        std::weak_ptr<sock_conn_cb> ptr)
 {
+    if (error) {
+        /* FIXME: handle error */
+        return;
+    }
+
     if (ptr.expired()) {
         return;
     }

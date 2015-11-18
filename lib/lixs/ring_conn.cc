@@ -51,7 +51,7 @@ lixs::ring_conn_base::ring_conn_base(iomux& io, domid_t domid,
     cb = std::shared_ptr<ring_conn_cb>(new ring_conn_cb(*this));
 
     io.add(fd, ev_read, ev_write, std::bind(ring_conn_cb::callback,
-                std::placeholders::_1, std::placeholders::_2,
+                std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
                 std::weak_ptr<ring_conn_cb>(cb)));
 }
 
@@ -172,7 +172,8 @@ lixs::ring_conn_cb::ring_conn_cb(ring_conn_base& conn)
 {
 }
 
-void lixs::ring_conn_cb::callback(bool read, bool write, std::weak_ptr<ring_conn_cb> ptr)
+void lixs::ring_conn_cb::callback(bool read, bool write, bool error,
+        std::weak_ptr<ring_conn_cb> ptr)
 {
     int ret;
 
@@ -183,6 +184,11 @@ void lixs::ring_conn_cb::callback(bool read, bool write, std::weak_ptr<ring_conn
     std::shared_ptr<ring_conn_cb> cb(ptr);
 
     if (!(cb->conn.alive)) {
+        return;
+    }
+
+    if (error) {
+        /* FIXME: handle error */
         return;
     }
 

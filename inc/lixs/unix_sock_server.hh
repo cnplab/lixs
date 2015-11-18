@@ -24,7 +24,7 @@ public:
     ~unix_sock_server();
 
 private:
-    void callback(bool read, bool write, int fd);
+    void callback(bool read, bool write, bool error, int fd);
 
 private:
     int bind_socket(const std::string& path, std::string& err_msg);
