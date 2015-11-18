@@ -74,17 +74,17 @@ int lixs::xenstore::store_dir(cid_t cid, unsigned int tid,
 }
 
 int lixs::xenstore::store_get_perms(cid_t cid, unsigned int tid,
-        const std::string& path, permission_list& resp)
+        const std::string& path, permission_list& perms)
 {
-    return st.get_perms(cid, tid, path, resp);
+    return st.get_perms(cid, tid, path, perms);
 }
 
 int lixs::xenstore::store_set_perms(cid_t cid, unsigned int tid,
-        const std::string& path, const permission_list& resp)
+        const std::string& path, const permission_list& perms)
 {
     int ret;
 
-    ret = st.set_perms(cid, tid, path, resp);
+    ret = st.set_perms(cid, tid, path, perms);
     if (ret == 0) {
         wmgr.fire(tid, path);
         wmgr.fire_parents(tid, path);

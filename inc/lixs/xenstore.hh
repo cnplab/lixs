@@ -34,9 +34,9 @@ public:
     int store_dir(cid_t cid, unsigned int tid,
             const std::string& path, std::set<std::string>& res);
     int store_get_perms(cid_t cid, unsigned int tid,
-            const std::string& path, permission_list& resp);
+            const std::string& path, permission_list& perms);
     int store_set_perms(cid_t cid, unsigned int tid,
-            const std::string& path, const permission_list& resp);
+            const std::string& path, const permission_list& perms);
 
     int transaction_start(cid_t cid, unsigned int* tid);
     int transaction_end(cid_t cid, unsigned int tid, bool commit);
