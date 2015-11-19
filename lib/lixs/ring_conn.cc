@@ -32,13 +32,13 @@ bool lixs::ring_conn_base::read(char*& buff, int& bytes)
 {
     bool notify = false;
 
-    notify = read_chunck(buff, bytes);
+    notify = read_chunk(buff, bytes);
     /*
      * If we're in the ring boundary and still have data to read we need to
      * recheck for space from the begin of the ring.
      */
     if (bytes > 0 && MASK_XENSTORE_IDX(interface->req_cons) == 0) {
-        notify |= read_chunck(buff, bytes);
+        notify |= read_chunk(buff, bytes);
     }
 
     if (bytes > 0 && !ev_read) {
@@ -62,13 +62,13 @@ bool lixs::ring_conn_base::write(char*& buff, int& bytes)
 {
     bool notify = false;
 
-    notify = write_chunck(buff, bytes);
+    notify = write_chunk(buff, bytes);
     /*
      * If we're in the ring boundary and still have data to write we need to
      * recheck for space from the begin of the ring.
      */
     if (bytes > 0 && MASK_XENSTORE_IDX(interface->rsp_prod) == 0) {
-        notify |= write_chunck(buff, bytes);
+        notify |= write_chunk(buff, bytes);
     }
 
     if (bytes > 0 && !ev_write) {
@@ -118,7 +118,7 @@ void lixs::ring_conn_base::operator()(bool read, bool write)
     }
 }
 
-bool lixs::ring_conn_base::read_chunck(char*& buff, int& bytes)
+bool lixs::ring_conn_base::read_chunk(char*& buff, int& bytes)
 {
     uint32_t len;
     XENSTORE_RING_IDX cons;
@@ -148,7 +148,7 @@ bool lixs::ring_conn_base::read_chunck(char*& buff, int& bytes)
     return len > 0;
 }
 
-bool lixs::ring_conn_base::write_chunck(char*&buff, int& bytes)
+bool lixs::ring_conn_base::write_chunk(char*&buff, int& bytes)
 {
     uint32_t len;
     XENSTORE_RING_IDX cons;

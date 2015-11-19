@@ -33,8 +33,8 @@ protected:
 private:
     void operator()(bool read, bool write);
 
-    bool read_chunck(char*& buff, int& bytes);
-    bool write_chunck(char*& buff, int& bytes);
+    bool read_chunk(char*& buff, int& bytes);
+    bool write_chunk(char*& buff, int& bytes);
 
 private:
     iomux& io;
