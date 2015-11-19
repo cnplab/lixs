@@ -149,6 +149,10 @@ bool lixs::sock_conn::write(char*& buff, int& bytes)
 
 void lixs::sock_conn::need_rx(void)
 {
+    if (!alive) {
+        return;
+    }
+
     if (!ev_read) {
         ev_read = true;
         io.set(fd, ev_read, ev_write);
@@ -157,6 +161,10 @@ void lixs::sock_conn::need_rx(void)
 
 void lixs::sock_conn::need_tx(void)
 {
+    if (!alive) {
+        return;
+    }
+
     if (!ev_write) {
         ev_write = true;
         io.set(fd, ev_read, ev_write);
@@ -175,6 +183,10 @@ void lixs::sock_conn_cb::callback(bool read, bool write, std::weak_ptr<sock_conn
     }
 
     std::shared_ptr<sock_conn_cb> cb(ptr);
+
+    if (!(cb->conn.alive)) {
+        return;
+    }
 
     if (read) {
         cb->conn.process_rx();
