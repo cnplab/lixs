@@ -106,8 +106,6 @@ void lixs::ring_conn_base::need_tx(void)
 
 void lixs::ring_conn_base::operator()(bool read, bool write)
 {
-    evtchn_port_t port = xc_evtchn_pending(xce_handle);
-    xc_evtchn_unmask(xce_handle, port);
 
     if (read) {
         process_rx();
@@ -116,6 +114,9 @@ void lixs::ring_conn_base::operator()(bool read, bool write)
     if (write) {
         process_tx();
     }
+
+    evtchn_port_t port = xc_evtchn_pending(xce_handle);
+    xc_evtchn_unmask(xce_handle, port);
 }
 
 bool lixs::ring_conn_base::read_chunk(char*& buff, int& bytes)
