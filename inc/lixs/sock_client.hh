@@ -24,7 +24,7 @@ private:
 
     void conn_dead(void);
 
-
+private:
     static unsigned int next_id;
 
     event_mgr& emgr;
