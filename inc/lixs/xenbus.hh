@@ -10,6 +10,7 @@
 #include <lixs/xs_proto_v1/xs_proto.hh>
 
 #include <cerrno>
+#include <stdexcept>
 #include <string>
 
 extern "C" {
@@ -18,6 +19,10 @@ extern "C" {
 
 
 namespace lixs {
+
+class xenbus_error : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
 
 class xenbus_mapper {
 protected:
