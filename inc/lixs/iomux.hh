@@ -30,8 +30,6 @@ public:
     virtual void set(io_cb& cb) = 0;
     virtual void remove(io_cb& cb) = 0;
 
-    virtual void handle(void) = 0;
-
 protected:
     event_mgr& emgr;
 };
