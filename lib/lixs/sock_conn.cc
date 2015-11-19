@@ -25,7 +25,9 @@ lixs::sock_conn::sock_conn(iomux& io, int fd)
 
 lixs::sock_conn::~sock_conn()
 {
-    io.rem(fd);
+    if (alive) {
+        io.rem(fd);
+    }
     close(fd);
 }
 
@@ -82,6 +84,7 @@ bool lixs::sock_conn::read(char*& buff, int& bytes)
     }
 
     if (!alive) {
+        io.rem(fd);
         conn_dead();
     }
 
@@ -141,6 +144,7 @@ bool lixs::sock_conn::write(char*& buff, int& bytes)
     }
 
     if (!alive) {
+        io.rem(fd);
         conn_dead();
     }
 
