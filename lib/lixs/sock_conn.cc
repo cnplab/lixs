@@ -15,7 +15,10 @@
 lixs::sock_conn::sock_conn(iomux& io, int fd)
     : io(io), fd(fd), ev_read(false), ev_write(false), alive(true)
 {
-    fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+    if (fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK) == -1) {
+        throw sock_conn_error("Unable to set O_NONBLOCK: " +
+                std::string(std::strerror(errno)));
+    }
 
     cb = std::shared_ptr<sock_conn_cb>(new sock_conn_cb(*this));
 
