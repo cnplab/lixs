@@ -5,6 +5,7 @@
 
 #include <cerrno>
 #include <memory>
+#include <stdexcept>
 #include <utility>
 
 extern "C" {
@@ -14,6 +15,10 @@ extern "C" {
 
 
 namespace lixs {
+
+class ring_conn_error : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
 
 class ring_conn_cb;
 

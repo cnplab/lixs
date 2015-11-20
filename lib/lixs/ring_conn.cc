@@ -4,6 +4,7 @@
 #include <cstring>
 #include <functional>
 #include <memory>
+#include <string>
 
 extern "C" {
 #include <xenctrl.h>
@@ -16,10 +17,34 @@ lixs::ring_conn_base::ring_conn_base(iomux& io, domid_t domid,
     : io(io), ev_read(false), ev_write(false),
     domid(domid), remote_port(port), interface(interface)
 {
+    int ret;
+
     xce_handle = xc_evtchn_open(NULL, 0);
+    if (xce_handle == NULL) {
+        throw ring_conn_error("Failed to open evtchn handle: " +
+                std::string(std::strerror(errno)));
+    }
+
     local_port = xc_evtchn_bind_interdomain(xce_handle, domid, remote_port);
-    xc_evtchn_unmask(xce_handle, local_port);
-    xc_evtchn_notify(xce_handle, local_port);
+    if (local_port == (evtchn_port_t)(-1)) {
+        xc_evtchn_close(xce_handle);
+        throw ring_conn_error("Failed to bind evtchn: " +
+                std::string(std::strerror(errno)));
+    }
+
+    ret = xc_evtchn_unmask(xce_handle, local_port);
+    if (ret == -1) {
+        xc_evtchn_close(xce_handle);
+        throw ring_conn_error("Failed to unmask evtchn: " +
+                std::string(std::strerror(errno)));
+    }
+
+    ret = xc_evtchn_notify(xce_handle, local_port);
+    if (ret == -1) {
+        xc_evtchn_close(xce_handle);
+        throw ring_conn_error("Failed to notify evtchn: " +
+                std::string(std::strerror(errno)));
+    }
 
     fd = xc_evtchn_fd(xce_handle);
 
