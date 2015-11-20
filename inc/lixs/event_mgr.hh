@@ -7,6 +7,8 @@
 
 namespace lixs {
 
+typedef std::function<void(void)> ev_cb;
+
 class event_mgr {
 public:
     event_mgr(void);
@@ -17,12 +19,15 @@ public:
     void enable(void);
     void disable(void);
 
-    void enqueue_event(std::function<void(void)> cb);
+    void enqueue_event(ev_cb);
+
+private:
+    typedef std::list<ev_cb> event_list;
 
 private:
     bool active;
 
-    std::list<std::function<void(void)> > event_list;
+    event_list events;
 };
 
 } /* namespace lixs */
