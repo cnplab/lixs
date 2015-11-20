@@ -16,8 +16,18 @@ extern "C" {
 lixs::foreign_ring_mapper::foreign_ring_mapper(domid_t domid, unsigned int mfn)
 {
     xcg_handle = xc_gnttab_open(NULL, 0);
+    if (xcg_handle == NULL) {
+        throw foreign_ring_mapper_error("Failed to open gnttab handle: " +
+                std::string(std::strerror(errno)));
+    }
+
     interface = (xenstore_domain_interface*) xc_gnttab_map_grant_ref(xcg_handle, domid,
             GNTTAB_RESERVED_XENSTORE, PROT_READ|PROT_WRITE);
+    if (interface == NULL) {
+        xc_gnttab_close(xcg_handle);
+        throw foreign_ring_mapper_error("Failed to open gnttab handle: " +
+                std::string(std::strerror(errno)));
+    }
 }
 
 lixs::foreign_ring_mapper::~foreign_ring_mapper()

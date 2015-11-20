@@ -19,6 +19,10 @@ extern "C" {
 
 namespace lixs {
 
+class foreign_ring_mapper_error : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
 class foreign_ring_mapper {
 protected:
     foreign_ring_mapper(domid_t domid, unsigned int mfn);
