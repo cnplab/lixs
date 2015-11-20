@@ -2,6 +2,7 @@
 #include <lixs/sock_conn.hh>
 
 #include <cerrno>
+#include <cstring>
 #include <fcntl.h>
 #include <functional>
 #include <memory>

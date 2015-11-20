@@ -22,6 +22,7 @@ private:
     void callback(bool read, bool write, int fd);
 
 private:
+    int bind_socket(const std::string& path);
     void client_dead(sock_client* client);
 
 private:
