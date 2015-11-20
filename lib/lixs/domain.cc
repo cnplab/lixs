@@ -53,6 +53,10 @@ domid_t lixs::domain::get_domid(void)
     return domid;
 }
 
+void lixs::domain::conn_dead(void)
+{
+}
+
 std::string lixs::domain::get_id(domid_t domid)
 {
     return "D" + std::to_string(domid);

@@ -35,6 +35,7 @@ protected:
 
     virtual void process_rx(void) = 0;
     virtual void process_tx(void) = 0;
+    virtual void conn_dead(void) = 0;
 
 private:
     bool read_chunk(char*& buff, int& bytes);

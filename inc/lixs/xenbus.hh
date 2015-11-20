@@ -45,6 +45,8 @@ public:
 private:
     static evtchn_port_t xenbus_evtchn(void);
 
+    void conn_dead(void);
+
 private:
     static const std::string xsd_port_path;
 };

@@ -82,3 +82,7 @@ evtchn_port_t lixs::xenbus::xenbus_evtchn(void)
     return port;
 }
 
+void lixs::xenbus::conn_dead(void)
+{
+}
+

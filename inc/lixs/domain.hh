@@ -45,6 +45,8 @@ public:
 private:
     static std::string get_id(domid_t domid);
 
+    void conn_dead(void);
+
 private:
     bool active;
     domid_t domid;
