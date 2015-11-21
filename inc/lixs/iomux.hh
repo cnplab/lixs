@@ -3,21 +3,13 @@
 
 #include <lixs/event_mgr.hh>
 
+#include <functional>
+
 
 namespace lixs {
 
-struct io_cb {
-    io_cb(void)
-        : fd(-1), ev_read(false), ev_write(false)
-    { }
-
-    /* FIXME: Provide information about errors (e.g. EPOLLERR) */
-    virtual void operator() (bool ev_read, bool ev_write) = 0;
-
-    int fd;
-    bool ev_read;
-    bool ev_write;
-};
+/* FIXME: Provide information about errors (e.g. EPOLLERR) */
+typedef std::function<void(bool, bool)> io_cb;
 
 class iomux {
 public:
@@ -26,9 +18,9 @@ public:
     { }
 
 public:
-    virtual void add(io_cb& cb) = 0;
-    virtual void set(io_cb& cb) = 0;
-    virtual void remove(io_cb& cb) = 0;
+    virtual void add(int fd, bool read, bool write, io_cb cb) = 0;
+    virtual void set(int fd, bool read, bool write) = 0;
+    virtual void rem(int fd) = 0;
 
 protected:
     event_mgr& emgr;

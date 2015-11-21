@@ -16,19 +16,18 @@ lixs::virq_handler::virq_handler(xenstore& xs, domain_mgr& dmgr, iomux& io)
     virq_port = xc_evtchn_bind_virq(xce_handle, VIRQ_DOM_EXC);
 
     fd = xc_evtchn_fd(xce_handle);
-    ev_read = true;
-    ev_write = false;
-    io.add(*this);
+    io.add(fd, true, false, std::bind(&virq_handler::callback, this,
+                std::placeholders::_1, std::placeholders::_2));
 }
 
 lixs::virq_handler::~virq_handler()
 {
-    io.remove(*this);
+    io.rem(fd);
     xc_evtchn_close(xce_handle);
     xc_interface_close(xc_handle);
 }
 
-void lixs::virq_handler::operator()(bool ev_read, bool ev_write)
+void lixs::virq_handler::callback(bool ev_read, bool ev_write)
 {
     int ret;
     xc_dominfo_t dominfo;

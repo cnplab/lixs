@@ -11,7 +11,8 @@ extern "C" {
 
 lixs::ring_conn_base::ring_conn_base(iomux& io, domid_t domid,
         evtchn_port_t port, xenstore_domain_interface* interface)
-    : io(io), domid(domid), remote_port (port), interface(interface)
+    : io(io), ev_read(false), ev_write(false),
+    domid(domid), remote_port(port), interface(interface)
 {
     xce_handle = xc_evtchn_open(NULL, 0);
     local_port = xc_evtchn_bind_interdomain(xce_handle, domid, remote_port);
@@ -19,12 +20,17 @@ lixs::ring_conn_base::ring_conn_base(iomux& io, domid_t domid,
     xc_evtchn_notify(xce_handle, local_port);
 
     fd = xc_evtchn_fd(xce_handle);
-    io.add(*this);
+
+    cb = std::shared_ptr<ring_conn_cb>(new ring_conn_cb(*this));
+
+    io.add(fd, ev_read, ev_write, std::bind(ring_conn_cb::callback,
+                std::placeholders::_1, std::placeholders::_2,
+                std::weak_ptr<ring_conn_cb>(cb)));
 }
 
 lixs::ring_conn_base::~ring_conn_base()
 {
-    io.remove(*this);
+    io.rem(fd);
     xc_evtchn_close(xce_handle);
 }
 
@@ -43,12 +49,12 @@ bool lixs::ring_conn_base::read(char*& buff, int& bytes)
 
     if (bytes > 0 && !ev_read) {
         ev_read = true;
-        io.set(*this);
+        io.set(fd, ev_read, ev_write);
     }
 
     if (bytes == 0 && ev_read) {
         ev_read = false;
-        io.set(*this);
+        io.set(fd, ev_read, ev_write);
     }
 
     if (notify) {
@@ -73,12 +79,12 @@ bool lixs::ring_conn_base::write(char*& buff, int& bytes)
 
     if (bytes > 0 && !ev_write) {
         ev_write = true;
-        io.set(*this);
+        io.set(fd, ev_read, ev_write);
     }
 
     if (bytes == 0 && ev_write) {
         ev_write = false;
-        io.set(*this);
+        io.set(fd, ev_read, ev_write);
     }
 
     if (notify) {
@@ -92,7 +98,7 @@ void lixs::ring_conn_base::need_rx(void)
 {
     if (!ev_read) {
         ev_read = true;
-        io.set(*this);
+        io.set(fd, ev_read, ev_write);
     }
 }
 
@@ -100,23 +106,33 @@ void lixs::ring_conn_base::need_tx(void)
 {
     if (!ev_write) {
         ev_write = true;
-        io.set(*this);
+        io.set(fd, ev_read, ev_write);
     }
 }
 
-void lixs::ring_conn_base::operator()(bool read, bool write)
+lixs::ring_conn_cb::ring_conn_cb(ring_conn_base& conn)
+    : conn(conn)
 {
+}
+
+void lixs::ring_conn_cb::callback(bool read, bool write, std::weak_ptr<ring_conn_cb> ptr)
+{
+    if (ptr.expired()) {
+        return;
+    }
+
+    std::shared_ptr<ring_conn_cb> cb(ptr);
 
     if (read) {
-        process_rx();
+        cb->conn.process_rx();
     }
 
     if (write) {
-        process_tx();
+        cb->conn.process_tx();
     }
 
-    evtchn_port_t port = xc_evtchn_pending(xce_handle);
-    xc_evtchn_unmask(xce_handle, port);
+    evtchn_port_t port = xc_evtchn_pending(cb->conn.xce_handle);
+    xc_evtchn_unmask(cb->conn.xce_handle, port);
 }
 
 bool lixs::ring_conn_base::read_chunk(char*& buff, int& bytes)

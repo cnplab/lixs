@@ -14,17 +14,19 @@ extern "C" {
 
 namespace lixs {
 
-class virq_handler : io_cb {
+class virq_handler {
 public:
     virq_handler(xenstore& xs, domain_mgr& dmgr, iomux& io);
     virtual ~virq_handler();
 
-    void operator()(bool ev_read, bool ev_write);
+    void callback(bool ev_read, bool ev_write);
 
 private:
     xenstore& xs;
     domain_mgr& dmgr;
     iomux& io;
+
+    int fd;
 
     xc_interface* xc_handle;
     xc_evtchn *xce_handle;
