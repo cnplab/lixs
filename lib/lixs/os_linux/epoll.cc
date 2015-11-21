@@ -62,7 +62,6 @@ void lixs::os_linux::epoll::rem(int fd)
 
 void lixs::os_linux::epoll::handle(void)
 {
-    io_cb* cb;
     int n_events;
 
     n_events = epoll_wait(epfd, epev, epoll_max_events, timeout);
@@ -76,8 +75,8 @@ void lixs::os_linux::epoll::handle(void)
              * invalidate this pointers before doing that move. Probably this
              * can be done through the use of smart pointers.
              */
-            cb = static_cast<io_cb*>(epev[i].data.ptr);
-            cb->operator()(is_read(epev[i].events), is_write(epev[i].events));
+            emgr.enqueue_event(std::bind(*static_cast<io_cb*>(epev[i].data.ptr),
+                        is_read(epev[i].events), is_write(epev[i].events)));
         }
     }
 
