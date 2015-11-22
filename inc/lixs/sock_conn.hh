@@ -28,9 +28,6 @@ protected:
     virtual void conn_dead(void) = 0;
 
 private:
-    void operator()(bool read, bool write);
-
-private:
     iomux& io;
 
     int fd;
