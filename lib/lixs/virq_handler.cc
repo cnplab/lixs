@@ -27,7 +27,7 @@ lixs::virq_handler::~virq_handler()
     xc_interface_close(xc_handle);
 }
 
-void lixs::virq_handler::callback(bool ev_read, bool ev_write)
+void lixs::virq_handler::callback(bool read, bool write)
 {
     int ret;
     xc_dominfo_t dominfo;

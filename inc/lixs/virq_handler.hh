@@ -19,7 +19,7 @@ public:
     virq_handler(xenstore& xs, domain_mgr& dmgr, iomux& io);
     virtual ~virq_handler();
 
-    void callback(bool ev_read, bool ev_write);
+    void callback(bool read, bool write);
 
 private:
     xenstore& xs;
