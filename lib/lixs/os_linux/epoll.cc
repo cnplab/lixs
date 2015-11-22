@@ -16,29 +16,52 @@ lixs::os_linux::epoll::~epoll()
 {
 }
 
-void lixs::os_linux::epoll::add(io_cb& cb)
+void lixs::os_linux::epoll::add(int fd, bool read, bool write, io_cb cb)
 {
-    struct epoll_event event = { get_events(cb), { reinterpret_cast<void*>(&cb) } };
+    std::pair<cb_map::iterator, bool> res = callbacks.insert({fd, cb});
 
-    epoll_ctl(epfd, EPOLL_CTL_ADD, cb.fd, &event);
+    if (!res.second) {
+        return;
+    }
+
+    struct epoll_event event = {
+        get_events(read, write),
+        { static_cast<void*>(&(res.first->second)) }
+    };
+
+    epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &event);
 }
 
-void lixs::os_linux::epoll::set(io_cb& cb)
+void lixs::os_linux::epoll::set(int fd, bool read, bool write)
 {
-    struct epoll_event event = { get_events(cb), { reinterpret_cast<void*>(&cb) } };
+    cb_map::iterator it = callbacks.find(fd);
 
-    epoll_ctl(epfd, EPOLL_CTL_MOD, cb.fd, &event);
+    if (it == callbacks.end()) {
+        return;
+    }
+
+    struct epoll_event event = {
+        get_events(read, write),
+        { static_cast<void*>(&(it->second)) }
+    };
+
+    epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &event);
 }
 
-void lixs::os_linux::epoll::remove(io_cb& cb)
+void lixs::os_linux::epoll::rem(int fd)
 {
+    cb_map::size_type res = callbacks.erase(fd);
+
+    if (res == 0) {
+        return;
+    }
+
     /* Passing event == NULL requires linux > 2.6.9, see BUGS */
-    epoll_ctl(epfd, EPOLL_CTL_DEL, cb.fd, NULL);
+    epoll_ctl(epfd, EPOLL_CTL_DEL, fd, NULL);
 }
 
 void lixs::os_linux::epoll::handle(void)
 {
-    io_cb* cb;
     int n_events;
 
     n_events = epoll_wait(epfd, epev, epoll_max_events, timeout);
@@ -52,17 +75,17 @@ void lixs::os_linux::epoll::handle(void)
              * invalidate this pointers before doing that move. Probably this
              * can be done through the use of smart pointers.
              */
-            cb = reinterpret_cast<io_cb*>(epev[i].data.ptr);
-            cb->operator()(is_read(epev[i].events), is_write(epev[i].events));
+            emgr.enqueue_event(std::bind(*static_cast<io_cb*>(epev[i].data.ptr),
+                        is_read(epev[i].events), is_write(epev[i].events)));
         }
     }
 
     emgr.enqueue_event(std::bind(&epoll::handle, this));
 }
 
-uint32_t inline lixs::os_linux::epoll::get_events(const io_cb& cb)
+uint32_t inline lixs::os_linux::epoll::get_events(bool read, bool write)
 {
-    return (cb.ev_read ? EPOLLIN : 0) | (cb.ev_write ? EPOLLOUT : 0);
+    return (read ? EPOLLIN : 0) | (write ? EPOLLOUT : 0);
 }
 
 bool inline lixs::os_linux::epoll::is_read(const uint32_t ev)

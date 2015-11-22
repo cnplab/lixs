@@ -3,6 +3,7 @@
 
 #include <lixs/iomux.hh>
 
+#include <map>
 #include <sys/epoll.h>
 
 
@@ -14,14 +15,17 @@ public:
     epoll(event_mgr& emgr);
     ~epoll();
 
-    void add(io_cb& cb);
-    void set(io_cb& cb);
-    void remove(io_cb& cb);
+    void add(int fd, bool read, bool write, io_cb cb);
+    void set(int fd, bool read, bool write);
+    void rem(int fd);
+
+private:
+    typedef std::map<int, io_cb> cb_map;
 
 private:
     void handle(void);
 
-    uint32_t inline get_events(const io_cb& cb);
+    uint32_t inline get_events(bool read, bool write);
     bool inline is_read(const uint32_t ev);
     bool inline is_write(const uint32_t ev);
     bool inline is_err(const uint32_t ev);
@@ -33,6 +37,8 @@ private:
 
     int epfd;
     struct epoll_event epev[epoll_max_events];
+
+    cb_map callbacks;
 };
 
 } /* namespace os_linux */

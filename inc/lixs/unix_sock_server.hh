@@ -19,15 +19,7 @@ public:
     ~unix_sock_server();
 
 private:
-    struct io_cb : public lixs::io_cb {
-        io_cb (unix_sock_server& server)
-            : server(server)
-        { }
-
-        void operator()(bool read, bool write);
-
-        unix_sock_server& server;
-    };
+    void callback(bool read, bool write, int fd);
 
 private:
     void client_dead(sock_client* client);
@@ -39,10 +31,10 @@ private:
     iomux& io;
 
     std::string rw_path;
-    io_cb rw_cb;
+    int rw_fd;
 
     std::string ro_path;
-    io_cb ro_cb;
+    int ro_fd;
 };
 
 } /* namespace lixs */

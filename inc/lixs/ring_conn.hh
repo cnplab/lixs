@@ -14,7 +14,12 @@ extern "C" {
 
 namespace lixs {
 
-class ring_conn_base : public io_cb {
+class ring_conn_cb;
+
+class ring_conn_base {
+private:
+    friend ring_conn_cb;
+
 protected:
     ring_conn_base(iomux& io, domid_t domid,
             evtchn_port_t port, xenstore_domain_interface* interface);
@@ -31,13 +36,17 @@ protected:
     virtual void process_tx(void) = 0;
 
 private:
-    void operator()(bool read, bool write);
-
     bool read_chunk(char*& buff, int& bytes);
     bool write_chunk(char*& buff, int& bytes);
 
 private:
     iomux& io;
+
+    int fd;
+    bool ev_read;
+    bool ev_write;
+
+    std::shared_ptr<ring_conn_cb> cb;
 
     domid_t domid;
     evtchn_port_t local_port;
@@ -45,6 +54,17 @@ private:
 
     xc_evtchn *xce_handle;
     xenstore_domain_interface* interface;
+};
+
+class ring_conn_cb {
+public:
+    ring_conn_cb(ring_conn_base& conn);
+
+public:
+    static void callback(bool read, bool write, std::weak_ptr<ring_conn_cb> ptr);
+
+private:
+    ring_conn_base& conn;
 };
 
 

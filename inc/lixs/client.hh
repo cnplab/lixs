@@ -31,14 +31,14 @@ client<PROTOCOL>::client(const std::string& cid, ARGS&&... args)
     printf("LiXS: [%4s] New client registered\n", client_id.c_str());
 }
 
-template < typename CONNECTION >
-client<CONNECTION>::~client()
+template < typename PROTOCOL >
+client<PROTOCOL>::~client()
 {
     printf("LiXS: [%4s] Client connection closed\n", client_id.c_str());
 }
 
-template < typename CONNECTION >
-std::string client<CONNECTION>::cid(void)
+template < typename PROTOCOL >
+std::string client<PROTOCOL>::cid(void)
 {
     return client_id;
 }
