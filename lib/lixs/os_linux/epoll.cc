@@ -68,13 +68,6 @@ void lixs::os_linux::epoll::handle(void)
 
     for (int i = 0; i < n_events; i++) {
         if (!is_err(epev[i].events)) {
-            /* TODO: A better design would be to enqueue each of the callbacks
-             * on the event_mgr. However it's possible the object the callback
-             * refers to is deleted after enqueue and before being fired
-             * leading to a crash. Therefore we need to come up with a way to
-             * invalidate this pointers before doing that move. Probably this
-             * can be done through the use of smart pointers.
-             */
             emgr.enqueue_event(std::bind(*static_cast<io_cb*>(epev[i].data.ptr),
                         is_read(epev[i].events), is_write(epev[i].events)));
         }
