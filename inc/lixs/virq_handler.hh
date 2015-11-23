@@ -6,6 +6,7 @@
 #include <lixs/xenstore.hh>
 
 #include <cerrno>
+#include <stdexcept>
 
 extern "C" {
 #include <xenctrl.h>
@@ -13,6 +14,10 @@ extern "C" {
 
 
 namespace lixs {
+
+class virq_handler_error : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
 
 class virq_handler {
 public:

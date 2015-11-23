@@ -12,9 +12,23 @@ lixs::virq_handler::virq_handler(xenstore& xs, domain_mgr& dmgr, iomux& io)
     : xs(xs), dmgr(dmgr), io(io)
 {
     xc_handle = xc_interface_open(NULL, NULL, 0);
+    if (xc_handle == NULL) {
+        throw ring_conn_error("Failed to open xc handle: " +
+                std::string(std::strerror(errno)));
+    }
+
     xce_handle = xc_evtchn_open(NULL, 0);
+    if (xce_handle == NULL) {
+        throw ring_conn_error("Failed to open evtchn handle: " +
+                std::string(std::strerror(errno)));
+    }
 
     virq_port = xc_evtchn_bind_virq(xce_handle, VIRQ_DOM_EXC);
+    if (virq_port == (evtchn_port_t)(-1)) {
+        xc_evtchn_close(xce_handle);
+        throw ring_conn_error("Failed to bind virq: " +
+                std::string(std::strerror(errno)));
+    }
 
     fd = xc_evtchn_fd(xce_handle);
     io.add(fd, true, false, std::bind(&virq_handler::callback, this,
