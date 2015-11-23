@@ -7,10 +7,15 @@
 #include <lixs/sock_client.hh>
 #include <lixs/xenstore.hh>
 
+#include <stdexcept>
 #include <string>
 
 
 namespace lixs {
+
+class unix_sock_server_error : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
 
 class unix_sock_server {
 public:
@@ -22,7 +27,7 @@ private:
     void callback(bool read, bool write, int fd);
 
 private:
-    int bind_socket(const std::string& path);
+    int bind_socket(const std::string& path, std::string& err_msg);
     void client_dead(sock_client* client);
 
 private:
