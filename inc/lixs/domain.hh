@@ -34,7 +34,7 @@ private:
 
 class domain : public client<xs_proto_v1::xs_proto<ring_conn<foreign_ring_mapper> > > {
 public:
-    domain(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io,
+    domain(ev_cb dead_cb, xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io,
             domid_t domid, evtchn_port_t port, unsigned int mfn);
     ~domain();
 
@@ -48,6 +48,9 @@ private:
     void conn_dead(void);
 
 private:
+    event_mgr& emgr;
+    ev_cb dead_cb;
+
     bool active;
     domid_t domid;
 };

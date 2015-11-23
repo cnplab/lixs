@@ -27,9 +27,9 @@ lixs::foreign_ring_mapper::~foreign_ring_mapper()
 }
 
 
-lixs::domain::domain(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io,
+lixs::domain::domain(ev_cb dead_cb, xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io,
         domid_t domid, evtchn_port_t port, unsigned int mfn)
-    : client(get_id(domid), domid, xs, dmgr, io, domid, port, mfn),
+    : client(get_id(domid), domid, xs, dmgr, io, domid, port, mfn), emgr(emgr), dead_cb(dead_cb),
     active(true), domid(domid)
 {
 }
@@ -55,6 +55,7 @@ domid_t lixs::domain::get_domid(void)
 
 void lixs::domain::conn_dead(void)
 {
+    emgr.enqueue_event(dead_cb);
 }
 
 std::string lixs::domain::get_id(domid_t domid)

@@ -32,6 +32,9 @@ public:
     iterator end(void);
 
 private:
+    void domain_dead(domid_t domid);
+
+private:
     typedef std::map<domid_t, domain*> domain_map;
 
 private:
