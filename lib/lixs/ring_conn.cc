@@ -2,6 +2,8 @@
 
 #include <cerrno>
 #include <cstring>
+#include <functional>
+#include <memory>
 
 extern "C" {
 #include <xenctrl.h>
