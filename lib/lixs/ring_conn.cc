@@ -176,6 +176,7 @@ void lixs::ring_conn_cb::callback(bool read, bool write, bool error,
         std::weak_ptr<ring_conn_cb> ptr)
 {
     int ret;
+    evtchn_port_t port;
 
     if (ptr.expired()) {
         return;
@@ -188,8 +189,7 @@ void lixs::ring_conn_cb::callback(bool read, bool write, bool error,
     }
 
     if (error) {
-        /* FIXME: handle error */
-        return;
+        goto out_err;
     }
 
     if (read) {
@@ -204,7 +204,7 @@ void lixs::ring_conn_cb::callback(bool read, bool write, bool error,
         return;
     }
 
-    evtchn_port_t port = xc_evtchn_pending(cb->conn.xce_handle);
+    port = xc_evtchn_pending(cb->conn.xce_handle);
     if (port == (evtchn_port_t)(-1)) {
         goto out_err;
     }
