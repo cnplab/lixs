@@ -53,6 +53,8 @@ private:
     bool ev_read;
     bool ev_write;
 
+    bool alive;
+
     std::shared_ptr<ring_conn_cb> cb;
 
     domid_t domid;
