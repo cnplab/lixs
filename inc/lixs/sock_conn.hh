@@ -3,6 +3,8 @@
 
 #include <lixs/iomux.hh>
 
+#include <memory>
+
 
 namespace lixs {
 

@@ -3,6 +3,8 @@
 
 #include <cerrno>
 #include <fcntl.h>
+#include <functional>
+#include <memory>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
