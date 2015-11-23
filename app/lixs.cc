@@ -121,7 +121,12 @@ int main(int argc, char** argv)
     }
 
     if (conf.virq_dom_exc) {
-        dom_exc = new lixs::virq_handler(xs, dmgr, epoll);
+        try {
+            dom_exc = new lixs::virq_handler(xs, dmgr, epoll);
+        } catch (lixs::virq_handler_error e) {
+            printf("LiXS: [dom_exc] %s\n", e.what());
+            goto out;
+        }
     }
 
 
