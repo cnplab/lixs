@@ -62,8 +62,7 @@ void lixs::virq_handler::callback(bool read, bool write, bool error)
     }
 
     if (error) {
-        /* FIXME: handle error */
-        return;
+        goto out_err;
     }
 
     ret = 0;
