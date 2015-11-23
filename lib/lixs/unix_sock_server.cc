@@ -111,9 +111,19 @@ void lixs::unix_sock_server::client_dead(sock_client* client)
 
 void lixs::unix_sock_server::callback(bool read, bool write, int fd)
 {
+    int client_fd;
+
+    client_fd = accept(fd, NULL, NULL);
+    if (client_fd == -1) {
+        printf("LiXS: [unix_socket_server] Calling accept on socket failed: %d\n", errno);
+        printf("LiXS: [unix_socket_server] Disabling socket (fd = %d)\n", fd);
+        io.rem(fd);
+        return;
+    }
+
     std::function<void(sock_client*)> cb = std::bind(
             &unix_sock_server::client_dead, this, std::placeholders::_1);
 
-    new sock_client(cb, xs, dmgr, emgr, io, accept(fd, NULL, NULL));
+    new sock_client(cb, xs, dmgr, emgr, io, client_fd);
 }
 
