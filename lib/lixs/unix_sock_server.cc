@@ -114,7 +114,9 @@ void lixs::unix_sock_server::callback(bool read, bool write, bool error, int fd)
     int client_fd;
 
     if (error) {
-        /* FIXME: handle error */
+        printf("LiXS: [unix_socket_server] Got error from iomux\n");
+        printf("LiXS: [unix_socket_server] Disabling socket (fd = %d)\n", fd);
+        io.rem(fd);
         return;
     }
 
