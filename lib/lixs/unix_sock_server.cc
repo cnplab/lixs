@@ -6,6 +6,7 @@
 #include <lixs/xenstore.hh>
 
 #include <cstddef>
+#include <functional>
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
