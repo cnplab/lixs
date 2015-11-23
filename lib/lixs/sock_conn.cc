@@ -187,11 +187,6 @@ lixs::sock_conn_cb::sock_conn_cb(sock_conn& conn)
 void lixs::sock_conn_cb::callback(bool read, bool write, bool error,
         std::weak_ptr<sock_conn_cb> ptr)
 {
-    if (error) {
-        /* FIXME: handle error */
-        return;
-    }
-
     if (ptr.expired()) {
         return;
     }
@@ -199,6 +194,13 @@ void lixs::sock_conn_cb::callback(bool read, bool write, bool error,
     std::shared_ptr<sock_conn_cb> cb(ptr);
 
     if (!(cb->conn.alive)) {
+        return;
+    }
+
+    if (error) {
+        cb->conn.io.rem(cb->conn.fd);
+        cb->conn.alive = false;
+        cb->conn.conn_dead();
         return;
     }
 
