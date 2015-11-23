@@ -112,7 +112,12 @@ int main(int argc, char** argv)
     }
 
     if (conf.xenbus) {
-        xenbus = new lixs::xenbus(xs, dmgr, emgr, epoll);
+        try {
+            xenbus = new lixs::xenbus(xs, dmgr, emgr, epoll);
+        } catch (lixs::xenbus_error e) {
+            printf("LiXS: [xenbus] %s\n", e.what());
+            goto out;
+        }
     }
 
     if (conf.virq_dom_exc) {
@@ -128,6 +133,8 @@ int main(int argc, char** argv)
 
     emgr.run();
 
+
+out:
     if (nix) {
         delete nix;
     }
