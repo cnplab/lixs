@@ -33,6 +33,8 @@ private:
 
     int fd;
 
+    bool alive;
+
     xc_interface* xc_handle;
     xc_evtchn *xce_handle;
     evtchn_port_t virq_port;
