@@ -5,6 +5,7 @@
 #include <lixs/xenstore.hh>
 
 #include <list>
+#include <functional>
 
 
 lixs::virq_handler::virq_handler(xenstore& xs, domain_mgr& dmgr, iomux& io)
