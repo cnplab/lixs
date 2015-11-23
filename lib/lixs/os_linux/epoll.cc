@@ -1,8 +1,6 @@
 #include <lixs/os_linux/epoll.hh>
 
 #include <cstddef>
-#include <cstdio>
-#include <list>
 #include <sys/epoll.h>
 
 
