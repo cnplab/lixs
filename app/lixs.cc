@@ -107,8 +107,13 @@ int main(int argc, char** argv)
     lixs::virq_handler* dom_exc = NULL;
 
     if (conf.unix_sockets) {
-        nix = new lixs::unix_sock_server(xs, dmgr, emgr, epoll,
-                conf.unix_socket_path, conf.unix_socket_ro_path);
+        try {
+            nix = new lixs::unix_sock_server(xs, dmgr, emgr, epoll,
+                    conf.unix_socket_path, conf.unix_socket_ro_path);
+        } catch (lixs::unix_sock_server_error e) {
+            printf("LiXS: [unix_sock_server] %s\n", e.what());
+            goto out;
+        }
     }
 
     if (conf.xenbus) {
