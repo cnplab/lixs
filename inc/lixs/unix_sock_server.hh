@@ -20,7 +20,7 @@ class unix_sock_server_error : public std::runtime_error {
 class unix_sock_server {
 public:
     unix_sock_server(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io,
-            std::string rw_path, std::string ro_path);
+            const std::string& rw_path, const std::string& ro_path);
     ~unix_sock_server();
 
 private:

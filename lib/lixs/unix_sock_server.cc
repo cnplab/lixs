@@ -15,8 +15,7 @@
 
 
 lixs::unix_sock_server::unix_sock_server(xenstore& xs, domain_mgr& dmgr,
-        event_mgr& emgr, iomux& io,
-        std::string rw_path, std::string ro_path)
+        event_mgr& emgr, iomux& io, const std::string& rw_path, const std::string& ro_path)
     : xs(xs), dmgr(dmgr), emgr(emgr), io(io), rw_path(rw_path), ro_path(ro_path)
 {
     std::string err_msg;
