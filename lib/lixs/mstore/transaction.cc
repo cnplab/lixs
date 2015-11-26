@@ -16,13 +16,12 @@ int lixs::mstore::transaction::create(cid_t cid, const std::string& path, bool& 
     record& rec = db[path];
     entry& te = rec.te[id];
 
-    if (!te.init_seq) {
-        te.init_seq = rec.next_seq++;
+    if (!te.read_seq) {
+        te.read_seq = rec.next_seq++;
         records.insert(path);
     }
 
     if (te.write_seq || rec.e.write_seq) {
-        te.read_seq = rec.next_seq++;
         created = false;
     } else {
         ensure_branch(cid, path);
@@ -43,12 +42,10 @@ int lixs::mstore::transaction::read(cid_t cid, const std::string& path, std::str
     record& rec = db[path];
     entry& te = rec.te[id];
 
-    if (!te.init_seq) {
-        te.init_seq = rec.next_seq++;
+    if (!te.read_seq) {
+        te.read_seq = rec.next_seq++;
         records.insert(path);
     }
-
-    te.read_seq = rec.next_seq++;
 
     if (te.write_seq) {
         if (!has_read_access(cid, te.perms)) {
@@ -74,19 +71,17 @@ int lixs::mstore::transaction::update(cid_t cid, const std::string& path, const 
     record& rec = db[path];
     entry& te = rec.te[id];
 
-    if (!te.init_seq) {
-        te.init_seq = rec.next_seq++;
+    if (!te.read_seq) {
+        te.read_seq = rec.next_seq++;
         records.insert(path);
     }
 
     if (te.write_seq) {
         if (!has_write_access(cid, te.perms)) {
-            te.read_seq = rec.next_seq++;
             return EACCES;
         }
     } else if (rec.e.write_seq) {
         if (!has_write_access(cid, rec.e.perms)) {
-            te.read_seq = rec.next_seq++;
             return EACCES;
         }
 
@@ -110,23 +105,20 @@ int lixs::mstore::transaction::del(cid_t cid, const std::string& path)
     record& rec = db[path];
     entry& te = rec.te[id];
 
-    if (!te.init_seq) {
-        te.init_seq = rec.next_seq++;
+    if (!te.read_seq) {
+        te.read_seq = rec.next_seq++;
         records.insert(path);
     }
 
     if (te.write_seq) {
         if (!has_write_access(cid, te.perms)) {
-            te.read_seq = rec.next_seq++;
             return EACCES;
         }
     } else if (!te.delete_seq && rec.e.write_seq) {
         if (!has_write_access(cid, rec.e.perms)) {
-            te.read_seq = rec.next_seq++;
             return EACCES;
         }
     } else {
-        te.read_seq = rec.next_seq++;
         return ENOENT;
     }
 
@@ -144,12 +136,10 @@ int lixs::mstore::transaction::get_children(cid_t cid, const std::string& path, 
     record& rec = db[path];
     entry& te = rec.te[id];
 
-    if (!te.init_seq) {
-        te.init_seq = rec.next_seq++;
+    if (!te.read_seq) {
+        te.read_seq = rec.next_seq++;
         records.insert(path);
     }
-
-    te.read_seq = rec.next_seq++;
 
     if (te.write_seq) {
         if (!has_read_access(cid, te.perms)) {
@@ -186,12 +176,10 @@ int lixs::mstore::transaction::get_perms(cid_t cid,
     record& rec = db[path];
     entry& te = rec.te[id];
 
-    if (!te.init_seq) {
-        te.init_seq = rec.next_seq++;
+    if (!te.read_seq) {
+        te.read_seq = rec.next_seq++;
         records.insert(path);
     }
-
-    te.read_seq = rec.next_seq++;
 
     if (te.write_seq) {
         if (!has_read_access(cid, te.perms)) {
@@ -218,14 +206,13 @@ int lixs::mstore::transaction::set_perms(cid_t cid,
     record& rec = db[path];
     entry& te = rec.te[id];
 
-    if (!te.init_seq) {
-        te.init_seq = rec.next_seq++;
+    if (!te.read_seq) {
+        te.read_seq = rec.next_seq++;
         records.insert(path);
     }
 
     if (te.write_seq) {
         if (!has_write_access(cid, te.perms)) {
-            te.read_seq = rec.next_seq++;
             return EACCES;
         }
 
@@ -234,7 +221,6 @@ int lixs::mstore::transaction::set_perms(cid_t cid,
         return 0;
     } else if (!te.delete_seq && rec.e.write_seq) {
         if (!has_write_access(cid, rec.e.perms)) {
-            te.read_seq = rec.next_seq++;
             return EACCES;
         }
 
@@ -244,7 +230,6 @@ int lixs::mstore::transaction::set_perms(cid_t cid,
         te.delete_seq = 0;
         return 0;
     } else {
-        te.read_seq = rec.next_seq++;
         return ENOENT;
     }
 }
@@ -284,7 +269,7 @@ bool lixs::mstore::transaction::can_merge()
 
         long int rec_seq = std::max(rec.e.write_seq, rec.e.delete_seq);
 
-        if (rec_seq && (rec_seq > te.init_seq)) {
+        if (rec_seq && (rec_seq > te.read_seq)) {
             return false;
         }
 
@@ -350,8 +335,8 @@ void lixs::mstore::transaction::register_with_parent(const std::string& path)
         record& rec = db[parent];
         entry& te = rec.te[id];
 
-        if (!te.init_seq) {
-            te.init_seq = rec.next_seq++;
+        if (!te.read_seq) {
+            te.read_seq = rec.next_seq++;
             records.insert(parent);
         }
 
