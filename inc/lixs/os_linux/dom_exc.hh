@@ -1,5 +1,5 @@
-#ifndef __LIXS_VIRQ_HANDLER_HH__
-#define __LIXS_VIRQ_HANDLER_HH__
+#ifndef __LIXS_OS_LINUX_DOM_EXC_HH__
+#define __LIXS_OS_LINUX_DOM_EXC_HH__
 
 #include <lixs/domain_mgr.hh>
 #include <lixs/iomux.hh>
@@ -14,15 +14,16 @@ extern "C" {
 
 
 namespace lixs {
+namespace os_linux {
 
-class virq_handler_error : public std::runtime_error {
+class dom_exc_error : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
-class virq_handler {
+class dom_exc {
 public:
-    virq_handler(xenstore& xs, domain_mgr& dmgr, iomux& io);
-    virtual ~virq_handler();
+    dom_exc(xenstore& xs, domain_mgr& dmgr, iomux& io);
+    virtual ~dom_exc();
 
     void callback(bool read, bool write, bool error);
 
@@ -40,7 +41,8 @@ private:
     evtchn_port_t virq_port;
 };
 
+} /* namespace os_linux */
 } /* namespace lixs */
 
-#endif /* __LIXS_VIRQ_HANDLER_HH__ */
+#endif /* __LIXS_OS_LINUX_DOM_EXC_HH__ */
 

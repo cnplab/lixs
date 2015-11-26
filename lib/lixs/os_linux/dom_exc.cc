@@ -1,14 +1,14 @@
 #include <lixs/domain.hh>
 #include <lixs/domain_mgr.hh>
 #include <lixs/iomux.hh>
-#include <lixs/virq_handler.hh>
+#include <lixs/os_linux/dom_exc.hh>
 #include <lixs/xenstore.hh>
 
 #include <list>
 #include <functional>
 
 
-lixs::virq_handler::virq_handler(xenstore& xs, domain_mgr& dmgr, iomux& io)
+lixs::os_linux::dom_exc::dom_exc(xenstore& xs, domain_mgr& dmgr, iomux& io)
     : xs(xs), dmgr(dmgr), io(io), alive(true)
 {
     xc_handle = xc_interface_open(NULL, NULL, 0);
@@ -31,11 +31,11 @@ lixs::virq_handler::virq_handler(xenstore& xs, domain_mgr& dmgr, iomux& io)
     }
 
     fd = xc_evtchn_fd(xce_handle);
-    io.add(fd, true, false, std::bind(&virq_handler::callback, this,
+    io.add(fd, true, false, std::bind(&dom_exc::callback, this,
                 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
-lixs::virq_handler::~virq_handler()
+lixs::os_linux::dom_exc::~dom_exc()
 {
     if (alive) {
         io.rem(fd);
@@ -45,7 +45,7 @@ lixs::virq_handler::~virq_handler()
     xc_interface_close(xc_handle);
 }
 
-void lixs::virq_handler::callback(bool read, bool write, bool error)
+void lixs::os_linux::dom_exc::callback(bool read, bool write, bool error)
 {
     int ret;
     evtchn_port_t port;

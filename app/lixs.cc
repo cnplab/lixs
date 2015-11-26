@@ -3,7 +3,7 @@
 #include <lixs/mstore/store.hh>
 #include <lixs/os_linux/epoll.hh>
 #include <lixs/unix_sock_server.hh>
-#include <lixs/virq_handler.hh>
+#include <lixs/os_linux/dom_exc.hh>
 #include <lixs/xenbus.hh>
 #include <lixs/xenstore.hh>
 
@@ -104,7 +104,7 @@ int main(int argc, char** argv)
 
     lixs::unix_sock_server* nix = NULL;
     lixs::xenbus* xenbus = NULL;
-    lixs::virq_handler* dom_exc = NULL;
+    lixs::os_linux::dom_exc* dom_exc = NULL;
 
     if (conf.unix_sockets) {
         try {
@@ -127,8 +127,8 @@ int main(int argc, char** argv)
 
     if (conf.virq_dom_exc) {
         try {
-            dom_exc = new lixs::virq_handler(xs, dmgr, epoll);
-        } catch (lixs::virq_handler_error e) {
+            dom_exc = new lixs::os_linux::dom_exc(xs, dmgr, epoll);
+        } catch (lixs::os_linux::dom_exc_error e) {
             printf("LiXS: [dom_exc] %s\n", e.what());
             goto out;
         }
