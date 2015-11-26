@@ -13,20 +13,20 @@ lixs::os_linux::dom_exc::dom_exc(xenstore& xs, domain_mgr& dmgr, iomux& io)
 {
     xc_handle = xc_interface_open(NULL, NULL, 0);
     if (xc_handle == NULL) {
-        throw ring_conn_error("Failed to open xc handle: " +
+        throw dom_exc_error("Failed to open xc handle: " +
                 std::string(std::strerror(errno)));
     }
 
     xce_handle = xc_evtchn_open(NULL, 0);
     if (xce_handle == NULL) {
-        throw ring_conn_error("Failed to open evtchn handle: " +
+        throw dom_exc_error("Failed to open evtchn handle: " +
                 std::string(std::strerror(errno)));
     }
 
     virq_port = xc_evtchn_bind_virq(xce_handle, VIRQ_DOM_EXC);
     if (virq_port == (evtchn_port_t)(-1)) {
         xc_evtchn_close(xce_handle);
-        throw ring_conn_error("Failed to bind virq: " +
+        throw dom_exc_error("Failed to bind virq: " +
                 std::string(std::strerror(errno)));
     }
 
