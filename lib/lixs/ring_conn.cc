@@ -4,6 +4,7 @@
 #include <cstring>
 #include <functional>
 #include <memory>
+#include <string>
 
 extern "C" {
 #include <xenctrl.h>
@@ -13,13 +14,37 @@ extern "C" {
 
 lixs::ring_conn_base::ring_conn_base(iomux& io, domid_t domid,
         evtchn_port_t port, xenstore_domain_interface* interface)
-    : io(io), ev_read(false), ev_write(false),
+    : io(io), ev_read(false), ev_write(false), alive(true),
     domid(domid), remote_port(port), interface(interface)
 {
+    int ret;
+
     xce_handle = xc_evtchn_open(NULL, 0);
+    if (xce_handle == NULL) {
+        throw ring_conn_error("Failed to open evtchn handle: " +
+                std::string(std::strerror(errno)));
+    }
+
     local_port = xc_evtchn_bind_interdomain(xce_handle, domid, remote_port);
-    xc_evtchn_unmask(xce_handle, local_port);
-    xc_evtchn_notify(xce_handle, local_port);
+    if (local_port == (evtchn_port_t)(-1)) {
+        xc_evtchn_close(xce_handle);
+        throw ring_conn_error("Failed to bind evtchn: " +
+                std::string(std::strerror(errno)));
+    }
+
+    ret = xc_evtchn_unmask(xce_handle, local_port);
+    if (ret == -1) {
+        xc_evtchn_close(xce_handle);
+        throw ring_conn_error("Failed to unmask evtchn: " +
+                std::string(std::strerror(errno)));
+    }
+
+    ret = xc_evtchn_notify(xce_handle, local_port);
+    if (ret == -1) {
+        xc_evtchn_close(xce_handle);
+        throw ring_conn_error("Failed to notify evtchn: " +
+                std::string(std::strerror(errno)));
+    }
 
     fd = xc_evtchn_fd(xce_handle);
 
@@ -32,13 +57,20 @@ lixs::ring_conn_base::ring_conn_base(iomux& io, domid_t domid,
 
 lixs::ring_conn_base::~ring_conn_base()
 {
-    io.rem(fd);
+    if (alive) {
+        io.rem(fd);
+    }
     xc_evtchn_close(xce_handle);
 }
 
 bool lixs::ring_conn_base::read(char*& buff, int& bytes)
 {
+    int ret;
     bool notify = false;
+
+    if (!alive) {
+        return false;
+    }
 
     notify = read_chunk(buff, bytes);
     /*
@@ -60,15 +92,25 @@ bool lixs::ring_conn_base::read(char*& buff, int& bytes)
     }
 
     if (notify) {
-        xc_evtchn_notify(xce_handle, local_port);
+        ret = xc_evtchn_notify(xce_handle, local_port);
+        if (ret == -1) {
+            alive = false;
+            io.rem(fd);
+            conn_dead();
+        }
     }
 
-    return bytes == 0;
+    return alive && (bytes == 0);
 }
 
 bool lixs::ring_conn_base::write(char*& buff, int& bytes)
 {
+    int ret;
     bool notify = false;
+
+    if (!alive) {
+        return false;
+    }
 
     notify = write_chunk(buff, bytes);
     /*
@@ -90,14 +132,23 @@ bool lixs::ring_conn_base::write(char*& buff, int& bytes)
     }
 
     if (notify) {
-        xc_evtchn_notify(xce_handle, local_port);
+        ret = xc_evtchn_notify(xce_handle, local_port);
+        if (ret == -1) {
+            alive = false;
+            io.rem(fd);
+            conn_dead();
+        }
     }
 
-    return bytes == 0;
+    return alive && (bytes == 0);
 }
 
 void lixs::ring_conn_base::need_rx(void)
 {
+    if (!alive) {
+        return;
+    }
+
     if (!ev_read) {
         ev_read = true;
         io.set(fd, ev_read, ev_write);
@@ -106,6 +157,10 @@ void lixs::ring_conn_base::need_rx(void)
 
 void lixs::ring_conn_base::need_tx(void)
 {
+    if (!alive) {
+        return;
+    }
+
     if (!ev_write) {
         ev_write = true;
         io.set(fd, ev_read, ev_write);
@@ -119,11 +174,17 @@ lixs::ring_conn_cb::ring_conn_cb(ring_conn_base& conn)
 
 void lixs::ring_conn_cb::callback(bool read, bool write, std::weak_ptr<ring_conn_cb> ptr)
 {
+    int ret;
+
     if (ptr.expired()) {
         return;
     }
 
     std::shared_ptr<ring_conn_cb> cb(ptr);
+
+    if (!(cb->conn.alive)) {
+        return;
+    }
 
     if (read) {
         cb->conn.process_rx();
@@ -133,8 +194,26 @@ void lixs::ring_conn_cb::callback(bool read, bool write, std::weak_ptr<ring_conn
         cb->conn.process_tx();
     }
 
+    if (!(cb->conn.alive)) {
+        return;
+    }
+
     evtchn_port_t port = xc_evtchn_pending(cb->conn.xce_handle);
-    xc_evtchn_unmask(cb->conn.xce_handle, port);
+    if (port == (evtchn_port_t)(-1)) {
+        goto out_err;
+    }
+
+    ret = xc_evtchn_unmask(cb->conn.xce_handle, port);
+    if (ret == -1) {
+        goto out_err;
+    }
+
+    return;
+
+out_err:
+    cb->conn.alive = false;
+    cb->conn.io.rem(cb->conn.fd);
+    cb->conn.conn_dead();
 }
 
 bool lixs::ring_conn_base::read_chunk(char*& buff, int& bytes)

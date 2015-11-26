@@ -107,16 +107,31 @@ int main(int argc, char** argv)
     lixs::virq_handler* dom_exc = NULL;
 
     if (conf.unix_sockets) {
-        nix = new lixs::unix_sock_server(xs, dmgr, emgr, epoll,
-                conf.unix_socket_path, conf.unix_socket_ro_path);
+        try {
+            nix = new lixs::unix_sock_server(xs, dmgr, emgr, epoll,
+                    conf.unix_socket_path, conf.unix_socket_ro_path);
+        } catch (lixs::unix_sock_server_error e) {
+            printf("LiXS: [unix_sock_server] %s\n", e.what());
+            goto out;
+        }
     }
 
     if (conf.xenbus) {
-        xenbus = new lixs::xenbus(xs, dmgr, emgr, epoll);
+        try {
+            xenbus = new lixs::xenbus(xs, dmgr, emgr, epoll);
+        } catch (lixs::xenbus_error e) {
+            printf("LiXS: [xenbus] %s\n", e.what());
+            goto out;
+        }
     }
 
     if (conf.virq_dom_exc) {
-        dom_exc = new lixs::virq_handler(xs, dmgr, epoll);
+        try {
+            dom_exc = new lixs::virq_handler(xs, dmgr, epoll);
+        } catch (lixs::virq_handler_error e) {
+            printf("LiXS: [dom_exc] %s\n", e.what());
+            goto out;
+        }
     }
 
 
@@ -128,6 +143,8 @@ int main(int argc, char** argv)
 
     emgr.run();
 
+
+out:
     if (nix) {
         delete nix;
     }

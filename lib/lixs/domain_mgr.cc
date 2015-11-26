@@ -22,12 +22,25 @@ lixs::domain_mgr::~domain_mgr()
 
 int lixs::domain_mgr::create(domid_t domid, evtchn_port_t port, unsigned int mfn)
 {
+    domain* dom;
     domain_map::iterator it;
 
     it = domains.find(domid);
     if (it == domains.end()) {
+        std::function<void(void)> cb = std::bind(&domain_mgr::domain_dead, this, domid);
+
+        try {
+            dom = new domain(cb, xs, *this, emgr, io, domid, port, mfn);
+        } catch (ring_conn_error e) {
+            printf("LiXS: [Domain %d] %s\n", domid, e.what());
+            return ECANCELED;
+        } catch (foreign_ring_mapper_error e) {
+            printf("LiXS: [Domain %d] %s\n", domid, e.what());
+            return ECANCELED;
+        }
+
         /* TODO: Consider using emplace when moving to gcc 4.8 is acceptable */
-        domains.insert(std::make_pair(domid, new domain(xs, *this, emgr, io, domid, port, mfn)));
+        domains.insert(std::make_pair(domid, dom));
 
         return 0;
     } else {
@@ -63,5 +76,16 @@ lixs::domain_mgr::iterator lixs::domain_mgr::begin()
 lixs::domain_mgr::iterator lixs::domain_mgr::end()
 {
     return domains.end();
+}
+
+void lixs::domain_mgr::domain_dead(domid_t domid)
+{
+    domain_map::iterator it;
+
+    it = domains.find(domid);
+    if (it != domains.end()) {
+        delete it->second;
+        domains.erase(it);
+    }
 }
 

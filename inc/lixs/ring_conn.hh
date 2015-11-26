@@ -5,6 +5,7 @@
 
 #include <cerrno>
 #include <memory>
+#include <stdexcept>
 #include <utility>
 
 extern "C" {
@@ -14,6 +15,10 @@ extern "C" {
 
 
 namespace lixs {
+
+class ring_conn_error : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
 
 class ring_conn_cb;
 
@@ -35,6 +40,7 @@ protected:
 
     virtual void process_rx(void) = 0;
     virtual void process_tx(void) = 0;
+    virtual void conn_dead(void) = 0;
 
 private:
     bool read_chunk(char*& buff, int& bytes);
@@ -46,6 +52,8 @@ private:
     int fd;
     bool ev_read;
     bool ev_write;
+
+    bool alive;
 
     std::shared_ptr<ring_conn_cb> cb;
 

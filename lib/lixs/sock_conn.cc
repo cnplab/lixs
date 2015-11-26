@@ -2,6 +2,7 @@
 #include <lixs/sock_conn.hh>
 
 #include <cerrno>
+#include <cstring>
 #include <fcntl.h>
 #include <functional>
 #include <memory>
@@ -14,7 +15,10 @@
 lixs::sock_conn::sock_conn(iomux& io, int fd)
     : io(io), fd(fd), ev_read(false), ev_write(false), alive(true)
 {
-    fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+    if (fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK) == -1) {
+        throw sock_conn_error("Unable to set O_NONBLOCK: " +
+                std::string(std::strerror(errno)));
+    }
 
     cb = std::shared_ptr<sock_conn_cb>(new sock_conn_cb(*this));
 
@@ -25,7 +29,9 @@ lixs::sock_conn::sock_conn(iomux& io, int fd)
 
 lixs::sock_conn::~sock_conn()
 {
-    io.rem(fd);
+    if (alive) {
+        io.rem(fd);
+    }
     close(fd);
 }
 
@@ -82,6 +88,7 @@ bool lixs::sock_conn::read(char*& buff, int& bytes)
     }
 
     if (!alive) {
+        io.rem(fd);
         conn_dead();
     }
 
@@ -141,6 +148,7 @@ bool lixs::sock_conn::write(char*& buff, int& bytes)
     }
 
     if (!alive) {
+        io.rem(fd);
         conn_dead();
     }
 
@@ -149,6 +157,10 @@ bool lixs::sock_conn::write(char*& buff, int& bytes)
 
 void lixs::sock_conn::need_rx(void)
 {
+    if (!alive) {
+        return;
+    }
+
     if (!ev_read) {
         ev_read = true;
         io.set(fd, ev_read, ev_write);
@@ -157,6 +169,10 @@ void lixs::sock_conn::need_rx(void)
 
 void lixs::sock_conn::need_tx(void)
 {
+    if (!alive) {
+        return;
+    }
+
     if (!ev_write) {
         ev_write = true;
         io.set(fd, ev_read, ev_write);
@@ -175,6 +191,10 @@ void lixs::sock_conn_cb::callback(bool read, bool write, std::weak_ptr<sock_conn
     }
 
     std::shared_ptr<sock_conn_cb> cb(ptr);
+
+    if (!(cb->conn.alive)) {
+        return;
+    }
 
     if (read) {
         cb->conn.process_rx();
