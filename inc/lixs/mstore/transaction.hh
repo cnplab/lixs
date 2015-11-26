@@ -36,7 +36,7 @@ private:
     void ensure_branch(cid_t cid, const std::string& path);
     void delete_branch(const std::string& path);
     void get_parent_perms(const std::string& path, permission_list& perms);
-    bool can_write(cid_t cid, record& rec, entry& te);
+    bool was_deleted(const std::string& path);
 
     unsigned int id;
     std::set<std::string> records;

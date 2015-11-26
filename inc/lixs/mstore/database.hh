@@ -14,7 +14,7 @@ namespace mstore {
 class entry {
 public:
     entry ()
-        : init_seq(0), read_seq(0), write_seq(0), delete_seq(0)
+        : read_seq(0), write_seq(0), delete_seq(0)
     { }
 
     std::string value;
@@ -22,7 +22,6 @@ public:
 
     permission_list perms;
 
-    long int init_seq;
     long int read_seq;
     long int write_seq;
     long int delete_seq;
