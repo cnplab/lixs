@@ -65,10 +65,8 @@ void lixs::os_linux::epoll::handle(void)
     n_events = epoll_wait(epfd, epev, epoll_max_events, timeout);
 
     for (int i = 0; i < n_events; i++) {
-        if (!is_err(epev[i].events)) {
-            emgr.enqueue_event(std::bind(*static_cast<io_cb*>(epev[i].data.ptr),
-                        is_read(epev[i].events), is_write(epev[i].events)));
-        }
+        emgr.enqueue_event(std::bind(*static_cast<io_cb*>(epev[i].data.ptr),
+                is_read(epev[i].events), is_write(epev[i].events), is_error(epev[i].events)));
     }
 
     emgr.enqueue_event(std::bind(&epoll::handle, this));
@@ -89,8 +87,8 @@ bool inline lixs::os_linux::epoll::is_write(const uint32_t ev)
     return (ev & EPOLLOUT) != 0;
 }
 
-bool inline lixs::os_linux::epoll::is_err(const uint32_t ev)
+bool inline lixs::os_linux::epoll::is_error(const uint32_t ev)
 {
-    return (ev & EPOLLERR) != 0;
+    return (ev & (EPOLLHUP | EPOLLERR)) != 0;
 }
 

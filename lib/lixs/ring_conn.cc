@@ -51,7 +51,7 @@ lixs::ring_conn_base::ring_conn_base(iomux& io, domid_t domid,
     cb = std::shared_ptr<ring_conn_cb>(new ring_conn_cb(*this));
 
     io.add(fd, ev_read, ev_write, std::bind(ring_conn_cb::callback,
-                std::placeholders::_1, std::placeholders::_2,
+                std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
                 std::weak_ptr<ring_conn_cb>(cb)));
 }
 
@@ -172,9 +172,11 @@ lixs::ring_conn_cb::ring_conn_cb(ring_conn_base& conn)
 {
 }
 
-void lixs::ring_conn_cb::callback(bool read, bool write, std::weak_ptr<ring_conn_cb> ptr)
+void lixs::ring_conn_cb::callback(bool read, bool write, bool error,
+        std::weak_ptr<ring_conn_cb> ptr)
 {
     int ret;
+    evtchn_port_t port;
 
     if (ptr.expired()) {
         return;
@@ -184,6 +186,10 @@ void lixs::ring_conn_cb::callback(bool read, bool write, std::weak_ptr<ring_conn
 
     if (!(cb->conn.alive)) {
         return;
+    }
+
+    if (error) {
+        goto out_err;
     }
 
     if (read) {
@@ -198,7 +204,7 @@ void lixs::ring_conn_cb::callback(bool read, bool write, std::weak_ptr<ring_conn
         return;
     }
 
-    evtchn_port_t port = xc_evtchn_pending(cb->conn.xce_handle);
+    port = xc_evtchn_pending(cb->conn.xce_handle);
     if (port == (evtchn_port_t)(-1)) {
         goto out_err;
     }

@@ -51,7 +51,7 @@ public:
     sock_conn_cb(sock_conn& conn);
 
 public:
-    static void callback(bool read, bool write, std::weak_ptr<sock_conn_cb> ptr);
+    static void callback(bool read, bool write, bool error, std::weak_ptr<sock_conn_cb> ptr);
 
 private:
     sock_conn& conn;
