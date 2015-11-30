@@ -33,6 +33,9 @@ public:
     wire(std::string dom_path);
 
 public:
+    operator std::string () const;
+
+public:
     struct xsd_sockmsg hdr;
 
     /* make this pointers const */
@@ -170,10 +173,6 @@ private:
     void process_rx(void);
     void process_tx(void);
 
-#ifdef DEBUG
-    void print_wire(const std::string& dir, const wire& msg);
-#endif
-
 private:
     io_state rx_state;
     io_state tx_state;
@@ -232,7 +231,8 @@ void xs_proto<CONNECTION>::process_rx(void)
                 }
 
 #if DEBUG
-                print_wire("<", rx_msg);
+                printf("LiXS: [%4s] %s %s\n", cid().c_str(), "<",
+                        static_cast<std::string>(rx_msg).c_str());
 #endif
 
                 handle_rx();
@@ -254,7 +254,8 @@ void xs_proto<CONNECTION>::process_tx(void)
                 }
 
 #if DEBUG
-                print_wire(">", tx_msg);
+                printf("LiXS: [%4s] %s %s\n", cid().c_str(), ">",
+                        static_cast<std::string>(tx_msg).c_str());
 #endif
 
                 tx_buff = reinterpret_cast<char*>((&tx_msg.hdr));
@@ -284,31 +285,6 @@ void xs_proto<CONNECTION>::process_tx(void)
         }
     }
 }
-
-#ifdef DEBUG
-template < typename CONNECTION >
-void xs_proto<CONNECTION>::print_wire(const std::string& dir, const wire& msg)
-{
-    unsigned int i;
-    char c;
-
-    msg.body[msg.hdr.len] = '\0';
-
-    printf("LiXS: [%4s] %s { type = %2d, req_id = %d, tx_id = %d, len = %d, msg = ",
-            cid().c_str(), dir.c_str(),
-            msg.hdr.type, msg.hdr.req_id, msg.hdr.tx_id, msg.hdr.len);
-
-    c = '"';
-    for (i = 0; i < msg.hdr.len; i += strlen(msg.body + i) + 1) {
-        printf("%c%s", c, msg.body + i);
-        c = ' ';
-    }
-
-    printf("%s%s\" }\n",
-            i == 0 ? "\"" : "",
-            i > 0 && i == msg.hdr.len ? " " : "");
-}
-#endif
 
 } /* namespace xs_proto_v1 */
 } /* namespace lixs */
