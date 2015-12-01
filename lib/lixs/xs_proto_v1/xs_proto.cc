@@ -291,7 +291,7 @@ void xs_proto_base::op_unwatch(void)
     char* path;
     char* token;
     watch_map::iterator it;
-    
+
     path = get_path();
     token = get_arg2();
 
