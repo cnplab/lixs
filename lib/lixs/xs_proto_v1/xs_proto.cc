@@ -31,12 +31,6 @@ xs_proto_base::~xs_proto_base()
 
 void xs_proto_base::handle_rx(void)
 {
-    /* NOTE: Null terminate the body to simplify scripts.
-     * It is not guaranteed that the body coming from client (even legitimate
-     * ones) is null terminated, therefore do it here.
-     */
-    rx_msg.body[rx_msg.hdr.len] = '\0';
-
     switch (rx_msg.hdr.type) {
         case XS_DIRECTORY:
             op_directory();

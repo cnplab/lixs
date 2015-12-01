@@ -33,6 +33,7 @@ public:
     wire(std::string dom_path);
 
 public:
+    void sanitize_input(void);
     operator std::string () const;
 
 public:
@@ -229,6 +230,8 @@ void xs_proto<CONNECTION>::process_rx(void)
                 if (CONNECTION::read(rx_buff, rx_bytes) == false) {
                     return;
                 }
+
+                rx_msg.sanitize_input();
 
 #if DEBUG
                 printf("LiXS: [%4s] %s %s\n", cid().c_str(), "<",

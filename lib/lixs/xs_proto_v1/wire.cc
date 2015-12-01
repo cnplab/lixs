@@ -10,13 +10,16 @@ lixs::xs_proto_v1::wire::wire(std::string dom_path)
     std::sprintf(abs_path, "%s/", dom_path.c_str());
 }
 
+void lixs::xs_proto_v1::wire::sanitize_input(void)
+{
+    body[hdr.len] = '\0';
+}
+
 lixs::xs_proto_v1::wire::operator std::string () const
 {
     unsigned int i;
     std::string sep;
     std::ostringstream stream;
-
-    body[hdr.len] = '\0';
 
     stream << "{ ";
     stream << "type = " << hdr.type << ", ";
