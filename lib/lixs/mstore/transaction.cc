@@ -351,7 +351,7 @@ void lixs::mstore::transaction::unregister_from_parent(const std::string& path)
 
     if (basename(path, parent, name)) {
         record& rec = db[parent];
-        std::map<unsigned int, entry>::iterator it;
+        tentry_map::iterator it;
 
         it = rec.te.find(id);
         if (it != rec.te.end()) {
@@ -409,7 +409,7 @@ bool lixs::mstore::transaction::was_deleted(const std::string& path)
 {
     record& rec = db[path];
 
-    std::map<unsigned int, entry>::iterator it;
+    tentry_map::iterator it;
 
     it = rec.te.find(id);
     if (it != rec.te.end()) {
@@ -425,7 +425,7 @@ void lixs::mstore::transaction::get_parent_perms(const std::string& path, permis
     std::string parent;
 
     database::iterator it;
-    std::map<unsigned int, entry>::iterator t_it;
+    tentry_map::iterator t_it;
 
     if (basename(path, parent, name)) {
         it = db.find(parent);

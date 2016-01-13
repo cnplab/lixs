@@ -27,6 +27,8 @@ public:
     long int delete_seq;
 };
 
+typedef std::map<unsigned int, entry> tentry_map;
+
 class record {
 public:
     record()
@@ -36,7 +38,7 @@ public:
     long int next_seq;
 
     entry e;
-    std::map<unsigned int, entry> te;
+    tentry_map te;
 };
 
 typedef std::map<std::string, record> database;
