@@ -14,20 +14,51 @@ namespace mstore {
 class entry {
 public:
     entry ()
-        : read_seq(0), write_seq(0), delete_seq(0)
+        : write_seq(0), delete_seq(0), write_children_seq(0)
     { }
 
+    /* Data */
     std::string value;
+    permission_list perms;
+
+    /* Metadata for tree management */
     std::set<std::string> children;
 
+    /* Metadata for transaction management */
+    long int write_seq;
+    long int delete_seq;
+    long int write_children_seq;
+};
+
+class tentry {
+public:
+    tentry ()
+        : init_seq(0), init_valid(false), read_seq(0), write_seq(0), delete_seq(0),
+        read_children_seq(0)
+    { }
+
+    /* Data */
+    std::string value;
     permission_list perms;
+
+    /* Metadata for tree management */
+    std::set<std::string> children;
+    std::set<std::string> children_add;
+    std::set<std::string> children_rem;
+
+    /* Metadata for transaction management */
+    long int init_seq;
+    bool init_valid;
 
     long int read_seq;
     long int write_seq;
     long int delete_seq;
+
+    long int read_children_seq;
 };
 
-typedef std::map<unsigned int, entry> tentry_map;
+typedef std::map<unsigned int, tentry> tentry_map;
+
 
 class record {
 public:
@@ -35,13 +66,14 @@ public:
         : next_seq(1)
     { }
 
-    long int next_seq;
-
     entry e;
     tentry_map te;
+
+    long int next_seq;
 };
 
 typedef std::map<std::string, record> database;
+
 
 class db_access {
 public:
@@ -62,6 +94,7 @@ public:
 protected:
     database& db;
 };
+
 
 bool has_read_access(cid_t cid, const permission_list& perms);
 bool has_write_access(cid_t cid, const permission_list& perms);
