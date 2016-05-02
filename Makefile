@@ -31,7 +31,9 @@ endif
 
 include make.mk
 
-all: $(APP) $(TST)
+all: $(APP)
+
+tests: $(TST)
 
 # Because of some make intricacies adding $(call app_lib,%) to the general rule
 # dependency list doesn't work. Curiously I managed to get the function to
