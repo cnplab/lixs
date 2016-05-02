@@ -148,14 +148,12 @@ int lixs::mstore::transaction::get_children(cid_t cid, const std::string& path, 
     fetch_tentry_children(te, rec);
 
     /* Build the current children list as: `te.children + te.children_add - te.children_rem`. */
-    std::set<std::string>::iterator it;
-
     resp = te.children;
-    for (it = te.children_add.begin(); it != te.children_add.end(); it++) {
-        resp.insert(*it);
+    for (auto& c : te.children_add) {
+        resp.insert(c);
     }
-    for (it = te.children_rem.begin(); it != te.children_rem.end(); it++) {
-        resp.erase(*it);
+    for (auto& c : te.children_rem) {
+        resp.erase(c);
     }
 
     return 0;
@@ -212,17 +210,15 @@ int lixs::mstore::transaction::set_perms(cid_t cid,
 
 void lixs::mstore::transaction::abort()
 {
-    std::set<std::string>::iterator it;
-
-    for (it = records.begin(); it != records.end(); it++) {
-        record& rec = db[*it];
+    for (auto& r : records) {
+        record& rec = db[r];
 
         /* Remove transaction information from the entry. */
         rec.te.erase(id);
 
         /* If the entry is invalid and has no more active transactions we clean it from the DB. */
         if ((rec.e.delete_seq > rec.e.write_seq) && rec.te.empty()) {
-            db.erase(*it);
+            db.erase(r);
         }
     }
 
@@ -243,13 +239,11 @@ void lixs::mstore::transaction::merge(bool& success)
 
 bool lixs::mstore::transaction::can_merge()
 {
-    std::set<std::string>::iterator it;
-
     /* The transaction should only succeed if, for each of the records referenced during the
      * transaction, three conditions are meet:
      */
-    for (it = records.begin(); it != records.end(); it++) {
-        record& rec = db[*it];
+    for (auto& r : records) {
+        record& rec = db[r];
         tentry& te = rec.te[id];
 
         /* 1. A valid entry at initialization time was deleted or an invalid entry at
@@ -285,10 +279,8 @@ bool lixs::mstore::transaction::can_merge()
 
 void lixs::mstore::transaction::do_merge()
 {
-    std::set<std::string>::iterator it;
-
-    for (it = records.begin(); it != records.end(); it++) {
-        record& rec = db[*it];
+    for (auto& r : records) {
+        record& rec = db[r];
         tentry& te = rec.te[id];
 
         /* Updating write_seq and delete_seq will have no effect if the entry wasn't written during
@@ -314,14 +306,11 @@ void lixs::mstore::transaction::do_merge()
              * update the write_children_seq sequence number.
              */
             if (!te.children_add.empty() || !te.children_rem.empty()) {
-                std::set<std::string>::iterator it;
-
-                for (it = te.children_add.begin(); it != te.children_add.end(); it++) {
-                    rec.e.children.insert(*it);
+                for (auto& c : te.children_add) {
+                    rec.e.children.insert(c);
                 }
-
-                for (it = te.children_rem.begin(); it != te.children_rem.end(); it++) {
-                    rec.e.children.erase(*it);
+                for (auto& c : te.children_rem) {
+                    rec.e.children.erase(c);
                 }
 
                 rec.e.write_children_seq = rec.next_seq++;
@@ -345,7 +334,7 @@ void lixs::mstore::transaction::do_merge()
                 rec.e.write_children_seq = 0;
             } else {
                 /* If the entry is invalid we should remove it from the database. */
-                db.erase(*it);
+                db.erase(r);
             }
         }
     }
@@ -406,22 +395,21 @@ void lixs::mstore::transaction::delete_branch(const std::string& path, tentry& t
      * the current children list on a separate set without touching te.children. Later we can
      * optimize this if necessary.
      */
-    std::set<std::string>::iterator it;
     std::set<std::string> children;
 
     /* Build the current children list as: `te.children + te.children_add - te.children_rem`. */
     children = te.children;
-    for (it = te.children_add.begin(); it != te.children_add.end(); it++) {
-        children.insert(*it);
+    for (auto& c : te.children_add) {
+        children.insert(c);
     }
-    for (it = te.children_rem.begin(); it != te.children_rem.end(); it++) {
-        children.erase(*it);
+    for (auto& c : te.children_rem) {
+        children.erase(c);
     }
 
     /* Delete all children. This will recursively delete the full branches. */
-    for (it = children.begin(); it != children.end(); it++) {
+    for (auto& c : children) {
         /* Deleting a subtree only requires write access to the root node, so delete as 0. */
-        del(0, path + "/" + *it);
+        del(0, path + "/" + c);
     }
 
     /* During the deletion process children_rem will be updated with all the deleted children so

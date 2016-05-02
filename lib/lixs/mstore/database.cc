@@ -3,8 +3,6 @@
 
 bool lixs::mstore::has_read_access(cid_t cid, const permission_list& perms)
 {
-    permission_list::const_iterator it;
-
     if (cid == 0
             || perms.size() == 0
             || perms.front().cid == cid
@@ -12,8 +10,8 @@ bool lixs::mstore::has_read_access(cid_t cid, const permission_list& perms)
         return true;
     }
 
-    for (it = perms.begin(); it != perms.end(); it++) {
-        if (it->cid == cid && it->read) {
+    for (auto& p : perms) {
+        if (p.cid == cid && p.read) {
             return true;
         }
     }
@@ -23,8 +21,6 @@ bool lixs::mstore::has_read_access(cid_t cid, const permission_list& perms)
 
 bool lixs::mstore::has_write_access(cid_t cid, const permission_list& perms)
 {
-    permission_list::const_iterator it;
-
     if (cid == 0
             || perms.size() == 0
             || perms.front().cid == cid
@@ -32,8 +28,8 @@ bool lixs::mstore::has_write_access(cid_t cid, const permission_list& perms)
         return true;
     }
 
-    for (it = perms.begin(); it != perms.end(); it++) {
-        if (it->cid == cid && it->write) {
+    for (auto& p : perms) {
+        if (p.cid == cid && p.write) {
             return true;
         }
     }
