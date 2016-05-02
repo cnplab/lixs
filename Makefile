@@ -35,6 +35,9 @@ all: $(APP)
 
 tests: $(TST)
 
+install: $(APP)
+	$(call cmd, "INSTALL", "app/lixs", cp -f, app/lixs /usr/local/sbin/lixs)
+
 # Because of some make intricacies adding $(call app_lib,%) to the general rule
 # dependency list doesn't work. Curiously I managed to get the function to
 # receive the argument but it only worked with a $(shell echo $1) not the find
