@@ -32,7 +32,7 @@ lixs::xenbus_mapper::xenbus_mapper(domid_t domid)
     }
 
     ptr = mmap(NULL, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-    if (interface == MAP_FAILED) {
+    if (ptr == MAP_FAILED) {
         close(fd);
         throw xenbus_error("Cannot mmap interface: " +
                 std::string(std::strerror(errno)));
