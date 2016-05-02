@@ -41,6 +41,8 @@ private:
 
     std::string ro_path;
     int ro_fd;
+
+    long unsigned int next_id;
 };
 
 } /* namespace lixs */

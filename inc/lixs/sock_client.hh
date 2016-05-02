@@ -15,17 +15,17 @@ namespace lixs {
 
 class sock_client : public client<xs_proto_v1::xs_proto<sock_conn> > {
 public:
-    sock_client(std::function<void(sock_client*)> dead_cb,
+    sock_client(long unsigned int id, std::function<void(sock_client*)> dead_cb,
             xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io, int fd);
     ~sock_client();
 
 private:
-    static std::string get_id(void);
+    static std::string get_id(long unsigned int id);
 
     void conn_dead(void);
 
 private:
-    static unsigned int next_id;
+    long unsigned int id;
 
     event_mgr& emgr;
     std::function<void(sock_client*)> dead_cb;
