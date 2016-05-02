@@ -18,6 +18,10 @@ lixs::domain_mgr::domain_mgr(xenstore& xs, event_mgr& emgr, iomux& io)
 
 lixs::domain_mgr::~domain_mgr()
 {
+    for (auto& e : domains) {
+        delete e.second;
+    }
+    domains.clear();
 }
 
 int lixs::domain_mgr::create(domid_t domid, evtchn_port_t port, unsigned int mfn)
