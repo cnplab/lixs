@@ -56,6 +56,11 @@ out_err:
 
 lixs::unix_sock_server::~unix_sock_server(void)
 {
+    for (auto& c : clients) {
+        delete c.second;
+    }
+    clients.clear();
+
     io.rem(rw_fd);
     close(rw_fd);
     unlink(rw_path.c_str());
