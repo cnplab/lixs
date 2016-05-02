@@ -16,7 +16,7 @@
 
 lixs::unix_sock_server::unix_sock_server(xenstore& xs, domain_mgr& dmgr,
         event_mgr& emgr, iomux& io, const std::string& rw_path, const std::string& ro_path)
-    : xs(xs), dmgr(dmgr), emgr(emgr), io(io), rw_path(rw_path), ro_path(ro_path)
+    : xs(xs), dmgr(dmgr), emgr(emgr), io(io), rw_path(rw_path), ro_path(ro_path), next_id(0)
 {
     std::string err_msg;
 
@@ -103,9 +103,15 @@ int lixs::unix_sock_server::bind_socket(const std::string& path, std::string& er
     return fd;
 }
 
-void lixs::unix_sock_server::client_dead(sock_client* client)
+void lixs::unix_sock_server::client_dead(long unsigned int id)
 {
-    delete client;
+    client_map::iterator it;
+
+    it = clients.find(id);
+    if (it != clients.end()) {
+        delete it->second;
+        clients.erase(it);
+    }
 }
 
 void lixs::unix_sock_server::callback(bool read, bool write, bool error, int fd)
@@ -127,9 +133,11 @@ void lixs::unix_sock_server::callback(bool read, bool write, bool error, int fd)
         return;
     }
 
-    std::function<void(sock_client*)> cb = std::bind(
-            &unix_sock_server::client_dead, this, std::placeholders::_1);
+    long unsigned int id = next_id++;
+    std::function<void(void)> cb = std::bind(&unix_sock_server::client_dead, this, id);
 
-    new sock_client(cb, xs, dmgr, emgr, io, client_fd);
+    sock_client* client = new sock_client(id, cb, xs, dmgr, emgr, io, client_fd);
+
+    clients.insert({id, client});
 }
 

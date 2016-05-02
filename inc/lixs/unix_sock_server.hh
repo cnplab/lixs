@@ -28,7 +28,10 @@ private:
 
 private:
     int bind_socket(const std::string& path, std::string& err_msg);
-    void client_dead(sock_client* client);
+    void client_dead(long unsigned int id);
+
+private:
+    typedef std::map<long unsigned int, sock_client*> client_map;
 
 private:
     xenstore& xs;
@@ -43,6 +46,8 @@ private:
     int ro_fd;
 
     long unsigned int next_id;
+
+    client_map clients;
 };
 
 } /* namespace lixs */
