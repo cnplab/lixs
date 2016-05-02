@@ -34,9 +34,11 @@ private:
     void register_with_parent(const std::string& path);
     void unregister_from_parent(const std::string& path);
     void ensure_branch(cid_t cid, const std::string& path);
-    void delete_branch(const std::string& path);
+    void delete_branch(const std::string& path, tentry& te);
     void get_parent_perms(const std::string& path, permission_list& perms);
-    bool was_deleted(const std::string& path);
+    tentry& get_tentry(const std::string& path, record& rec);
+    void fetch_tentry_data(tentry& te, record& rec);
+    void fetch_tentry_children(tentry& te, record& rec);
 
     unsigned int id;
     std::set<std::string> records;

@@ -28,7 +28,7 @@ private:
     void register_with_parent(const std::string& path);
     void unregister_from_parent(const std::string& path);
     void ensure_branch(cid_t cid, const std::string& path);
-    void delete_branch(const std::string& path);
+    void delete_branch(const std::string& path, record& rec);
     void get_parent_perms(const std::string& path, permission_list& perms);
 };
 
