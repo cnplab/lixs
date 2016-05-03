@@ -44,7 +44,10 @@ install: $(APP)
 # command. For now we just need to add a specific rule for each of the apps that
 # require per app libraries.
 app/lixs: $(call app_lib,app/lixs)
-$(APP) $(TST): % : %.o $(LIB)
+$(APP): % : %.o $(LIB)
+	$(call cxxlink, $^, $@)
+
+$(TST): % : %.o $(LIB)
 	$(call cxxlink, $^, $@)
 
 %.o: %.cc
