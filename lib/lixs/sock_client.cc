@@ -13,12 +13,10 @@
 #include <unistd.h>
 
 
-unsigned int lixs::sock_client::next_id = 0;
-
 /* FIXME: What is the correct domid when running in a stub domain? */
-lixs::sock_client::sock_client(std::function<void(sock_client*)> dead_cb,
+lixs::sock_client::sock_client(long unsigned int id, std::function<void(void)> dead_cb,
         xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io, int fd)
-    : client(get_id(), 0, xs, dmgr, io, fd), emgr(emgr), dead_cb(dead_cb)
+    : client(get_id(id), 0, xs, dmgr, io, fd), id(id), emgr(emgr), dead_cb(dead_cb)
 {
 }
 
@@ -28,11 +26,11 @@ lixs::sock_client::~sock_client()
 
 void lixs::sock_client::conn_dead(void)
 {
-    emgr.enqueue_event(std::bind(dead_cb, this));
+    emgr.enqueue_event(dead_cb);
 }
 
-std::string lixs::sock_client::get_id(void)
+std::string lixs::sock_client::get_id(long unsigned int id)
 {
-    return "S" + std::to_string(next_id++);
+    return "S" + std::to_string(id);
 }
 
