@@ -67,5 +67,4 @@ distclean: clean
 
 -include $(APP:%=%.d)
 -include $(TST:%=%.d)
--include $(patsubst %.c, %.d, $(shell find lib/ -name "*.c"))
--include $(patsubst %.cc, %.d, $(shell find lib/ -name "*.cc"))
+-include $(LIB:%.o=%.d)
