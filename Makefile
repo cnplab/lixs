@@ -43,12 +43,6 @@ $(LIXS_APP): % : %.o $(LIXS_LIB) $(LIB)
 $(TST): % : %.o $(LIB)
 	$(call cxxlink, $^, $@)
 
-%.o: %.cc
-	$(call cxxcompile, $<, $@)
-
-%.o: %.c
-	$(call ccompile, $<, $@)
-
 
 clean:
 	$(call cmd, "CLN", "*.o", rm -rf, $(shell find -name "*.o"))
