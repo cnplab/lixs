@@ -1,4 +1,5 @@
-#include <app/lixs/conf.hh>
+#include "lixs_conf.hh"
+
 #include <lixs/event_mgr.hh>
 #include <lixs/mstore/store.hh>
 #include <lixs/os_linux/epoll.hh>

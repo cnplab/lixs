@@ -1,5 +1,5 @@
-#ifndef __APP_LIXS_CONF_HH__
-#define __APP_LIXS_CONF_HH__
+#ifndef __LIXS_CONF_HH__
+#define __LIXS_CONF_HH__
 
 #include <string>
 
@@ -36,5 +36,5 @@ private:
 
 } /* namespace app */
 
-#endif /* __APP_LIXS_CONF_HH__ */
+#endif /* __LIXS_CONF_HH__ */
 

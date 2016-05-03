@@ -17,3 +17,9 @@ cxxlink		 = $(CXXLINK)
 cmd			 = $(3) $(4)
 endif
 
+
+%.o: %.cc
+	$(call cxxcompile, $<, $@)
+
+%.o: %.c
+	$(call ccompile, $<, $@)

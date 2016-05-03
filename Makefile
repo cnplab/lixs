@@ -3,20 +3,17 @@
 verbose	?= n
 debug	?= n
 
+LIXS_APP	:= app/lixs
+LIXS_LIB	:=
+LIXS_LIB	+= app/lixs_conf.o
 
-APP	:=
-APP	+= $(patsubst %.cc, %, $(shell find app/ -name "*.cc"))
 
 TST	:=
 TST	+= $(patsubst %.cc, %, $(shell find test/ -name "*.cc"))
 
 LIB	:=
-LIB	+= $(patsubst %.c, %.o, $(shell find lib/ -name "*.c" -not -path "lib/app/*"))
-LIB	+= $(patsubst %.cc, %.o, $(shell find lib/ -name "*.cc" -not -path "lib/app/*"))
-
-app_lib  =
-app_lib += $(patsubst %.c, %.o, $(shell find lib/$1/ -name "*.c" 2>/dev/null))
-app_lib += $(patsubst %.cc, %.o, $(shell find lib/$1/ -name "*.cc" 2>/dev/null))
+LIB	+= $(patsubst %.c, %.o, $(shell find lib/ -name "*.c"))
+LIB	+= $(patsubst %.cc, %.o, $(shell find lib/ -name "*.cc"))
 
 
 CFLAGS		+= -Iinc -Wall -MD -MP -g -O3 -std=gnu11
@@ -31,22 +28,20 @@ endif
 
 include make.mk
 
-all: $(APP) $(TST)
 
-# Because of some make intricacies adding $(call app_lib,%) to the general rule
-# dependency list doesn't work. Curiously I managed to get the function to
-# receive the argument but it only worked with a $(shell echo $1) not the find
-# command. For now we just need to add a specific rule for each of the apps that
-# require per app libraries.
-app/lixs: $(call app_lib,app/lixs)
-$(APP) $(TST): % : %.o $(LIB)
+all: $(LIXS_APP)
+
+tests: $(TST)
+
+install: $(LIXS_APP)
+	$(call cmd, "INSTALL", $(LIXS_APP), cp -f, $(LIXS_APP) /usr/local/sbin/lixs)
+
+
+$(LIXS_APP): % : %.o $(LIXS_LIB) $(LIB)
 	$(call cxxlink, $^, $@)
 
-%.o: %.cc
-	$(call cxxcompile, $<, $@)
-
-%.o: %.c
-	$(call ccompile, $<, $@)
+$(TST): % : %.o $(LIB)
+	$(call cxxlink, $^, $@)
 
 
 clean:
@@ -54,13 +49,13 @@ clean:
 	$(call cmd, "CLN", "*.d", rm -rf, $(shell find -name "*.d"))
 
 distclean: clean
-	$(call cmd, "CLN", "app/" , rm -rf, $(APP))
+	$(call cmd, "CLN", "app/" , rm -rf, $(LIXS_APP))
 	$(call cmd, "CLN", "test/", rm -rf, $(TST))
 
 
-.PHONY: all clean distclean
+.PHONY: all tests install clean distclean
 
--include $(APP:%=%.d)
+-include $(LIXS_APP:%=%.d)
+-include $(LIXS_LIB:%.o=%.d)
 -include $(TST:%=%.d)
--include $(patsubst %.c, %.d, $(shell find lib/ -name "*.c"))
--include $(patsubst %.cc, %.d, $(shell find lib/ -name "*.cc"))
+-include $(LIB:%.o=%.d)

@@ -1,4 +1,4 @@
-#include <app/lixs/conf.hh>
+#include "lixs_conf.hh"
 
 #include <getopt.h>
 #include <string>
