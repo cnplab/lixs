@@ -59,7 +59,7 @@ distclean: clean
 	$(call cmd, "CLN", "test/", rm -rf, $(TST))
 
 
-.PHONY: all clean distclean
+.PHONY: all tests install clean distclean
 
 -include $(LIXS_APP:%=%.d)
 -include $(LIXS_LIB:%.o=%.d)
