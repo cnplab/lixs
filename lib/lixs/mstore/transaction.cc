@@ -283,16 +283,6 @@ void lixs::mstore::transaction::do_merge()
         record& rec = db[r];
         tentry& te = rec.te[id];
 
-        /* Updating write_seq and delete_seq will have no effect if the entry wasn't written during
-         * transaction, given sequence numbers should remain the same as on initialization. It will
-         * however mark the entry as valid or invalid in case it was written during transaction.
-         */
-        rec.e.write_seq = te.write_seq;
-        rec.e.delete_seq = te.delete_seq;
-
-        /* We only need to update data in case the entry is valid, otherwise the sequence numbers
-         * written above will mark the entry as invalid and that's all we need.
-         */
         if (te.write_seq > te.delete_seq) {
             /* We should only update entry's data if the entry was written during transaction, i.e.
              * after initialization.
@@ -300,6 +290,12 @@ void lixs::mstore::transaction::do_merge()
             if (te.write_seq > te.init_seq) {
                 rec.e.value = te.value;
                 rec.e.perms = te.perms;
+
+                /* If a second transaction started after this entry was written here, that
+                 * transaction would be able to commit even though this transaction is modifying
+                 * the entry now. Therefore we need to update the sequence numbers with new ones.
+                 */
+                rec.e.write_seq = rec.next_seq++;
             }
 
             /* If there were changes to the children list during transaction we apply those now and
@@ -319,6 +315,11 @@ void lixs::mstore::transaction::do_merge()
             /* It is possible to get here without applying any action on the node, for instance,
              * when the node was simply read during the transaction.
              */
+        } else {
+            if (te.delete_seq > te.init_seq) {
+                /* See above for why we need to update the sequence number. */
+                te.delete_seq = rec.next_seq++;
+            }
         }
 
         /* Delete the transaction information from the entry. */
