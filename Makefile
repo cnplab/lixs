@@ -7,9 +7,8 @@ LIXS_APP	:= app/lixs
 LIXS_LIB	:=
 LIXS_LIB	+= app/lixs_conf.o
 
-
-TST	:=
-TST	+= $(patsubst %.cc, %, $(shell find test/ -name "*.cc"))
+CATCH_APP	:= test/run-catch
+CATCH_LIB	:= $(patsubst %.cc, %.o, $(shell find test/catch/ -name "*.cc"))
 
 LIB	:=
 LIB	+= $(patsubst %.c, %.o, $(shell find lib/ -name "*.c"))
@@ -31,7 +30,7 @@ include make.mk
 
 all: $(LIXS_APP)
 
-tests: $(TST)
+tests: $(CATCH_APP)
 
 install: $(LIXS_APP)
 	$(call cmd, "INSTALL", $(LIXS_APP), cp -f, $(LIXS_APP) /usr/local/sbin/lixs)
@@ -40,7 +39,7 @@ install: $(LIXS_APP)
 $(LIXS_APP): % : %.o $(LIXS_LIB) $(LIB)
 	$(call cxxlink, $^, $@)
 
-$(TST): % : %.o $(LIB)
+$(CATCH_APP): % : %.o $(CATCH_LIB) $(LIB)
 	$(call cxxlink, $^, $@)
 
 
@@ -50,12 +49,13 @@ clean:
 
 distclean: clean
 	$(call cmd, "CLN", "app/" , rm -rf, $(LIXS_APP))
-	$(call cmd, "CLN", "test/", rm -rf, $(TST))
+	$(call cmd, "CLN", "test/", rm -rf, $(CATCH_APP))
 
 
 .PHONY: all tests install clean distclean
 
 -include $(LIXS_APP:%=%.d)
 -include $(LIXS_LIB:%.o=%.d)
--include $(TST:%=%.d)
+-include $(CATCH_APP:%=%.d)
+-include $(CATCH_LIB:%.o=%.d)
 -include $(LIB:%.o=%.d)

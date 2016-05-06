@@ -1,0 +1,21 @@
+stages:
+    - build
+    - test
+
+
+build:
+    stage: build
+    script:
+        - make
+    tags:
+        - C
+        - C++
+
+test:
+    stage: test
+    script:
+        - make tests
+        - ./test/run-catch
+    tags:
+        - C
+        - C++

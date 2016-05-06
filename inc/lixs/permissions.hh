@@ -23,6 +23,11 @@ public:
     { }
 
 
+    bool operator==(const permission& rhs) const {
+        return (cid == rhs.cid) && (read == rhs.read) && (write == rhs.write);
+    }
+
+
     cid_t cid;
 
     bool read;
