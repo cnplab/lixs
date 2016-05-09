@@ -10,17 +10,8 @@
 namespace lixs {
 namespace xs_proto_v1 {
 
-std::string get_dom_path(domid_t domid)
-{
-    char numstr[35];
-    sprintf(numstr, "/local/domain/%d", domid);
-
-    return std::string(numstr);
-}
-
-
 xs_proto_base::xs_proto_base(domid_t domid, xenstore& xs, domain_mgr& dmgr)
-    : domid(domid), dom_path(get_dom_path(domid)),
+    : domid(domid), dom_path(get_dom_path(domid, xs)),
     rx_msg(dom_path), tx_msg(dom_path), xs(xs), dmgr(dmgr)
 {
 }
@@ -447,7 +438,8 @@ void xs_proto_base::op_get_domain_path(void)
         return;
     }
 
-    std::string path = get_dom_path(domid);
+    std::string path;
+    xs.domain_path(domid, path);
 
     tx_queue.push_back({XS_GET_DOMAIN_PATH, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
             {path}, false});
@@ -688,6 +680,15 @@ bool xs_proto_base::build_body(std::list<std::string> elems, bool terminator)
     tx_msg.hdr.len = length;
 
     return true;
+}
+
+std::string xs_proto_base::get_dom_path(domid_t domid, xenstore& xs)
+{
+    std::string path;
+
+    xs.domain_path(domid, path);
+
+    return path;
 }
 
 } /* namespace xs_proto_v1 */

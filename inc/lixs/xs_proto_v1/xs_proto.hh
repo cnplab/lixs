@@ -22,7 +22,6 @@ namespace xs_proto_v1 {
 
 /* /local/domain/<id> */
 const int dom_path_length_max = 35;
-std::string get_dom_path(domid_t domid);
 
 
 class xs_proto_base;
@@ -144,6 +143,8 @@ private:
     void build_hdr(uint32_t type, uint32_t req_id, uint32_t tx_id);
     bool build_body(std::string elem, bool terminator);
     bool build_body(std::list<std::string> elems, bool terminator);
+
+    static std::string get_dom_path(domid_t domid, xenstore& xs);
 
 protected:
     domid_t domid;
