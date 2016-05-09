@@ -35,10 +35,10 @@ int lixs::domain_mgr::create(domid_t domid, evtchn_port_t port, unsigned int mfn
 
         try {
             dom = new domain(cb, xs, *this, emgr, io, domid, port, mfn);
-        } catch (ring_conn_error e) {
+        } catch (ring_conn_error& e) {
             printf("LiXS: [Domain %d] %s\n", domid, e.what());
             return ECANCELED;
-        } catch (foreign_ring_mapper_error e) {
+        } catch (foreign_ring_mapper_error& e) {
             printf("LiXS: [Domain %d] %s\n", domid, e.what());
             return ECANCELED;
         }
