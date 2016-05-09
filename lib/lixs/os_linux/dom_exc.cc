@@ -54,9 +54,6 @@ void lixs::os_linux::dom_exc::callback(bool read, bool write, bool error)
     std::list<domid_t> dead_list;
     std::list<domid_t> dying_list;
 
-    domain_mgr::iterator dom_it;
-    std::list<domid_t>::iterator id_it;
-
     if (!alive) {
         return;
     }
@@ -66,9 +63,9 @@ void lixs::os_linux::dom_exc::callback(bool read, bool write, bool error)
     }
 
     ret = 0;
-    for (dom_it = dmgr.begin(); dom_it != dmgr.end(); dom_it++) {
-        bool active = dom_it->second->is_active();
-        domid_t domid = dom_it->second->get_domid();
+    for (auto& d : dmgr) {
+        domain* dom = d.second;
+        domid_t domid = dom->get_domid();
 
         ret = xc_domain_getinfo(xc_handle, domid, 1, &dominfo);
         if (ret == -1) {
@@ -79,8 +76,8 @@ void lixs::os_linux::dom_exc::callback(bool read, bool write, bool error)
         } else if (dominfo.dying) {
             /* Domain is dying: remove */
             dead_list.push_back(domid);
-        } else if (active && (dominfo.shutdown || dominfo.crashed)) {
-            dom_it->second->set_inactive();
+        } else if (dom->is_active() && (dominfo.shutdown || dominfo.crashed)) {
+            dom->set_inactive();
             dying_list.push_back(domid);
         }
     }
@@ -89,14 +86,14 @@ void lixs::os_linux::dom_exc::callback(bool read, bool write, bool error)
         goto out_err;
     }
 
-    for (id_it = dead_list.begin(); id_it != dead_list.end(); id_it++) {
-        if (dmgr.destroy(*id_it) == 0) {
-            xs.domain_release(*id_it);
+    for (auto& d : dead_list) {
+        if (dmgr.destroy(d) == 0) {
+            xs.domain_release(d);
         }
     }
 
-    for (id_it = dying_list.begin(); id_it != dying_list.end(); id_it++) {
-        xs.domain_release(*id_it);
+    for (auto& d : dying_list) {
+        xs.domain_release(d);
     }
 
     port = xc_evtchn_pending(xce_handle);
