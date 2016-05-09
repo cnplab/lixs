@@ -27,7 +27,7 @@ void lixs::watch_mgr::del(watch_cb& cb)
 {
     record& rec = db[cb.path];
     rec.path.erase(&cb);
-    if (rec.path.size() == 0 && rec.children.size() == 0) {
+    if (rec.path.empty() && rec.children.empty()) {
         db.erase(cb.path);
     }
 
@@ -179,7 +179,7 @@ void lixs::watch_mgr::unregister_from_parents(const std::string& path, watch_cb&
         record& rec = db[parent];
 
         rec.children.erase(&cb);
-        if (rec.path.size() == 0 && rec.children.size() == 0) {
+        if (rec.path.empty() && rec.children.empty()) {
             db.erase(parent);
         }
 
