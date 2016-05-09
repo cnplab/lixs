@@ -196,10 +196,8 @@ xs_proto<CONNECTION>::xs_proto(domid_t domid, xenstore& xs, domain_mgr& dmgr, AR
 template < typename CONNECTION >
 xs_proto<CONNECTION>::~xs_proto()
 {
-    watch_map::iterator it;
-
-    for (it = watches.begin(); it != watches.end(); it++) {
-        xs.watch_del(it->second);
+    for (auto& w : watches) {
+        xs.watch_del(w.second);
     }
 }
 

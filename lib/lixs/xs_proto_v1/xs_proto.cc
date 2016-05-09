@@ -206,7 +206,6 @@ void xs_proto_base::op_get_perms(void)
 {
     int ret;
     permission_list result;
-    permission_list::iterator it;
 
     std::string perm_str;
     std::list<std::string> result_str;
@@ -214,8 +213,8 @@ void xs_proto_base::op_get_perms(void)
     ret = xs.store_get_perms(domid, rx_msg.hdr.tx_id, get_path(), result);
 
     if (ret == 0) {
-        for (it = result.begin(); it != result.end(); it++) {
-            perm2str(*it, perm_str);
+        for (auto& r : result) {
+            perm2str(r, perm_str);
             result_str.push_back(perm_str);
         }
 
@@ -656,7 +655,6 @@ bool xs_proto_base::build_body(std::list<std::string> elems, bool terminator)
 {
     char* body;
     uint32_t length;
-    std::list<std::string>::iterator it;
 
     if (elems.empty()) {
         tx_msg.body[0] = '\0';
@@ -666,9 +664,9 @@ bool xs_proto_base::build_body(std::list<std::string> elems, bool terminator)
 
     /* Calculate total message length for checks */
     length = 0;
-    for (it = elems.begin(); it != elems.end(); it++) {
+    for (auto& e : elems) {
         /* String plus null separators */
-        length += it->length() + 1;
+        length += e.length() + 1;
     }
 
     /* If not null terminated don't count the last \0 */
@@ -682,10 +680,10 @@ bool xs_proto_base::build_body(std::list<std::string> elems, bool terminator)
     }
 
     body = tx_msg.body;
-    for (it = elems.begin(); it != elems.end(); it++) {
-        memcpy(body, it->c_str(), it->length());
-        body[it->length()] = '\0';
-        body += it->length() + 1;
+    for (auto& e : elems) {
+        memcpy(body, e.c_str(), e.length());
+        body[e.length()] = '\0';
+        body += e.length() + 1;
     }
     tx_msg.hdr.len = length;
 
