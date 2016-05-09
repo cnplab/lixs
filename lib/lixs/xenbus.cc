@@ -74,7 +74,7 @@ evtchn_port_t lixs::xenbus::xenbus_evtchn(void)
         }
 
         file >> port;
-    } catch (std::ifstream::failure e) {
+    } catch (std::ifstream::failure& e) {
         throw xenbus_error("Cannot read port from " + xsd_port_path + ": " +
                 std::string(std::strerror(errno)));
     }
