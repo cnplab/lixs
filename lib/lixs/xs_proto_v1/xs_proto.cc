@@ -605,9 +605,9 @@ int xs_proto_base::get_int(const char* arg, int_t& number)
 
     try {
         n = std::stoll(arg);
-    } catch(std::invalid_argument e) {
+    } catch(std::invalid_argument& e) {
         return EINVAL;
-    } catch(std::out_of_range e) {
+    } catch(std::out_of_range& e) {
         return EINVAL;
     }
 
