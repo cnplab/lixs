@@ -27,7 +27,7 @@ void lixs::watch_mgr::del(watch_cb& cb)
 {
     record& rec = db[cb.path];
     rec.path.erase(&cb);
-    if (rec.path.size() == 0 && rec.children.size() == 0) {
+    if (rec.path.empty() && rec.children.empty()) {
         db.erase(cb.path);
     }
 
@@ -63,11 +63,8 @@ void lixs::watch_mgr::fire_children(unsigned int tid, const std::string& path)
 
 void lixs::watch_mgr::fire_transaction(unsigned int tid)
 {
-    fire_list::iterator it;
-
-    fire_list& l = tdb[tid];
-    for (it = l.begin(); it != l.end(); it++) {
-        emgr.enqueue_event(*it);
+    for (auto& t : tdb[tid]) {
+        emgr.enqueue_event(t);
     }
 
     tdb.erase(tid);
@@ -94,23 +91,18 @@ void lixs::watch_mgr::callback(const std::string& key, watch_cb* cb, const std::
 
 void lixs::watch_mgr::_fire(const std::string& path, const std::string& fire_path)
 {
-    watch_set::iterator it;
-
-    record& rec = db[path];
-    for (it = rec.path.begin(); it != rec.path.end(); it++) {
-        emgr.enqueue_event(std::bind(&watch_mgr::callback, this, path, *it, fire_path));
+    for (auto& r : db[path].path) {
+        emgr.enqueue_event(std::bind(&watch_mgr::callback, this, path, r, fire_path));
     }
 }
 
 void lixs::watch_mgr::_tfire(unsigned int tid, const std::string& path,
         const std::string& fire_path)
 {
-    watch_set::iterator it;
-
-    record& rec = db[path];
     fire_list& l = tdb[tid];
-    for (it = rec.path.begin(); it != rec.path.end(); it++) {
-        l.push_back(std::bind(&watch_mgr::callback, this, path, *it, fire_path));
+
+    for (auto& p : db[path].path) {
+        l.push_back(std::bind(&watch_mgr::callback, this, path, p, fire_path));
     }
 }
 
@@ -139,22 +131,17 @@ void lixs::watch_mgr::_tfire_parents(unsigned int tid, const std::string& path,
 
 void lixs::watch_mgr::_fire_children(const std::string& path)
 {
-    watch_set::iterator it;
-
-    record& rec = db[path];
-    for (it = rec.children.begin(); it != rec.children.end(); it++) {
-        emgr.enqueue_event(std::bind(&watch_mgr::callback, this, path, *it, (*it)->path));
+    for (auto& c : db[path].children) {
+        emgr.enqueue_event(std::bind(&watch_mgr::callback, this, path, c, c->path));
     }
 }
 
 void lixs::watch_mgr::_tfire_children(unsigned int tid, const std::string& path)
 {
-    watch_set::iterator it;
-
-    record& rec = db[path];
     fire_list& l = tdb[tid];
-    for (it = rec.children.begin(); it != rec.children.end(); it++) {
-        l.push_back(std::bind(&watch_mgr::callback, this, path, *it, (*it)->path));
+
+    for (auto& c : db[path].children) {
+        l.push_back(std::bind(&watch_mgr::callback, this, path, c, c->path));
     }
 }
 
@@ -179,7 +166,7 @@ void lixs::watch_mgr::unregister_from_parents(const std::string& path, watch_cb&
         record& rec = db[parent];
 
         rec.children.erase(&cb);
-        if (rec.path.size() == 0 && rec.children.size() == 0) {
+        if (rec.path.empty() && rec.children.empty()) {
             db.erase(parent);
         }
 

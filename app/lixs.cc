@@ -111,7 +111,7 @@ int main(int argc, char** argv)
         try {
             nix = new lixs::unix_sock_server(xs, dmgr, emgr, epoll,
                     conf.unix_socket_path, conf.unix_socket_ro_path);
-        } catch (lixs::unix_sock_server_error e) {
+        } catch (lixs::unix_sock_server_error& e) {
             printf("LiXS: [unix_sock_server] %s\n", e.what());
             goto out;
         }
@@ -120,7 +120,7 @@ int main(int argc, char** argv)
     if (conf.xenbus) {
         try {
             xenbus = new lixs::xenbus(xs, dmgr, emgr, epoll);
-        } catch (lixs::xenbus_error e) {
+        } catch (lixs::xenbus_error& e) {
             printf("LiXS: [xenbus] %s\n", e.what());
             goto out;
         }
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
     if (conf.virq_dom_exc) {
         try {
             dom_exc = new lixs::os_linux::dom_exc(xs, dmgr, epoll);
-        } catch (lixs::os_linux::dom_exc_error e) {
+        } catch (lixs::os_linux::dom_exc_error& e) {
             printf("LiXS: [dom_exc] %s\n", e.what());
             goto out;
         }

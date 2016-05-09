@@ -4,7 +4,7 @@
 bool lixs::mstore::has_read_access(cid_t cid, const permission_list& perms)
 {
     if (cid == 0
-            || perms.size() == 0
+            || perms.empty()
             || perms.front().cid == cid
             || perms.front().read) {
         return true;
@@ -22,7 +22,7 @@ bool lixs::mstore::has_read_access(cid_t cid, const permission_list& perms)
 bool lixs::mstore::has_write_access(cid_t cid, const permission_list& perms)
 {
     if (cid == 0
-            || perms.size() == 0
+            || perms.empty()
             || perms.front().cid == cid
             || perms.front().write) {
         return true;
