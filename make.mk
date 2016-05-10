@@ -1,6 +1,6 @@
 # Define verbose command
 ifneq ($(verbose),y)
-cmd			 = @printf " %-4s %s\n" $(1) $(2) && $(3) $(4)
+cmd			 = @printf " %-10s %s\n" $(1) $(2) && $(3) $(4)
 else
 cmd			 = $(3) $(4)
 endif
