@@ -48,7 +48,7 @@ distclean: clean
 
 
 # Include default rules
-include make.mk
+include rules.mk
 
 # Build rules for binaries
 $(LIXS_APP): % : %.o $(LIXS_LIB) $(LIBLIXS)
