@@ -2,7 +2,8 @@
 
 # Basic configuration
 verbose	?= n
-debug	?= n
+
+LOGGER_MAX_LEVEL	?= DEBUG
 
 
 # Define binaries and objects
@@ -22,10 +23,10 @@ LIBLIXS		+= $(patsubst %.cc, %.o, $(shell find lib/ -name "*.cc"))
 CFLAGS		+= -Iinc -Wall -MD -MP -g -O3 -std=gnu11
 CXXFLAGS	+= -Iinc -Wall -MD -MP -g -O3 -std=gnu++11
 LDFLAGS		+= -lxenctrl -lxenstore
-ifeq ($(debug),y)
-CFLAGS		+= -DDEBUG
-CXXFLAGS	+= -DDEBUG
-endif
+
+# Configuration macros
+CCFLAGS		+= -DLOGGER_MAX_LEVEL=LOGGER_MAX_LEVEL_$(LOGGER_MAX_LEVEL)
+CXXFLAGS	+= -DLOGGER_MAX_LEVEL=LOGGER_MAX_LEVEL_$(LOGGER_MAX_LEVEL)
 
 
 # Build targets
