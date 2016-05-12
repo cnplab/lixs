@@ -2,6 +2,7 @@
 #define __LIXS_XS_PROTO_V1_XS_PROTO_HH__
 
 #include <lixs/domain_mgr.hh>
+#include <lixs/log/logger.hh>
 #include <lixs/permissions.hh>
 #include <lixs/watch.hh>
 #include <lixs/xenstore.hh>
@@ -96,7 +97,7 @@ protected:
     friend watch_cb;
 
 protected:
-    xs_proto_base(domid_t domid, xenstore& xs, domain_mgr& dmgr);
+    xs_proto_base(domid_t domid, xenstore& xs, domain_mgr& dmgr, log::logger& log);
     virtual ~xs_proto_base();
 
 protected:
@@ -158,6 +159,8 @@ protected:
 
     xenstore& xs;
     domain_mgr& dmgr;
+
+    log::logger& log;
 };
 
 
@@ -165,7 +168,7 @@ template < typename CONNECTION >
 class xs_proto: public CONNECTION, public xs_proto_base {
 protected:
     template < typename... ARGS >
-    xs_proto(domid_t domid, xenstore& xs, domain_mgr& dmgr, ARGS&&... args);
+    xs_proto(domid_t domid, xenstore& xs, domain_mgr& dmgr, log::logger& log, ARGS&&... args);
     ~xs_proto();
 
 protected:
@@ -187,8 +190,9 @@ private:
 
 template < typename CONNECTION >
 template < typename... ARGS >
-xs_proto<CONNECTION>::xs_proto(domid_t domid, xenstore& xs, domain_mgr& dmgr, ARGS&&... args)
-    : CONNECTION(std::forward<ARGS>(args)...), xs_proto_base(domid, xs, dmgr),
+xs_proto<CONNECTION>::xs_proto(domid_t domid, xenstore& xs, domain_mgr& dmgr, log::logger& log,
+        ARGS&&... args)
+    : CONNECTION(std::forward<ARGS>(args)...), xs_proto_base(domid, xs, dmgr, log),
     rx_state(io_state::p), tx_state(io_state::p)
 {
     CONNECTION::need_rx();
@@ -232,10 +236,8 @@ void xs_proto<CONNECTION>::process_rx(void)
 
                 rx_msg.sanitize_input();
 
-#if DEBUG
-                printf("LiXS: [%4s] %s %s\n", cid().c_str(), "<",
-                        static_cast<std::string>(rx_msg).c_str());
-#endif
+                log::LOG<log::level::TRACE>::logf(log, "[%4s] %s %s",
+                        cid().c_str(), ">", static_cast<std::string>(rx_msg).c_str());
 
                 handle_rx();
 
@@ -255,10 +257,8 @@ void xs_proto<CONNECTION>::process_tx(void)
                     return;
                 }
 
-#if DEBUG
-                printf("LiXS: [%4s] %s %s\n", cid().c_str(), ">",
-                        static_cast<std::string>(tx_msg).c_str());
-#endif
+                log::LOG<log::level::TRACE>::logf(log, "[%4s] %s %s",
+                        cid().c_str(), "<", static_cast<std::string>(tx_msg).c_str());
 
                 tx_buff = reinterpret_cast<char*>((&tx_msg.hdr));
                 tx_bytes = sizeof(tx_msg.hdr);

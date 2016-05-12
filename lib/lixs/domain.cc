@@ -40,9 +40,8 @@ lixs::foreign_ring_mapper::~foreign_ring_mapper()
 
 lixs::domain::domain(ev_cb dead_cb, xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io,
         log::logger& log, domid_t domid, evtchn_port_t port, unsigned int mfn)
-    : client(get_id(domid), log,
-            domid, xs, dmgr, io, domid, port, mfn), emgr(emgr), dead_cb(dead_cb),
-    active(true), domid(domid)
+    : client(get_id(domid), log, domid, xs, dmgr, log, io, domid, port, mfn),
+    emgr(emgr), dead_cb(dead_cb), active(true), domid(domid)
 {
 }
 
