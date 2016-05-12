@@ -1,10 +1,12 @@
 #include <catch.hpp>
 
+#include <lixs/log/logger.hh>
 #include <lixs/mstore/store.hh>
 
 
 TEST_CASE( "Basic CRUD operations", "[mstore]" ) {
-    lixs::mstore::store store;
+    lixs::log::logger log(lixs::log::level::OFF);
+    lixs::mstore::store store(log);
 
 
     SECTION( "Create entry" ) {
@@ -98,7 +100,8 @@ static std::string permlist2str(lixs::permission_list& perms)
 }
 
 TEST_CASE( "Basic permission operations" ) {
-    lixs::mstore::store store;
+    lixs::log::logger log(lixs::log::level::OFF);
+    lixs::mstore::store store(log);
 
 
     SECTION( "Default permissions" ) {
@@ -142,7 +145,8 @@ TEST_CASE( "Non-conflicting transactions", "[mstore][transactions]" ) {
     unsigned int tid1;
     unsigned int tid2;
 
-    lixs::mstore::store store;
+    lixs::log::logger log(lixs::log::level::OFF);
+    lixs::mstore::store store(log);
 
 
     REQUIRE( store.create(0, 0, "/test", created) == 0 );
@@ -169,7 +173,8 @@ TEST_CASE( "Conflicting transactions", "[mstore][transactions]" ) {
     bool created;
     bool success;
 
-    lixs::mstore::store store;
+    lixs::log::logger log(lixs::log::level::OFF);
+    lixs::mstore::store store(log);
 
 
     SECTION( "Both transactions create the same entry" ) {

@@ -4,6 +4,7 @@
 #include <lixs/client.hh>
 #include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
+#include <lixs/log/logger.hh>
 #include <lixs/sock_conn.hh>
 #include <lixs/xenstore.hh>
 #include <lixs/xs_proto_v1/xs_proto.hh>
@@ -16,7 +17,7 @@ namespace lixs {
 class sock_client : public client<xs_proto_v1::xs_proto<sock_conn> > {
 public:
     sock_client(long unsigned int id, std::function<void(void)> dead_cb,
-            xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io, int fd);
+            xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io, log::logger& log, int fd);
     ~sock_client();
 
 private:

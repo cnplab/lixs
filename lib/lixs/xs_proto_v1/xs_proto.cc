@@ -10,9 +10,9 @@
 namespace lixs {
 namespace xs_proto_v1 {
 
-xs_proto_base::xs_proto_base(domid_t domid, xenstore& xs, domain_mgr& dmgr)
+xs_proto_base::xs_proto_base(domid_t domid, xenstore& xs, domain_mgr& dmgr, log::logger& log)
     : domid(domid), dom_path(get_dom_path(domid, xs)),
-    rx_msg(dom_path), tx_msg(dom_path), xs(xs), dmgr(dmgr)
+    rx_msg(dom_path), tx_msg(dom_path), xs(xs), dmgr(dmgr), log(log)
 {
 }
 

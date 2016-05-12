@@ -1,8 +1,8 @@
 #include <lixs/mstore/store.hh>
 
 
-lixs::mstore::store::store(void)
-    : access(db), next_tid(1)
+lixs::mstore::store::store(log::logger& log)
+    : access(db, log), next_tid(1), log(log)
 {
 }
 
@@ -13,7 +13,7 @@ lixs::mstore::store::~store(void)
 void lixs::mstore::store::branch(unsigned int& tid)
 {
     tid = next_tid++;
-    trans.insert({tid, transaction(tid, db)});
+    trans.insert({tid, transaction(tid, db, log)});
 }
 
 int lixs::mstore::store::merge(unsigned int tid, bool& success)

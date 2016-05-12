@@ -1,6 +1,7 @@
 #include "lixs_conf.hh"
 
 #include <lixs/event_mgr.hh>
+#include <lixs/log/logger.hh>
 #include <lixs/mstore/store.hh>
 #include <lixs/os_linux/epoll.hh>
 #include <lixs/unix_sock_server.hh>
@@ -15,34 +16,18 @@
 #include <unistd.h>
 
 
+using lixs::log::level;
+using lixs::log::LOG;
+
+static lixs::log::logger* log_ptr;
 static lixs::event_mgr* emgr_ptr;
 
 static void signal_handler(int sig)
 {
     if (sig == SIGINT) {
-        printf("LiXS: Got SIGINT, stopping...\n");
+        LOG<level::INFO>::logf(*log_ptr, "Got SIGINT, stopping...");
         emgr_ptr->disable();
     }
-}
-
-static bool setup_logging(app::lixs_conf& conf)
-{
-    /* Reopen stdout first so that worst case we can still log to stderr */
-    if (freopen(conf.log_file.c_str(), "w", stdout) == NULL) {
-        goto out_err;
-    }
-    setvbuf(stdout, NULL, _IOLBF, 0);
-
-    if (freopen(conf.log_file.c_str(), "w", stderr) == NULL) {
-        goto out_err;
-    }
-    setvbuf(stderr, NULL, _IOLBF, 0);
-
-    return false;
-
-out_err:
-    fprintf(stderr, "LiXS: Failed to redirect output to file: %d\n", errno);
-    return true;
 }
 
 static int daemonize(app::lixs_conf& conf)
@@ -82,26 +67,31 @@ int main(int argc, char** argv)
         fclose(pidf);
     }
 
-    if (conf.log_to_file) {
-        if (setup_logging(conf)) {
-            return -1;
-        }
-    }
-
     if (conf.daemonize) {
         if (daemonize(conf)) {
             return -1;
         }
     }
 
-    printf("LiXS: Starting server...\n");
+    lixs::log::logger* log = NULL;
+
+    try {
+        if (conf.log_to_file) {
+            log = new lixs::log::logger(conf.log_level, conf.log_file);
+        } else {
+            log = new lixs::log::logger(conf.log_level);
+        }
+    } catch (std::runtime_error& e) {
+        printf("LiXS: [logger] %s\n", e.what());
+        return -1;
+    }
 
     lixs::event_mgr emgr;
     lixs::os_linux::epoll epoll(emgr);
-    lixs::mstore::store store;
+    lixs::mstore::store store(*log);
     lixs::xenstore xs(store, emgr, epoll);
 
-    lixs::domain_mgr dmgr(xs, emgr, epoll);
+    lixs::domain_mgr dmgr(xs, emgr, epoll, *log);
 
     lixs::unix_sock_server* nix = NULL;
     lixs::xenbus* xenbus = NULL;
@@ -109,7 +99,7 @@ int main(int argc, char** argv)
 
     if (conf.unix_sockets) {
         try {
-            nix = new lixs::unix_sock_server(xs, dmgr, emgr, epoll,
+            nix = new lixs::unix_sock_server(xs, dmgr, emgr, epoll, *log,
                     conf.unix_socket_path, conf.unix_socket_ro_path);
         } catch (lixs::unix_sock_server_error& e) {
             printf("LiXS: [unix_sock_server] %s\n", e.what());
@@ -119,7 +109,7 @@ int main(int argc, char** argv)
 
     if (conf.xenbus) {
         try {
-            xenbus = new lixs::xenbus(xs, dmgr, emgr, epoll);
+            xenbus = new lixs::xenbus(xs, dmgr, emgr, epoll, *log);
         } catch (lixs::xenbus_error& e) {
             printf("LiXS: [xenbus] %s\n", e.what());
             goto out;
@@ -136,11 +126,13 @@ int main(int argc, char** argv)
     }
 
 
+    LOG<level::INFO>::logf(*log, "Starting server...");
+
     emgr.enable();
+
+    log_ptr = log;
     emgr_ptr = &emgr;
     signal(SIGINT, signal_handler);
-
-    printf("LiXS: Entering main loop...\n");
 
     emgr.run();
 
@@ -158,7 +150,11 @@ out:
         delete dom_exc;
     }
 
-    printf("LiXS: Server stoped!\n");
+    LOG<level::INFO>::logf(*log, "Server stoped!");
+
+    if (log) {
+        delete log;
+    }
 
     return 0;
 }

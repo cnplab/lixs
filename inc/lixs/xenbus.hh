@@ -5,6 +5,7 @@
 #include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/iomux.hh>
+#include <lixs/log/logger.hh>
 #include <lixs/ring_conn.hh>
 #include <lixs/xenstore.hh>
 #include <lixs/xs_proto_v1/xs_proto.hh>
@@ -39,7 +40,7 @@ private:
 
 class xenbus : public client<xs_proto_v1::xs_proto<ring_conn<xenbus_mapper> > > {
 public:
-    xenbus(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io);
+    xenbus(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io, log::logger& log);
     ~xenbus();
 
 private:

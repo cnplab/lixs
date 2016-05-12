@@ -1,3 +1,4 @@
+#include <lixs/log/logger.hh>
 #include <lixs/mstore/database.hh>
 #include <lixs/mstore/transaction.hh>
 #include <lixs/util.hh>
@@ -6,8 +7,8 @@
 #include <string>
 
 
-lixs::mstore::transaction::transaction(unsigned int id, database& db)
-    : db_access(db), id(id)
+lixs::mstore::transaction::transaction(unsigned int id, database& db, log::logger& log)
+    : db_access(db, log), id(id)
 {
 }
 
@@ -239,9 +240,12 @@ void lixs::mstore::transaction::merge(bool& success)
 
 bool lixs::mstore::transaction::can_merge()
 {
+    log::LOG<log::level::TRACE>::logf(log, "mstore::transaction::can_merge %d", id);
+
     /* The transaction should only succeed if, for each of the records referenced during the
      * transaction, three conditions are meet:
      */
+    log::LOG<log::level::TRACE>::logf(log, "  RECORDS");
     for (auto& r : records) {
         record& rec = db[r];
         tentry& te = rec.te[id];
@@ -251,10 +255,14 @@ bool lixs::mstore::transaction::can_merge()
          */
         if (te.init_valid) {
             if (rec.e.delete_seq > te.init_seq) {
+                log::LOG<log::level::TRACE>::logf(log,
+                        "    '%s' ABORT (rec.e.delete_seq > te.init_seq)", r.c_str());
                 return false;
             }
         } else {
             if (rec.e.write_seq > te.init_seq) {
+                log::LOG<log::level::TRACE>::logf(log,
+                        "    '%s' ABORT (rec.e.write_seq > te.init_seq)", r.c_str());
                 return false;
             }
         }
@@ -263,6 +271,8 @@ bool lixs::mstore::transaction::can_merge()
          * inside the transaction;
          */
         if (te.read_seq && rec.e.write_seq > te.read_seq) {
+            log::LOG<log::level::TRACE>::logf(log,
+                    "    '%s' ABORT (te.read_seq && rec.e.write_seq > te.read_seq)", r.c_str());
             return false;
         }
 
@@ -270,8 +280,14 @@ bool lixs::mstore::transaction::can_merge()
          * it was read inside the transaction.
          */
         if (te.read_children_seq && rec.e.write_children_seq > te.read_children_seq) {
+            log::LOG<log::level::TRACE>::logf(log,
+                    "    '%s' ABORT "
+                    "(te.read_children_seq && rec.e.write_children_seq > te.read_children_seq)",
+                    r.c_str());
             return false;
         }
+
+        log::LOG<log::level::TRACE>::logf(log, "    '%s' MERGE", r.c_str());
     }
 
     return true;

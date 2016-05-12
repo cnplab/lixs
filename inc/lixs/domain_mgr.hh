@@ -3,6 +3,7 @@
 
 #include <lixs/event_mgr.hh>
 #include <lixs/iomux.hh>
+#include <lixs/log/logger.hh>
 #include <lixs/xenstore.hh>
 
 #include <cerrno>
@@ -22,7 +23,7 @@ public:
     typedef std::map<domid_t, domain*>::iterator iterator;
 
 public:
-    domain_mgr(xenstore& xs, event_mgr& emgr, iomux& io);
+    domain_mgr(xenstore& xs, event_mgr& emgr, iomux& io, log::logger& log);
     ~domain_mgr();
 
     int create(domid_t domid, evtchn_port_t port, unsigned int mfn);
@@ -41,6 +42,7 @@ private:
     xenstore& xs;
     event_mgr& emgr;
     iomux& io;
+    log::logger& log;
 
     domain_map domains;
 };

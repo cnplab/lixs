@@ -1,6 +1,7 @@
 #ifndef __LIXS_MSTORE_DATABASE_HH__
 #define __LIXS_MSTORE_DATABASE_HH__
 
+#include <lixs/log/logger.hh>
 #include <lixs/permissions.hh>
 
 #include <map>
@@ -77,8 +78,8 @@ typedef std::map<std::string, record> database;
 
 class db_access {
 public:
-    db_access(database& db)
-        : db(db)
+    db_access(database& db, log::logger& log)
+        : db(db), log(log)
     { }
 
     virtual int create(cid_t cid, const std::string& path, bool& created) = 0;
@@ -93,6 +94,8 @@ public:
 
 protected:
     database& db;
+
+    log::logger& log;
 };
 
 
