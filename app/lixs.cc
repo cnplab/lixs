@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 
     lixs::event_mgr emgr;
     lixs::os_linux::epoll epoll(emgr);
-    lixs::mstore::store store;
+    lixs::mstore::store store(*log);
     lixs::xenstore xs(store, emgr, epoll);
 
     lixs::domain_mgr dmgr(xs, emgr, epoll, *log);

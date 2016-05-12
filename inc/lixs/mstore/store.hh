@@ -1,6 +1,7 @@
 #ifndef __LIXS_MSTORE_STORE_HH__
 #define __LIXS_MSTORE_STORE_HH__
 
+#include <lixs/log/logger.hh>
 #include <lixs/store.hh>
 #include <lixs/mstore/database.hh>
 #include <lixs/mstore/simple_access.hh>
@@ -16,7 +17,7 @@ namespace mstore {
 
 class store : public lixs::store {
 public:
-    store(void);
+    store(log::logger& log);
     ~store();
 
     void branch(unsigned int& tid);
@@ -50,6 +51,8 @@ private:
 
     unsigned int next_tid;
     transaction_db trans;
+
+    log::logger& log;
 };
 
 } /* namespace mstore */

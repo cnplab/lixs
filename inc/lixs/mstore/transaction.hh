@@ -1,6 +1,7 @@
 #ifndef __LIXS_MSTORE_TRANSACTION_HH__
 #define __LIXS_MSTORE_TRANSACTION_HH__
 
+#include <lixs/log/logger.hh>
 #include <lixs/mstore/database.hh>
 
 #include <set>
@@ -12,7 +13,7 @@ namespace mstore {
 
 class transaction : public db_access {
 public:
-    transaction(unsigned int id, database& db);
+    transaction(unsigned int id, database& db, log::logger& log);
 
     void abort();
     void merge(bool& success);

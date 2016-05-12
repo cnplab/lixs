@@ -1,6 +1,7 @@
 #ifndef __LIXS_MSTORE_SIMPLE_ACCESS_HH__
 #define __LIXS_MSTORE_SIMPLE_ACCESS_HH__
 
+#include <lixs/log/logger.hh>
 #include <lixs/mstore/database.hh>
 
 #include <set>
@@ -12,7 +13,7 @@ namespace mstore {
 
 class simple_access : public db_access {
 public:
-    simple_access(database& db);
+    simple_access(database& db, log::logger& log);
 
     int create(cid_t cid, const std::string& path, bool& created);
     int read(cid_t cid, const std::string& path, std::string& val);

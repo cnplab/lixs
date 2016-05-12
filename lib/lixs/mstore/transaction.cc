@@ -1,3 +1,4 @@
+#include <lixs/log/logger.hh>
 #include <lixs/mstore/database.hh>
 #include <lixs/mstore/transaction.hh>
 #include <lixs/util.hh>
@@ -6,8 +7,8 @@
 #include <string>
 
 
-lixs::mstore::transaction::transaction(unsigned int id, database& db)
-    : db_access(db), id(id)
+lixs::mstore::transaction::transaction(unsigned int id, database& db, log::logger& log)
+    : db_access(db, log), id(id)
 {
 }
 

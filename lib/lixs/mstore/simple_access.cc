@@ -1,3 +1,4 @@
+#include <lixs/log/logger.hh>
 #include <lixs/mstore/database.hh>
 #include <lixs/permissions.hh>
 #include <lixs/mstore/simple_access.hh>
@@ -7,8 +8,8 @@
 #include <string>
 
 
-lixs::mstore::simple_access::simple_access(database& db)
-    : db_access(db)
+lixs::mstore::simple_access::simple_access(database& db, log::logger& log)
+    : db_access(db, log)
 {
 }
 
