@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 
     if (conf.unix_sockets) {
         try {
-            nix = new lixs::unix_sock_server(xs, dmgr, emgr, epoll,
+            nix = new lixs::unix_sock_server(xs, dmgr, emgr, epoll, *log,
                     conf.unix_socket_path, conf.unix_socket_ro_path);
         } catch (lixs::unix_sock_server_error& e) {
             printf("LiXS: [unix_sock_server] %s\n", e.what());

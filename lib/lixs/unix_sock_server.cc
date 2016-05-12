@@ -1,6 +1,7 @@
 #include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
 #include <lixs/iomux.hh>
+#include <lixs/log/logger.hh>
 #include <lixs/sock_client.hh>
 #include <lixs/unix_sock_server.hh>
 #include <lixs/xenstore.hh>
@@ -14,9 +15,10 @@
 #include <unistd.h>
 
 
-lixs::unix_sock_server::unix_sock_server(xenstore& xs, domain_mgr& dmgr,
-        event_mgr& emgr, iomux& io, const std::string& rw_path, const std::string& ro_path)
-    : xs(xs), dmgr(dmgr), emgr(emgr), io(io), rw_path(rw_path), ro_path(ro_path), next_id(0)
+lixs::unix_sock_server::unix_sock_server(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr,
+        iomux& io, log::logger& log, const std::string& rw_path, const std::string& ro_path)
+    : xs(xs), dmgr(dmgr), emgr(emgr), io(io), log(log), rw_path(rw_path), ro_path(ro_path),
+    next_id(0)
 {
     std::string err_msg;
 
@@ -89,7 +91,6 @@ int lixs::unix_sock_server::bind_socket(const std::string& path, std::string& er
     ret = unlink(sock_addr.sun_path);
     if (ret == -1 && errno != ENOENT) {
         error_msg = "Failed to unlink socket: " + std::string(std::strerror(errno));
-        printf("error_msg %s\n", error_msg.c_str());
         return -1;
     }
 
@@ -124,16 +125,20 @@ void lixs::unix_sock_server::callback(bool read, bool write, bool error, int fd)
     int client_fd;
 
     if (error) {
-        printf("LiXS: [unix_socket_server] Got error from iomux\n");
-        printf("LiXS: [unix_socket_server] Disabling socket (fd = %d)\n", fd);
+        log::LOG<log::level::WARN>::logf(log,
+                "[unix_socket_server] Got error from iomux");
+        log::LOG<log::level::WARN>::logf(log,
+                "[unix_socket_server] Disabling socket (fd = %d)", fd);
         io.rem(fd);
         return;
     }
 
     client_fd = accept(fd, NULL, NULL);
     if (client_fd == -1) {
-        printf("LiXS: [unix_socket_server] Calling accept on socket failed: %d\n", errno);
-        printf("LiXS: [unix_socket_server] Disabling socket (fd = %d)\n", fd);
+        log::LOG<log::level::ERROR>::logf(log,
+                "[unix_socket_server] Calling accept on socket failed: %s", std::strerror(errno));
+        log::LOG<log::level::WARN>::logf(log,
+                "[unix_socket_server] Disabling socket (fd = %d)", fd);
         io.rem(fd);
         return;
     }
