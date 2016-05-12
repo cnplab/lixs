@@ -77,9 +77,9 @@ int main(int argc, char** argv)
 
     try {
         if (conf.log_to_file) {
-            log = new lixs::log::logger(level::INFO, conf.log_file);
+            log = new lixs::log::logger(conf.log_level, conf.log_file);
         } else {
-            log = new lixs::log::logger(level::INFO);
+            log = new lixs::log::logger(conf.log_level);
         }
     } catch (std::runtime_error& e) {
         printf("LiXS: [logger] %s\n", e.what());

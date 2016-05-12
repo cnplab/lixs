@@ -1,5 +1,7 @@
 #include "lixs_conf.hh"
 
+#include <lixs/log/logger.hh>
+
 #include <getopt.h>
 #include <string>
 
@@ -12,6 +14,7 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
     pid_file("/var/run/xenstored.pid"),
     log_to_file(false),
     log_file("/var/log/xen/lixs.log"),
+    log_level(lixs::log::level::INFO),
 
     xenbus(false),
     virq_dom_exc(false),
@@ -23,7 +26,7 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
 
     cmd(argv[0])
 {
-    const char *short_opts = "hDxiu";
+    const char *short_opts = "hDL:xiu";
     const struct option long_opts[] = {
         { "help"               , no_argument       , NULL , 'h' },
         { "daemon"             , no_argument       , NULL , 'D' },
@@ -34,6 +37,7 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
          */
         { "pid-file"           , required_argument , NULL , 'p' },
         { "log-file"           , optional_argument , NULL , 'l' },
+        { "log-level"          , required_argument , NULL,  'L' },
         { "xenbus"             , no_argument       , NULL , 'x' },
         { "virq-dom-exc"       , no_argument       , NULL , 'i' },
         { "unix-sockets"       , no_argument       , NULL , 'u' },
@@ -44,6 +48,7 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
 
     int opt;
     int opt_index;
+    std::string optarg_str;
 
     while (1) {
         opt = getopt_long(argc, argv, short_opts, long_opts, &opt_index);
@@ -74,6 +79,27 @@ app::lixs_conf::lixs_conf(int argc, char** argv)
                 log_to_file = true;
                 if (optarg) {
                     log_file = std::string(optarg);
+                }
+                break;
+
+            case 'L':
+                optarg_str = std::string(optarg);
+
+                if (optarg_str == "off") {
+                    log_level = lixs::log::level::OFF;
+                } else if (optarg_str == "error") {
+                    log_level = lixs::log::level::ERROR;
+                } else if (optarg_str == "warn") {
+                    log_level = lixs::log::level::WARN;
+                } else if (optarg_str == "info") {
+                    log_level = lixs::log::level::INFO;
+                } else if (optarg_str == "debug") {
+                    log_level = lixs::log::level::DEBUG;
+                } else if (optarg_str == "trace") {
+                    log_level = lixs::log::level::TRACE;
+                } else {
+                    printf("Invalid log level %s\n", optarg);
+                    error = true;
                 }
                 break;
 
@@ -124,6 +150,9 @@ void app::lixs_conf::print_usage() {
            "                         this options. Default value: '/var/log/xen/lixs.log'. This\n"
            "                         option is required for compatibility with the upstream sysV\n"
            "                         init script.\n");
+    printf("      --log-level <level>\n"
+           "                         Maximum log level. Default is info. Can be one of:\n"
+           "                         [ off, error, warn, info, debug, trace ].\n");
     printf("\n");
     printf("Communication mechanisms:\n");
     printf("  -x, --xenbus           Enable communication with Linux's xenbus driver.\n");

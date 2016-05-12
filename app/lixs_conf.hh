@@ -1,6 +1,8 @@
 #ifndef __LIXS_CONF_HH__
 #define __LIXS_CONF_HH__
 
+#include <lixs/log/logger.hh>
+
 #include <string>
 
 
@@ -21,6 +23,7 @@ public:
     std::string pid_file;
     bool log_to_file;
     std::string log_file;
+    lixs::log::level log_level;
 
     bool xenbus;
     bool virq_dom_exc;
