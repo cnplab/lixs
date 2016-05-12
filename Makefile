@@ -1,9 +1,12 @@
 # LiXS: Lightweight XenStore
 
 # Basic configuration
-verbose	?= n
+verbose		?= n
+config		?= config.mk
 
-LOGGER_MAX_LEVEL	?= DEBUG
+ifeq (,$(filter $(MAKECMDGOALS),configure clean distclean))
+-include $(config)
+endif
 
 
 # Define binaries and objects
@@ -25,14 +28,16 @@ CXXFLAGS	+= -Iinc -Wall -MD -MP -g -O3 -std=gnu++11
 LDFLAGS		+= -lxenctrl -lxenstore
 
 # Configuration macros
-CCFLAGS		+= -DLOGGER_MAX_LEVEL=LOGGER_MAX_LEVEL_$(LOGGER_MAX_LEVEL)
-CXXFLAGS	+= -DLOGGER_MAX_LEVEL=LOGGER_MAX_LEVEL_$(LOGGER_MAX_LEVEL)
+CCFLAGS		+= -DLOGGER_MAX_LEVEL=LOGGER_MAX_LEVEL_$(CONFIG_LOGGER_MAX_LEVEL)
+CXXFLAGS	+= -DLOGGER_MAX_LEVEL=LOGGER_MAX_LEVEL_$(CONFIG_LOGGER_MAX_LEVEL)
 
 
 # Build targets
 all: $(LIXS_APP)
 
 tests: $(CATCH_APP)
+
+configure: $(config)
 
 install: $(LIXS_APP)
 	$(call cmd, "INSTALL", $(LIXS_APP), cp -f, $(LIXS_APP) /usr/local/sbin/lixs)
@@ -44,8 +49,9 @@ clean:
 distclean: clean
 	$(call cmd, "CLEAN", $(LIXS_APP) , rm -f, $(LIXS_APP))
 	$(call cmd, "CLEAN", $(CATCH_APP), rm -f, $(CATCH_APP))
+	$(call cmd, "CLEAN", config.mk, rm -f, config.mk)
 
-.PHONY: all tests install clean distclean
+.PHONY: all tests configure install clean distclean
 
 
 # Include default rules
@@ -57,6 +63,10 @@ $(LIXS_APP): % : %.o $(LIXS_LIB) $(LIBLIXS)
 
 $(CATCH_APP): % : %.o $(CATCH_LIB) $(LIBLIXS)
 	$(call cxxlink, $^, $@)
+
+# Build rules for configuration
+config.mk: config.mk.in
+	$(call cmd, "CONFIG", $@, cp, $^ $@)
 
 
 # Include auto-generated dependency information

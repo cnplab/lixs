@@ -1,0 +1,8 @@
+# LiXS: Lightweight XenStore
+
+# Configure maximum log level supported by binary
+#
+# This is normaly use to remove more verbose log levels (mostly TRACE) to improve performance on a
+# production build. The following levels, listed in order, are supported: [ OFF, DEBUG, WARN, INFO,
+# DEBUG, TRACE ]. All levels above CONFIG_LOGGER_MAX_LEVEL will not be compiled in.
+CONFIG_LOGGER_MAX_LEVEL	:= DEBUG

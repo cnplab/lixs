@@ -13,8 +13,8 @@ cxxlink		 = $(call cmd, "LD", $2, $(CXX), $(CXXFLAGS) $(1) $(LDFLAGS) -o $(2))
 
 
 # Default build rules for objects
-%.o: %.cc
+%.o: %.cc $(config)
 	$(call cxxcompile, $<, $@)
 
-%.o: %.c
+%.o: %.c $(config)
 	$(call ccompile, $<, $@)
