@@ -35,7 +35,7 @@ int lixs::domain_mgr::create(domid_t domid, evtchn_port_t port, unsigned int mfn
         std::function<void(void)> cb = std::bind(&domain_mgr::domain_dead, this, domid);
 
         try {
-            dom = new domain(cb, xs, *this, emgr, io, domid, port, mfn);
+            dom = new domain(cb, xs, *this, emgr, io, log, domid, port, mfn);
         } catch (ring_conn_error& e) {
             log::LOG<log::level::ERROR>::logf(log, "[Domain %d] %s", domid, e.what());
             return ECANCELED;

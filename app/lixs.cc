@@ -109,7 +109,7 @@ int main(int argc, char** argv)
 
     if (conf.xenbus) {
         try {
-            xenbus = new lixs::xenbus(xs, dmgr, emgr, epoll);
+            xenbus = new lixs::xenbus(xs, dmgr, emgr, epoll, *log);
         } catch (lixs::xenbus_error& e) {
             printf("LiXS: [xenbus] %s\n", e.what());
             goto out;

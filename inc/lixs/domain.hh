@@ -4,6 +4,7 @@
 #include <lixs/client.hh>
 #include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
+#include <lixs/log/logger.hh>
 #include <lixs/ring_conn.hh>
 #include <lixs/xenstore.hh>
 #include <lixs/xs_proto_v1/xs_proto.hh>
@@ -39,7 +40,7 @@ private:
 class domain : public client<xs_proto_v1::xs_proto<ring_conn<foreign_ring_mapper> > > {
 public:
     domain(ev_cb dead_cb, xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io,
-            domid_t domid, evtchn_port_t port, unsigned int mfn);
+            log::logger& log, domid_t domid, evtchn_port_t port, unsigned int mfn);
     ~domain();
 
     bool is_active(void);

@@ -146,7 +146,7 @@ void lixs::unix_sock_server::callback(bool read, bool write, bool error, int fd)
     long unsigned int id = next_id++;
     std::function<void(void)> cb = std::bind(&unix_sock_server::client_dead, this, id);
 
-    sock_client* client = new sock_client(id, cb, xs, dmgr, emgr, io, client_fd);
+    sock_client* client = new sock_client(id, cb, xs, dmgr, emgr, io, log, client_fd);
 
     clients.insert({id, client});
 }

@@ -1,5 +1,6 @@
 #include <lixs/domain_mgr.hh>
 #include <lixs/event_mgr.hh>
+#include <lixs/log/logger.hh>
 #include <lixs/xenbus.hh>
 #include <lixs/xenstore.hh>
 
@@ -53,8 +54,8 @@ lixs::xenbus_mapper::~xenbus_mapper(void)
 const std::string lixs::xenbus::xsd_port_path = "/proc/xen/xsd_port";
 
 /* FIXME: What is the correct domid when running in a stub domain? */
-lixs::xenbus::xenbus(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io)
-    : client("XB", 0, xs, dmgr, io, 0, xenbus_evtchn())
+lixs::xenbus::xenbus(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io, log::logger& log)
+    : client("XB", log, 0, xs, dmgr, io, 0, xenbus_evtchn())
 {
 }
 
