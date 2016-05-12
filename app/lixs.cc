@@ -91,7 +91,7 @@ int main(int argc, char** argv)
     lixs::mstore::store store;
     lixs::xenstore xs(store, emgr, epoll);
 
-    lixs::domain_mgr dmgr(xs, emgr, epoll);
+    lixs::domain_mgr dmgr(xs, emgr, epoll, *log);
 
     lixs::unix_sock_server* nix = NULL;
     lixs::xenbus* xenbus = NULL;
