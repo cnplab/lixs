@@ -1,3 +1,10 @@
+image: fmanco/cpp-build
+
+
+before_script:
+    - apt-get update
+    - apt-get install -y libxen-dev catch
+
 stages:
     - build
     - test
@@ -8,8 +15,7 @@ build:
     script:
         - make
     tags:
-        - C
-        - C++
+        - docker
 
 test:
     stage: test
@@ -17,5 +23,4 @@ test:
         - make tests
         - ./test/run-catch
     tags:
-        - C
-        - C++
+        - docker
