@@ -74,4 +74,4 @@ config.mk: config.mk.in
 -include $(LIXS_LIB:%.o=%.d)
 -include $(CATCH_APP:%=%.d)
 -include $(CATCH_LIB:%.o=%.d)
--include $(LIB:%.o=%.d)
+-include $(LIBLIXS:%.o=%.d)
