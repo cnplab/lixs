@@ -1,10 +1,6 @@
 image: fmanco/cpp-build
 
 
-before_script:
-    - apt-get update
-    - apt-get install -y libxen-dev catch
-
 stages:
     - build
     - test
@@ -12,15 +8,27 @@ stages:
 
 build:
     stage: build
+    before_script:
+        - apt-get update
+        - apt-get install -y libxen-dev catch
     script:
-        - make
+        - make all
+        - make tests
+    artifacts:
+        paths:
+            - app/lixs
+            - test/run-catch
     tags:
         - docker
 
 test:
     stage: test
+    before_script:
+        - apt-get update
+        - apt-get install -y libxen-[0-9].[0-9]
     script:
-        - make tests
         - ./test/run-catch
+    dependencies:
+        - build
     tags:
         - docker
