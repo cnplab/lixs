@@ -23,8 +23,17 @@ LIBLIXS		+= $(patsubst %.cc, %.o, $(shell find lib/ -name "*.cc"))
 
 
 # Default build and linking flags
+ifneq ($(CONFIG_XEN_USR_ROOT),)
+CFLAGS		+= -I $(CONFIG_XEN_USR_ROOT)/usr/local/include
+CXXFLAGS	+= -I $(CONFIG_XEN_USR_ROOT)/usr/local/include
+endif
 CFLAGS		+= -Iinc -Wall -MD -MP -g -O3 -std=gnu11
 CXXFLAGS	+= -Iinc -Wall -MD -MP -g -O3 -std=gnu++11
+
+ifneq ($(CONFIG_XEN_USR_ROOT),)
+LDFLAGS		+= -L $(CONFIG_XEN_USR_ROOT)/usr/local/lib
+LDFLAGS		+= -Wl,-rpath-link,$(CONFIG_XEN_USR_ROOT)/usr/local/lib
+endif
 LDFLAGS		+= -lxenctrl -lxenstore
 
 # Configuration macros

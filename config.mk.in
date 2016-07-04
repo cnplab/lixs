@@ -6,3 +6,10 @@
 # production build. The following levels, listed in order, are supported: [ OFF, DEBUG, WARN, INFO,
 # DEBUG, TRACE ]. All levels above CONFIG_LOGGER_MAX_LEVEL will not be compiled in.
 CONFIG_LOGGER_MAX_LEVEL	:= DEBUG
+
+# Point to xen headers and libs
+#
+# Usually useful if you want to build for a xen version different that the one you're running on
+# your system. A typical usage is to point to the `${XEN_ROOT}/dist/install` directory after
+# building xen under `${XEN_ROOT}`.
+CONFIG_XEN_USR_ROOT :=
