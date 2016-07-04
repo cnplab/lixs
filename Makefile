@@ -39,6 +39,15 @@ LDFLAGS		+= -lxenctrl -lxenstore
 # Configuration macros
 CCFLAGS		+= -DLOGGER_MAX_LEVEL=LOGGER_MAX_LEVEL_$(CONFIG_LOGGER_MAX_LEVEL)
 CXXFLAGS	+= -DLOGGER_MAX_LEVEL=LOGGER_MAX_LEVEL_$(CONFIG_LOGGER_MAX_LEVEL)
+# On Xen 4.7 the libxc API changed being split into multiple libs. Defining the
+# following macros gives access to the old API. Lets not change the used API
+# for now, to keep compatibility with older version of Xen.
+CFLAGS		+= -DXC_WANT_COMPAT_EVTCHN_API
+CFLAGS		+= -DXC_WANT_COMPAT_GNTTAB_API
+CFLAGS		+= -DXC_WANT_COMPAT_MAP_FOREIGN_API
+CXXFLAGS	+= -DXC_WANT_COMPAT_EVTCHN_API
+CXXFLAGS	+= -DXC_WANT_COMPAT_GNTTAB_API
+CXXFLAGS	+= -DXC_WANT_COMPAT_MAP_FOREIGN_API
 
 
 # Build targets
