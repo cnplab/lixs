@@ -48,6 +48,7 @@
 #include <csignal>
 #include <cstdio>
 #include <fcntl.h>
+#include <memory>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -109,13 +110,15 @@ int main(int argc, char** argv)
         }
     }
 
-    lixs::log::logger* log = NULL;
+    std::unique_ptr<lixs::log::logger> log;
 
     try {
         if (conf.log_to_file) {
-            log = new lixs::log::logger(conf.log_level, conf.log_file);
+            log = std::unique_ptr<lixs::log::logger>(
+                    new lixs::log::logger(conf.log_level, conf.log_file));
         } else {
-            log = new lixs::log::logger(conf.log_level);
+            log = std::unique_ptr<lixs::log::logger>(
+                    new lixs::log::logger(conf.log_level));
         }
     } catch (std::runtime_error& e) {
         printf("LiXS: [logger] %s\n", e.what());
@@ -129,35 +132,38 @@ int main(int argc, char** argv)
 
     lixs::domain_mgr dmgr(xs, emgr, epoll, *log);
 
-    lixs::unix_sock_server* nix = NULL;
-    lixs::xenbus* xenbus = NULL;
-    lixs::os_linux::dom_exc* dom_exc = NULL;
+    std::unique_ptr<lixs::unix_sock_server> nix;
+    std::unique_ptr<lixs::xenbus> xenbus;
+    std::unique_ptr<lixs::os_linux::dom_exc> dom_exc;
 
     if (conf.unix_sockets) {
         try {
-            nix = new lixs::unix_sock_server(xs, dmgr, emgr, epoll, *log,
-                    conf.unix_socket_path, conf.unix_socket_ro_path);
+            nix = std::unique_ptr<lixs::unix_sock_server>(
+                    new lixs::unix_sock_server(xs, dmgr, emgr, epoll, *log,
+                        conf.unix_socket_path, conf.unix_socket_ro_path));
         } catch (lixs::unix_sock_server_error& e) {
             printf("LiXS: [unix_sock_server] %s\n", e.what());
-            goto out;
+            return -1;
         }
     }
 
     if (conf.xenbus) {
         try {
-            xenbus = new lixs::xenbus(xs, dmgr, emgr, epoll, *log);
+            xenbus = std::unique_ptr<lixs::xenbus>(
+                    new lixs::xenbus(xs, dmgr, emgr, epoll, *log));
         } catch (lixs::xenbus_error& e) {
             printf("LiXS: [xenbus] %s\n", e.what());
-            goto out;
+            return -1;
         }
     }
 
     if (conf.virq_dom_exc) {
         try {
-            dom_exc = new lixs::os_linux::dom_exc(xs, dmgr, epoll);
+            dom_exc = std::unique_ptr<lixs::os_linux::dom_exc>(
+                    new lixs::os_linux::dom_exc(xs, dmgr, epoll));
         } catch (lixs::os_linux::dom_exc_error& e) {
             printf("LiXS: [dom_exc] %s\n", e.what());
-            goto out;
+            return -1;
         }
     }
 
@@ -166,31 +172,13 @@ int main(int argc, char** argv)
 
     emgr.enable();
 
-    log_ptr = log;
+    log_ptr = log.get();
     emgr_ptr = &emgr;
     signal(SIGINT, signal_handler);
 
     emgr.run();
 
-
-out:
-    if (nix) {
-        delete nix;
-    }
-
-    if (xenbus) {
-        delete xenbus;
-    }
-
-    if (dom_exc) {
-        delete dom_exc;
-    }
-
     LOG<level::INFO>::logf(*log, "Server stoped!");
-
-    if (log) {
-        delete log;
-    }
 
     return 0;
 }
