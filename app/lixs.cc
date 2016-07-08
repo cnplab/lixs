@@ -56,8 +56,8 @@
 using lixs::log::level;
 using lixs::log::LOG;
 
-static lixs::log::logger* log_ptr;
-static lixs::event_mgr* emgr_ptr;
+static lixs::log::logger* log_ptr = NULL;
+static lixs::event_mgr* emgr_ptr = NULL;
 
 static void signal_handler(int sig)
 {
@@ -65,6 +65,14 @@ static void signal_handler(int sig)
         LOG<level::INFO>::logf(*log_ptr, "Got SIGINT, stopping...");
         emgr_ptr->disable();
     }
+}
+
+static void setup_signal_handler(lixs::event_mgr& emgr, lixs::log::logger& log)
+{
+    emgr_ptr = &emgr;
+    log_ptr = &log;
+
+    signal(SIGINT, signal_handler);
 }
 
 static int daemonize(app::lixs_conf& conf)
@@ -172,9 +180,7 @@ int main(int argc, char** argv)
 
     emgr.enable();
 
-    log_ptr = log.get();
-    emgr_ptr = &emgr;
-    signal(SIGINT, signal_handler);
+    setup_signal_handler(emgr, *log);
 
     emgr.run();
 
