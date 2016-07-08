@@ -48,6 +48,7 @@
 #include <csignal>
 #include <cstdio>
 #include <fcntl.h>
+#include <memory>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -55,8 +56,8 @@
 using lixs::log::level;
 using lixs::log::LOG;
 
-static lixs::log::logger* log_ptr;
-static lixs::event_mgr* emgr_ptr;
+static lixs::log::logger* log_ptr = NULL;
+static lixs::event_mgr* emgr_ptr = NULL;
 
 static void signal_handler(int sig)
 {
@@ -66,21 +67,60 @@ static void signal_handler(int sig)
     }
 }
 
-static int daemonize(app::lixs_conf& conf)
+static void setup_signal_handler(lixs::event_mgr& emgr, lixs::log::logger& log)
 {
-    /* If log to file is enabled we cannot let daemon() handle file descriptors
-     * (it would close the log files) but we still need to close stdin
-     */
-    if (conf.log_to_file) {
-        fclose(stdin);
+    emgr_ptr = &emgr;
+    log_ptr = &log;
+
+    signal(SIGINT, signal_handler);
+}
+
+static int daemonize(void)
+{
+    if (daemon(1, 0)) {
+        fprintf(stderr, "LiXS: Failed to daemonize: %s\n", std::strerror(errno));
+        return -1;
     }
 
-    if (daemon(1, conf.log_to_file ? 1 : 0)) {
-        fprintf(stderr, "LiXS: Failed to daemonize: %d\n", errno);
-        return true;
+    return 0;
+}
+
+static int create_pid_file(const std::string& pid_file)
+{
+    int ret;
+    FILE* pidf;
+
+    pidf = fopen(pid_file.c_str(), "w");
+
+    if (pidf == NULL) {
+        fprintf(stderr, "LiXS: Failed to open PID file: %s\n", std::strerror(errno));
+        return -1;
     }
 
-    return false;
+    ret = fprintf(pidf, "%d", getpid());
+    if (ret < 0) {
+        fprintf(stderr, "LiXS: Failed to write to PID file\n");
+        return ret;
+    }
+
+    fclose(pidf);
+
+    return 0;
+}
+
+static int remove_pid_file(const std::string& pid_file)
+{
+    int ret;
+
+    ret = unlink(pid_file.c_str());
+    if (ret) {
+        /* This print might fail if we daemonized and stderr is closed, but
+         * lets leave it at that for now.
+         */
+        fprintf(stderr, "LiXS: Failed to remove PID file\n");
+    }
+
+    return ret;
 }
 
 int main(int argc, char** argv)
@@ -97,30 +137,43 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    if (conf.write_pid_file) {
-        FILE* pidf = fopen(conf.pid_file.c_str(), "w");
-        fprintf(pidf, "%d", getpid());
-        fclose(pidf);
+
+    std::unique_ptr<lixs::log::logger> log;
+
+    try {
+        if (conf.log_to_file) {
+            log = std::unique_ptr<lixs::log::logger>(
+                    new lixs::log::logger(conf.log_level, conf.log_file));
+        } else {
+            log = std::unique_ptr<lixs::log::logger>(
+                    new lixs::log::logger(conf.log_level));
+        }
+    } catch (std::runtime_error& e) {
+        fprintf(stderr, "LiXS: Can't instantiate logger: %s\n", e.what());
+        return -1;
     }
 
+
     if (conf.daemonize) {
-        if (daemonize(conf)) {
+        /* The configuration should never allow this to happen, but check anyway. */
+        if (!conf.log_to_file) {
+            fprintf(stderr, "LiXS: when daemonizing log to file must be enabled\n");
+            return -1;
+        }
+
+        if (daemonize()) {
             return -1;
         }
     }
 
-    lixs::log::logger* log = NULL;
-
-    try {
-        if (conf.log_to_file) {
-            log = new lixs::log::logger(conf.log_level, conf.log_file);
-        } else {
-            log = new lixs::log::logger(conf.log_level);
+    if (conf.write_pid_file) {
+        if (create_pid_file(conf.pid_file)) {
+            return -1;
         }
-    } catch (std::runtime_error& e) {
-        printf("LiXS: [logger] %s\n", e.what());
-        return -1;
     }
+
+
+    LOG<level::INFO>::logf(*log, "Starting server...");
 
     lixs::event_mgr emgr;
     lixs::os_linux::epoll epoll(emgr);
@@ -129,68 +182,50 @@ int main(int argc, char** argv)
 
     lixs::domain_mgr dmgr(xs, emgr, epoll, *log);
 
-    lixs::unix_sock_server* nix = NULL;
-    lixs::xenbus* xenbus = NULL;
-    lixs::os_linux::dom_exc* dom_exc = NULL;
+    std::unique_ptr<lixs::unix_sock_server> nix;
+    std::unique_ptr<lixs::xenbus> xenbus;
+    std::unique_ptr<lixs::os_linux::dom_exc> dom_exc;
 
     if (conf.unix_sockets) {
         try {
-            nix = new lixs::unix_sock_server(xs, dmgr, emgr, epoll, *log,
-                    conf.unix_socket_path, conf.unix_socket_ro_path);
+            nix = std::unique_ptr<lixs::unix_sock_server>(
+                    new lixs::unix_sock_server(xs, dmgr, emgr, epoll, *log,
+                        conf.unix_socket_path, conf.unix_socket_ro_path));
         } catch (lixs::unix_sock_server_error& e) {
-            printf("LiXS: [unix_sock_server] %s\n", e.what());
-            goto out;
+            LOG<level::ERROR>::logf(*log, "Failed to enable unix sockets: %s", e.what());
+            return -1;
         }
     }
 
     if (conf.xenbus) {
         try {
-            xenbus = new lixs::xenbus(xs, dmgr, emgr, epoll, *log);
+            xenbus = std::unique_ptr<lixs::xenbus>(
+                    new lixs::xenbus(xs, dmgr, emgr, epoll, *log));
         } catch (lixs::xenbus_error& e) {
-            printf("LiXS: [xenbus] %s\n", e.what());
-            goto out;
+            LOG<level::ERROR>::logf(*log, "Failed to enable xenbus: %s", e.what());
+            return -1;
         }
     }
 
     if (conf.virq_dom_exc) {
         try {
-            dom_exc = new lixs::os_linux::dom_exc(xs, dmgr, epoll);
+            dom_exc = std::unique_ptr<lixs::os_linux::dom_exc>(
+                    new lixs::os_linux::dom_exc(xs, dmgr, epoll));
         } catch (lixs::os_linux::dom_exc_error& e) {
-            printf("LiXS: [dom_exc] %s\n", e.what());
-            goto out;
+            LOG<level::ERROR>::logf(*log, "Failed to enable DOM_EXC handler: %s", e.what());
+            return -1;
         }
     }
 
-
-    LOG<level::INFO>::logf(*log, "Starting server...");
-
     emgr.enable();
 
-    log_ptr = log;
-    emgr_ptr = &emgr;
-    signal(SIGINT, signal_handler);
+    setup_signal_handler(emgr, *log);
 
     emgr.run();
 
-
-out:
-    if (nix) {
-        delete nix;
-    }
-
-    if (xenbus) {
-        delete xenbus;
-    }
-
-    if (dom_exc) {
-        delete dom_exc;
-    }
-
     LOG<level::INFO>::logf(*log, "Server stoped!");
 
-    if (log) {
-        delete log;
-    }
+    remove_pid_file(conf.pid_file);
 
     return 0;
 }
