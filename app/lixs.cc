@@ -92,6 +92,29 @@ static int daemonize(app::lixs_conf& conf)
     return false;
 }
 
+static int create_pid_file(const std::string& pid_file)
+{
+    int ret;
+    FILE* pidf;
+
+    pidf = fopen(pid_file.c_str(), "w");
+
+    if (pidf == NULL) {
+        fprintf(stderr, "LiXS: Failed to open PID file: %s\n", std::strerror(errno));
+        return -1;
+    }
+
+    ret = fprintf(pidf, "%d", getpid());
+    if (ret < 0) {
+        fprintf(stderr, "LiXS: Failed to write to PID file\n");
+        return ret;
+    }
+
+    fclose(pidf);
+
+    return 0;
+}
+
 int main(int argc, char** argv)
 {
     app::lixs_conf conf(argc, argv);
@@ -107,9 +130,9 @@ int main(int argc, char** argv)
     }
 
     if (conf.write_pid_file) {
-        FILE* pidf = fopen(conf.pid_file.c_str(), "w");
-        fprintf(pidf, "%d", getpid());
-        fclose(pidf);
+        if (create_pid_file(conf.pid_file)) {
+            return -1;
+        }
     }
 
     if (conf.daemonize) {
