@@ -115,6 +115,21 @@ static int create_pid_file(const std::string& pid_file)
     return 0;
 }
 
+static int remove_pid_file(const std::string& pid_file)
+{
+    int ret;
+
+    ret = unlink(pid_file.c_str());
+    if (ret) {
+        /* This print might fail if we daemonized and stderr is closed, but
+         * lets leave it at that for now.
+         */
+        fprintf(stderr, "LiXS: Failed to remove PID file\n");
+    }
+
+    return ret;
+}
+
 int main(int argc, char** argv)
 {
     app::lixs_conf conf(argc, argv);
@@ -208,6 +223,8 @@ int main(int argc, char** argv)
     emgr.run();
 
     LOG<level::INFO>::logf(*log, "Server stoped!");
+
+    remove_pid_file(conf.pid_file);
 
     return 0;
 }
