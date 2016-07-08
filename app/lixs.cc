@@ -154,12 +154,6 @@ int main(int argc, char** argv)
     }
 
 
-    if (conf.write_pid_file) {
-        if (create_pid_file(conf.pid_file)) {
-            return -1;
-        }
-    }
-
     if (conf.daemonize) {
         /* The configuration should never allow this to happen, but check anyway. */
         if (!conf.log_to_file) {
@@ -168,6 +162,12 @@ int main(int argc, char** argv)
         }
 
         if (daemonize()) {
+            return -1;
+        }
+    }
+
+    if (conf.write_pid_file) {
+        if (create_pid_file(conf.pid_file)) {
             return -1;
         }
     }
