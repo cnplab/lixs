@@ -137,6 +137,23 @@ int main(int argc, char** argv)
         return 0;
     }
 
+
+    std::unique_ptr<lixs::log::logger> log;
+
+    try {
+        if (conf.log_to_file) {
+            log = std::unique_ptr<lixs::log::logger>(
+                    new lixs::log::logger(conf.log_level, conf.log_file));
+        } else {
+            log = std::unique_ptr<lixs::log::logger>(
+                    new lixs::log::logger(conf.log_level));
+        }
+    } catch (std::runtime_error& e) {
+        fprintf(stderr, "LiXS: Can't instantiate logger: %s\n", e.what());
+        return -1;
+    }
+
+
     if (conf.write_pid_file) {
         if (create_pid_file(conf.pid_file)) {
             return -1;
@@ -155,20 +172,8 @@ int main(int argc, char** argv)
         }
     }
 
-    std::unique_ptr<lixs::log::logger> log;
 
-    try {
-        if (conf.log_to_file) {
-            log = std::unique_ptr<lixs::log::logger>(
-                    new lixs::log::logger(conf.log_level, conf.log_file));
-        } else {
-            log = std::unique_ptr<lixs::log::logger>(
-                    new lixs::log::logger(conf.log_level));
-        }
-    } catch (std::runtime_error& e) {
-        printf("LiXS: [logger] %s\n", e.what());
-        return -1;
-    }
+    LOG<level::INFO>::logf(*log, "Starting server...");
 
     lixs::event_mgr emgr;
     lixs::os_linux::epoll epoll(emgr);
@@ -187,7 +192,7 @@ int main(int argc, char** argv)
                     new lixs::unix_sock_server(xs, dmgr, emgr, epoll, *log,
                         conf.unix_socket_path, conf.unix_socket_ro_path));
         } catch (lixs::unix_sock_server_error& e) {
-            printf("LiXS: [unix_sock_server] %s\n", e.what());
+            LOG<level::ERROR>::logf(*log, "Failed to enable unix sockets: %s", e.what());
             return -1;
         }
     }
@@ -197,7 +202,7 @@ int main(int argc, char** argv)
             xenbus = std::unique_ptr<lixs::xenbus>(
                     new lixs::xenbus(xs, dmgr, emgr, epoll, *log));
         } catch (lixs::xenbus_error& e) {
-            printf("LiXS: [xenbus] %s\n", e.what());
+            LOG<level::ERROR>::logf(*log, "Failed to enable xenbus: %s", e.what());
             return -1;
         }
     }
@@ -207,13 +212,10 @@ int main(int argc, char** argv)
             dom_exc = std::unique_ptr<lixs::os_linux::dom_exc>(
                     new lixs::os_linux::dom_exc(xs, dmgr, epoll));
         } catch (lixs::os_linux::dom_exc_error& e) {
-            printf("LiXS: [dom_exc] %s\n", e.what());
+            LOG<level::ERROR>::logf(*log, "Failed to enable DOM_EXC handler: %s", e.what());
             return -1;
         }
     }
-
-
-    LOG<level::INFO>::logf(*log, "Starting server...");
 
     emgr.enable();
 
