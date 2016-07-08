@@ -75,21 +75,14 @@ static void setup_signal_handler(lixs::event_mgr& emgr, lixs::log::logger& log)
     signal(SIGINT, signal_handler);
 }
 
-static int daemonize(app::lixs_conf& conf)
+static int daemonize(void)
 {
-    /* If log to file is enabled we cannot let daemon() handle file descriptors
-     * (it would close the log files) but we still need to close stdin
-     */
-    if (conf.log_to_file) {
-        fclose(stdin);
+    if (daemon(1, 0)) {
+        fprintf(stderr, "LiXS: Failed to daemonize: %s\n", std::strerror(errno));
+        return -1;
     }
 
-    if (daemon(1, conf.log_to_file ? 1 : 0)) {
-        fprintf(stderr, "LiXS: Failed to daemonize: %d\n", errno);
-        return true;
-    }
-
-    return false;
+    return 0;
 }
 
 static int create_pid_file(const std::string& pid_file)
@@ -151,7 +144,13 @@ int main(int argc, char** argv)
     }
 
     if (conf.daemonize) {
-        if (daemonize(conf)) {
+        /* The configuration should never allow this to happen, but check anyway. */
+        if (!conf.log_to_file) {
+            fprintf(stderr, "LiXS: when daemonizing log to file must be enabled\n");
+            return -1;
+        }
+
+        if (daemonize()) {
             return -1;
         }
     }
