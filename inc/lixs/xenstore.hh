@@ -44,6 +44,7 @@
 #include <lixs/watch_mgr.hh>
 
 #include <cerrno>
+#include <memory>
 #include <string>
 #include <set>
 
@@ -56,7 +57,9 @@ namespace lixs {
 
 class xenstore {
 public:
-    xenstore(store& st, event_mgr& emgr, iomux& io);
+    xenstore(const std::shared_ptr<store>& st,
+            const std::shared_ptr<event_mgr>& emgr,
+            const std::shared_ptr<iomux>& io);
     ~xenstore();
 
     int store_read(cid_t cid, unsigned int tid,
@@ -86,7 +89,7 @@ public:
     void domain_release(domid_t domid);
 
 private:
-    store& st;
+    std::shared_ptr<store> st;
 
     watch_mgr wmgr;
 };

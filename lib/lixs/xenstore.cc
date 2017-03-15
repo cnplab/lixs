@@ -37,16 +37,19 @@
 #include <lixs/xenstore.hh>
 
 #include <cerrno>
+#include <memory>
 #include <set>
 #include <string>
 
 
-lixs::xenstore::xenstore(store& st, event_mgr& emgr, iomux& io)
-    : st(st), wmgr(emgr)
+lixs::xenstore::xenstore(const std::shared_ptr<store>& st,
+        const std::shared_ptr<event_mgr>& emgr,
+        const std::shared_ptr<iomux>& io)
+    : st(st), wmgr(*emgr)
 {
     bool created;
 
-    st.create(0, 0, "/", created);
+    st->create(0, 0, "/", created);
 }
 
 lixs::xenstore::~xenstore()
@@ -56,7 +59,7 @@ lixs::xenstore::~xenstore()
 int lixs::xenstore::store_read(cid_t cid, unsigned int tid,
         const std::string& path, std::string& val)
 {
-    return st.read(cid, tid, path, val);
+    return st->read(cid, tid, path, val);
 }
 
 int lixs::xenstore::store_write(cid_t cid, unsigned int tid,
@@ -64,7 +67,7 @@ int lixs::xenstore::store_write(cid_t cid, unsigned int tid,
 {
     int ret;
 
-    ret = st.update(cid, tid, path, val);
+    ret = st->update(cid, tid, path, val);
     if (ret == 0) {
         wmgr.fire(tid, path);
         wmgr.fire_parents(tid, path);
@@ -79,7 +82,7 @@ int lixs::xenstore::store_mkdir(cid_t cid, unsigned int tid,
     int ret;
     bool created;
 
-    ret = st.create(cid, tid, path, created);
+    ret = st->create(cid, tid, path, created);
     if (ret == 0 && created) {
         wmgr.fire(tid, path);
         wmgr.fire_parents(tid, path);
@@ -93,7 +96,7 @@ int lixs::xenstore::store_rm(cid_t cid, unsigned int tid,
 {
     int ret;
 
-    ret = st.del(cid, tid, path);
+    ret = st->del(cid, tid, path);
     if (ret == 0) {
         wmgr.fire(tid, path);
         wmgr.fire_parents(tid, path);
@@ -106,13 +109,13 @@ int lixs::xenstore::store_rm(cid_t cid, unsigned int tid,
 int lixs::xenstore::store_dir(cid_t cid, unsigned int tid,
         const std::string& path, std::set<std::string>& res)
 {
-    return st.get_children(cid, tid, path, res);
+    return st->get_children(cid, tid, path, res);
 }
 
 int lixs::xenstore::store_get_perms(cid_t cid, unsigned int tid,
         const std::string& path, permission_list& perms)
 {
-    return st.get_perms(cid, tid, path, perms);
+    return st->get_perms(cid, tid, path, perms);
 }
 
 int lixs::xenstore::store_set_perms(cid_t cid, unsigned int tid,
@@ -120,7 +123,7 @@ int lixs::xenstore::store_set_perms(cid_t cid, unsigned int tid,
 {
     int ret;
 
-    ret = st.set_perms(cid, tid, path, perms);
+    ret = st->set_perms(cid, tid, path, perms);
     if (ret == 0) {
         wmgr.fire(tid, path);
         wmgr.fire_parents(tid, path);
@@ -131,7 +134,7 @@ int lixs::xenstore::store_set_perms(cid_t cid, unsigned int tid,
 
 int lixs::xenstore::transaction_start(cid_t cid, unsigned int* tid)
 {
-    st.branch(*tid);
+    st->branch(*tid);
 
     return 0;
 }
@@ -142,7 +145,7 @@ int lixs::xenstore::transaction_end(cid_t cid, unsigned int tid, bool commit)
     bool success;
 
     if (commit) {
-        ret = st.merge(tid, success);
+        ret = st->merge(tid, success);
 
         if (ret == 0) {
             if (success) {
@@ -156,7 +159,7 @@ int lixs::xenstore::transaction_end(cid_t cid, unsigned int tid, bool commit)
             return ret;
         }
     } else {
-        ret = st.abort(tid);
+        ret = st->abort(tid);
 
         if (ret == 0) {
             wmgr.abort_transaction(tid);
