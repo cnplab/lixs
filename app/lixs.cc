@@ -138,14 +138,25 @@ int main(int argc, char** argv)
     }
 
 
-    std::unique_ptr<lixs::log::logger> log;
+    std::shared_ptr<lixs::log::logger> log;
+
+    std::shared_ptr<lixs::event_mgr> emgr;
+    std::shared_ptr<lixs::os_linux::epoll> epoll;
+    std::shared_ptr<lixs::mstore::store> store;
+    std::shared_ptr<lixs::xenstore> xs;
+
+    std::shared_ptr<lixs::domain_mgr> dmgr;
+
+    std::shared_ptr<lixs::unix_sock_server> nix;
+    std::shared_ptr<lixs::xenbus> xenbus;
+    std::shared_ptr<lixs::os_linux::dom_exc> dom_exc;
 
     try {
         if (conf.log_to_file) {
-            log = std::unique_ptr<lixs::log::logger>(
+            log = std::shared_ptr<lixs::log::logger>(
                     new lixs::log::logger(conf.log_level, conf.log_file));
         } else {
-            log = std::unique_ptr<lixs::log::logger>(
+            log = std::shared_ptr<lixs::log::logger>(
                     new lixs::log::logger(conf.log_level));
         }
     } catch (std::runtime_error& e) {
@@ -175,21 +186,17 @@ int main(int argc, char** argv)
 
     LOG<level::INFO>::logf(*log, "Starting server...");
 
-    lixs::event_mgr emgr;
-    lixs::os_linux::epoll epoll(emgr);
-    lixs::mstore::store store(*log);
-    lixs::xenstore xs(store, emgr, epoll);
+    emgr = std::shared_ptr<lixs::event_mgr>(new lixs::event_mgr());
+    epoll = std::shared_ptr<lixs::os_linux::epoll>(new lixs::os_linux::epoll(*emgr));
+    store = std::shared_ptr<lixs::mstore::store>(new lixs::mstore::store(*log));
+    xs = std::shared_ptr<lixs::xenstore>(new lixs::xenstore(*store, *emgr, *epoll));
 
-    lixs::domain_mgr dmgr(xs, emgr, epoll, *log);
-
-    std::unique_ptr<lixs::unix_sock_server> nix;
-    std::unique_ptr<lixs::xenbus> xenbus;
-    std::unique_ptr<lixs::os_linux::dom_exc> dom_exc;
+    dmgr = std::shared_ptr<lixs::domain_mgr>(new lixs::domain_mgr(*xs, *emgr, *epoll, *log));
 
     if (conf.unix_sockets) {
         try {
-            nix = std::unique_ptr<lixs::unix_sock_server>(
-                    new lixs::unix_sock_server(xs, dmgr, emgr, epoll, *log,
+            nix = std::shared_ptr<lixs::unix_sock_server>(
+                    new lixs::unix_sock_server(*xs, *dmgr, *emgr, *epoll, *log,
                         conf.unix_socket_path, conf.unix_socket_ro_path));
         } catch (lixs::unix_sock_server_error& e) {
             LOG<level::ERROR>::logf(*log, "Failed to enable unix sockets: %s", e.what());
@@ -199,8 +206,8 @@ int main(int argc, char** argv)
 
     if (conf.xenbus) {
         try {
-            xenbus = std::unique_ptr<lixs::xenbus>(
-                    new lixs::xenbus(xs, dmgr, emgr, epoll, *log));
+            xenbus = std::shared_ptr<lixs::xenbus>(
+                    new lixs::xenbus(*xs, *dmgr, *emgr, *epoll, *log));
         } catch (lixs::xenbus_error& e) {
             LOG<level::ERROR>::logf(*log, "Failed to enable xenbus: %s", e.what());
             return -1;
@@ -209,19 +216,19 @@ int main(int argc, char** argv)
 
     if (conf.virq_dom_exc) {
         try {
-            dom_exc = std::unique_ptr<lixs::os_linux::dom_exc>(
-                    new lixs::os_linux::dom_exc(xs, dmgr, epoll));
+            dom_exc = std::shared_ptr<lixs::os_linux::dom_exc>(
+                    new lixs::os_linux::dom_exc(*xs, *dmgr, *epoll));
         } catch (lixs::os_linux::dom_exc_error& e) {
             LOG<level::ERROR>::logf(*log, "Failed to enable DOM_EXC handler: %s", e.what());
             return -1;
         }
     }
 
-    emgr.enable();
+    emgr->enable();
 
-    setup_signal_handler(emgr, *log);
+    setup_signal_handler(*emgr, *log);
 
-    emgr.run();
+    emgr->run();
 
     LOG<level::INFO>::logf(*log, "Server stoped!");
 
