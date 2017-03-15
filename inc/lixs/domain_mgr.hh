@@ -55,7 +55,7 @@ namespace lixs {
 
 class domain;
 
-class domain_mgr {
+class domain_mgr : public std::enable_shared_from_this<domain_mgr> {
 public:
     typedef std::map<domid_t, domain*>::iterator iterator;
 

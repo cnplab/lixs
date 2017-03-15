@@ -42,6 +42,7 @@
 
 #include <cerrno>
 #include <cstddef>
+#include <memory>
 #include <sys/mman.h>
 
 extern "C" {
@@ -74,9 +75,14 @@ lixs::foreign_ring_mapper::~foreign_ring_mapper()
 }
 
 
-lixs::domain::domain(ev_cb dead_cb, xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io,
-        log::logger& log, domid_t domid, evtchn_port_t port, unsigned int mfn)
-    : client(get_id(domid), log, domid, xs, dmgr, log, io, domid, port, mfn),
+lixs::domain::domain(ev_cb dead_cb,
+        const std::shared_ptr<xenstore>& xs,
+        const std::shared_ptr<domain_mgr>& dmgr,
+        const std::shared_ptr<event_mgr>& emgr,
+        const std::shared_ptr<iomux>& io,
+        const std::shared_ptr<log::logger>& log,
+        domid_t domid, evtchn_port_t port, unsigned int mfn)
+    : client(get_id(domid), *log, domid, *xs, *dmgr, *log, *io, domid, port, mfn),
     emgr(emgr), dead_cb(dead_cb), active(true), domid(domid)
 {
 }
@@ -102,7 +108,7 @@ domid_t lixs::domain::get_domid(void)
 
 void lixs::domain::conn_dead(void)
 {
-    emgr.enqueue_event(dead_cb);
+    emgr->enqueue_event(dead_cb);
 }
 
 std::string lixs::domain::get_id(domid_t domid)

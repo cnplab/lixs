@@ -46,6 +46,7 @@
 #include <lixs/xs_proto_v1/xs_proto.hh>
 
 #include <cerrno>
+#include <memory>
 #include <sys/mman.h>
 
 extern "C" {
@@ -75,8 +76,13 @@ private:
 
 class domain : public client<xs_proto_v1::xs_proto<ring_conn<foreign_ring_mapper> > > {
 public:
-    domain(ev_cb dead_cb, xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io,
-            log::logger& log, domid_t domid, evtchn_port_t port, unsigned int mfn);
+    domain(ev_cb dead_cb,
+            const std::shared_ptr<xenstore>& xs,
+            const std::shared_ptr<domain_mgr>& dmgr,
+            const std::shared_ptr<event_mgr>& emgr,
+            const std::shared_ptr<iomux>& io,
+            const std::shared_ptr<log::logger>& log,
+            domid_t domid, evtchn_port_t port, unsigned int mfn);
     ~domain();
 
     bool is_active(void);
@@ -89,7 +95,7 @@ private:
     void conn_dead(void);
 
 private:
-    event_mgr& emgr;
+    std::shared_ptr<event_mgr> emgr;
     ev_cb dead_cb;
 
     bool active;
