@@ -207,7 +207,7 @@ int main(int argc, char** argv)
     if (conf.xenbus) {
         try {
             xenbus = std::shared_ptr<lixs::xenbus>(
-                    new lixs::xenbus(*xs, *dmgr, *emgr, *epoll, *log));
+                    new lixs::xenbus(xs, dmgr, emgr, epoll, log));
         } catch (lixs::xenbus_error& e) {
             LOG<level::ERROR>::logf(*log, "Failed to enable xenbus: %s", e.what());
             return -1;

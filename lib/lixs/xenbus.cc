@@ -90,8 +90,12 @@ lixs::xenbus_mapper::~xenbus_mapper(void)
 const std::string lixs::xenbus::xsd_port_path = "/proc/xen/xsd_port";
 
 /* FIXME: What is the correct domid when running in a stub domain? */
-lixs::xenbus::xenbus(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io, log::logger& log)
-    : client("XB", log, 0, xs, dmgr, log, io, 0, xenbus_evtchn())
+lixs::xenbus::xenbus(const std::shared_ptr<xenstore>& xs,
+        const std::shared_ptr<domain_mgr>& dmgr,
+        const std::shared_ptr<event_mgr>& emgr,
+        const std::shared_ptr<iomux>& io,
+        const std::shared_ptr<log::logger>& log)
+    : client("XB", *log, 0, *xs, *dmgr, *log, *io, 0, xenbus_evtchn())
 {
 }
 

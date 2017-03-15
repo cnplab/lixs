@@ -76,7 +76,11 @@ private:
 
 class xenbus : public client<xs_proto_v1::xs_proto<ring_conn<xenbus_mapper> > > {
 public:
-    xenbus(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io, log::logger& log);
+    xenbus(const std::shared_ptr<xenstore>& xs,
+            const std::shared_ptr<domain_mgr>& dmgr,
+            const std::shared_ptr<event_mgr>& emgr,
+            const std::shared_ptr<iomux>& io,
+            const std::shared_ptr<log::logger>& log);
     ~xenbus();
 
 private:
