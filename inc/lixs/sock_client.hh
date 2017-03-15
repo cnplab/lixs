@@ -53,7 +53,11 @@ namespace lixs {
 class sock_client : public client<xs_proto_v1::xs_proto<sock_conn> > {
 public:
     sock_client(long unsigned int id, std::function<void(void)> dead_cb,
-            xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io, log::logger& log, int fd);
+            const std::shared_ptr<xenstore>& xs,
+            const std::shared_ptr<domain_mgr>& dmgr,
+            const std::shared_ptr<event_mgr>& emgr,
+            const std::shared_ptr<iomux>& io,
+            const std::shared_ptr<log::logger>& log, int fd);
     ~sock_client();
 
 private:
@@ -64,7 +68,7 @@ private:
 private:
     long unsigned int id;
 
-    event_mgr& emgr;
+    std::shared_ptr<event_mgr> emgr;
     std::function<void(void)> dead_cb;
 };
 
