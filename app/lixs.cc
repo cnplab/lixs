@@ -225,7 +225,9 @@ int main(int argc, char** argv)
 
     LOG<level::INFO>::logf(*log, "Server stoped!");
 
-    remove_pid_file(conf.pid_file);
+    if (conf.write_pid_file) {
+        remove_pid_file(conf.pid_file);
+    }
 
     return 0;
 }
