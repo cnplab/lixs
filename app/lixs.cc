@@ -236,6 +236,27 @@ int main(int argc, char** argv)
         remove_pid_file(conf.pid_file);
     }
 
+    if (conf.virq_dom_exc) {
+        dom_exc.reset();
+    }
+
+    if (conf.xenbus) {
+        xenbus.reset();
+    }
+
+    if (conf.unix_sockets) {
+        nix.reset();
+    }
+
+    dmgr.reset();
+
+    xs.reset();
+    store.reset();
+    epoll.reset();
+    emgr.reset();
+
+    log.reset();
+
     return 0;
 }
 
