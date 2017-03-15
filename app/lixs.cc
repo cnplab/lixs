@@ -217,7 +217,7 @@ int main(int argc, char** argv)
     if (conf.virq_dom_exc) {
         try {
             dom_exc = std::shared_ptr<lixs::os_linux::dom_exc>(
-                    new lixs::os_linux::dom_exc(*xs, *dmgr, *epoll));
+                    new lixs::os_linux::dom_exc(xs, dmgr, epoll));
         } catch (lixs::os_linux::dom_exc_error& e) {
             LOG<level::ERROR>::logf(*log, "Failed to enable DOM_EXC handler: %s", e.what());
             return -1;

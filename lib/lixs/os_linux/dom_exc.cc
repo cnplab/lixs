@@ -44,7 +44,9 @@
 #include <functional>
 
 
-lixs::os_linux::dom_exc::dom_exc(xenstore& xs, domain_mgr& dmgr, iomux& io)
+lixs::os_linux::dom_exc::dom_exc(const std::shared_ptr<xenstore>& xs,
+        const std::shared_ptr<domain_mgr>& dmgr,
+        const std::shared_ptr<iomux>& io)
     : xs(xs), dmgr(dmgr), io(io), alive(true)
 {
     xc_handle = xc_interface_open(NULL, NULL, 0);
@@ -67,14 +69,14 @@ lixs::os_linux::dom_exc::dom_exc(xenstore& xs, domain_mgr& dmgr, iomux& io)
     }
 
     fd = xc_evtchn_fd(xce_handle);
-    io.add(fd, true, false, std::bind(&dom_exc::callback, this,
+    io->add(fd, true, false, std::bind(&dom_exc::callback, this,
                 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 lixs::os_linux::dom_exc::~dom_exc()
 {
     if (alive) {
-        io.rem(fd);
+        io->rem(fd);
     }
 
     xc_evtchn_close(xce_handle);
@@ -99,7 +101,7 @@ void lixs::os_linux::dom_exc::callback(bool read, bool write, bool error)
     }
 
     ret = 0;
-    for (auto& d : dmgr) {
+    for (auto& d : *dmgr) {
         domain* dom = d.second;
         domid_t domid = dom->get_domid();
 
@@ -123,13 +125,13 @@ void lixs::os_linux::dom_exc::callback(bool read, bool write, bool error)
     }
 
     for (auto& d : dead_list) {
-        if (dmgr.destroy(d) == 0) {
-            xs.domain_release(d);
+        if (dmgr->destroy(d) == 0) {
+            xs->domain_release(d);
         }
     }
 
     for (auto& d : dying_list) {
-        xs.domain_release(d);
+        xs->domain_release(d);
     }
 
     port = xc_evtchn_pending(xce_handle);
@@ -146,6 +148,6 @@ void lixs::os_linux::dom_exc::callback(bool read, bool write, bool error)
 
 out_err:
     alive = false;
-    io.rem(fd);
+    io->rem(fd);
 }
 

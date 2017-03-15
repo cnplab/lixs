@@ -42,6 +42,7 @@
 #include <lixs/xenstore.hh>
 
 #include <cerrno>
+#include <memory>
 #include <stdexcept>
 
 extern "C" {
@@ -58,15 +59,17 @@ class dom_exc_error : public std::runtime_error {
 
 class dom_exc {
 public:
-    dom_exc(xenstore& xs, domain_mgr& dmgr, iomux& io);
+    dom_exc(const std::shared_ptr<xenstore>& xs,
+            const std::shared_ptr<domain_mgr>& dmgr,
+            const std::shared_ptr<iomux>& io);
     virtual ~dom_exc();
 
     void callback(bool read, bool write, bool error);
 
 private:
-    xenstore& xs;
-    domain_mgr& dmgr;
-    iomux& io;
+    std::shared_ptr<xenstore> xs;
+    std::shared_ptr<domain_mgr> dmgr;
+    std::shared_ptr<iomux> io;
 
     int fd;
 
