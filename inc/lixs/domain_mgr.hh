@@ -43,6 +43,7 @@
 #include <lixs/xenstore.hh>
 
 #include <cerrno>
+#include <memory>
 #include <map>
 
 extern "C" {
@@ -59,7 +60,10 @@ public:
     typedef std::map<domid_t, domain*>::iterator iterator;
 
 public:
-    domain_mgr(xenstore& xs, event_mgr& emgr, iomux& io, log::logger& log);
+    domain_mgr(const std::shared_ptr<xenstore>& xs,
+            const std::shared_ptr<event_mgr>& emgr,
+            const std::shared_ptr<iomux>& io,
+            const std::shared_ptr<log::logger>& log);
     ~domain_mgr();
 
     int create(domid_t domid, evtchn_port_t port, unsigned int mfn);
@@ -75,10 +79,10 @@ private:
     typedef std::map<domid_t, domain*> domain_map;
 
 private:
-    xenstore& xs;
-    event_mgr& emgr;
-    iomux& io;
-    log::logger& log;
+    std::shared_ptr<xenstore> xs;
+    std::shared_ptr<event_mgr> emgr;
+    std::shared_ptr<iomux> io;
+    std::shared_ptr<log::logger> log;
 
     domain_map domains;
 };

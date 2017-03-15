@@ -191,7 +191,7 @@ int main(int argc, char** argv)
     store = std::shared_ptr<lixs::mstore::store>(new lixs::mstore::store(log));
     xs = std::shared_ptr<lixs::xenstore>(new lixs::xenstore(store, emgr, epoll));
 
-    dmgr = std::shared_ptr<lixs::domain_mgr>(new lixs::domain_mgr(*xs, *emgr, *epoll, *log));
+    dmgr = std::shared_ptr<lixs::domain_mgr>(new lixs::domain_mgr(xs, emgr, epoll, log));
 
     if (conf.unix_sockets) {
         try {

@@ -41,6 +41,7 @@
 #include <lixs/log/logger.hh>
 
 #include <cerrno>
+#include <memory>
 #include <utility>
 
 extern "C" {
@@ -48,7 +49,10 @@ extern "C" {
 }
 
 
-lixs::domain_mgr::domain_mgr(xenstore& xs, event_mgr& emgr, iomux& io, log::logger& log)
+lixs::domain_mgr::domain_mgr(const std::shared_ptr<xenstore>& xs,
+        const std::shared_ptr<event_mgr>& emgr,
+        const std::shared_ptr<iomux>& io,
+        const std::shared_ptr<log::logger>& log)
     : xs(xs), emgr(emgr), io(io), log(log)
 {
 }
@@ -71,12 +75,12 @@ int lixs::domain_mgr::create(domid_t domid, evtchn_port_t port, unsigned int mfn
         std::function<void(void)> cb = std::bind(&domain_mgr::domain_dead, this, domid);
 
         try {
-            dom = new domain(cb, xs, *this, emgr, io, log, domid, port, mfn);
+            dom = new domain(cb, *xs, *this, *emgr, *io, *log, domid, port, mfn);
         } catch (ring_conn_error& e) {
-            log::LOG<log::level::ERROR>::logf(log, "[Domain %d] %s", domid, e.what());
+            log::LOG<log::level::ERROR>::logf(*log, "[Domain %d] %s", domid, e.what());
             return ECANCELED;
         } catch (foreign_ring_mapper_error& e) {
-            log::LOG<log::level::ERROR>::logf(log, "[Domain %d] %s", domid, e.what());
+            log::LOG<log::level::ERROR>::logf(*log, "[Domain %d] %s", domid, e.what());
             return ECANCELED;
         }
 
