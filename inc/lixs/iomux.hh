@@ -39,6 +39,7 @@
 
 #include <lixs/event_mgr.hh>
 
+#include <memory>
 #include <functional>
 
 
@@ -48,7 +49,7 @@ typedef std::function<void(bool, bool, bool)> io_cb;
 
 class iomux {
 public:
-    iomux(event_mgr& emgr)
+    iomux(const std::shared_ptr<event_mgr>& emgr)
         : emgr(emgr)
     { }
 
@@ -58,7 +59,7 @@ public:
     virtual void rem(int fd) = 0;
 
 protected:
-    event_mgr& emgr;
+    std::shared_ptr<event_mgr> emgr;
 };
 
 } /* namespace lixs */

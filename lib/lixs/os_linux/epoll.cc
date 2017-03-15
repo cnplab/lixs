@@ -42,7 +42,7 @@
 
 
 lixs::os_linux::epoll::epoll(const std::shared_ptr<event_mgr>& emgr)
-    : iomux(*emgr), epfd(epoll_create(0x7E57))
+    : iomux(emgr), epfd(epoll_create(0x7E57))
 {
     emgr->enqueue_event(std::bind(&epoll::handle, this));
 }
@@ -102,11 +102,11 @@ void lixs::os_linux::epoll::handle(void)
     n_events = epoll_wait(epfd, epev, epoll_max_events, timeout);
 
     for (int i = 0; i < n_events; i++) {
-        emgr.enqueue_event(std::bind(*static_cast<io_cb*>(epev[i].data.ptr),
+        emgr->enqueue_event(std::bind(*static_cast<io_cb*>(epev[i].data.ptr),
                 is_read(epev[i].events), is_write(epev[i].events), is_error(epev[i].events)));
     }
 
-    emgr.enqueue_event(std::bind(&epoll::handle, this));
+    emgr->enqueue_event(std::bind(&epoll::handle, this));
 }
 
 uint32_t inline lixs::os_linux::epoll::get_events(bool read, bool write)
