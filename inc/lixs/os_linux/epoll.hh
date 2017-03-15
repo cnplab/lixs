@@ -40,6 +40,7 @@
 #include <lixs/iomux.hh>
 
 #include <map>
+#include <memory>
 #include <sys/epoll.h>
 
 
@@ -48,7 +49,7 @@ namespace os_linux {
 
 class epoll : public iomux {
 public:
-    epoll(event_mgr& emgr);
+    epoll(const std::shared_ptr<event_mgr>& emgr);
     ~epoll();
 
     void add(int fd, bool read, bool write, io_cb cb);

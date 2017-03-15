@@ -187,7 +187,7 @@ int main(int argc, char** argv)
     LOG<level::INFO>::logf(*log, "Starting server...");
 
     emgr = std::shared_ptr<lixs::event_mgr>(new lixs::event_mgr());
-    epoll = std::shared_ptr<lixs::os_linux::epoll>(new lixs::os_linux::epoll(*emgr));
+    epoll = std::shared_ptr<lixs::os_linux::epoll>(new lixs::os_linux::epoll(emgr));
     store = std::shared_ptr<lixs::mstore::store>(new lixs::mstore::store(log));
     xs = std::shared_ptr<lixs::xenstore>(new lixs::xenstore(store, emgr, epoll));
 

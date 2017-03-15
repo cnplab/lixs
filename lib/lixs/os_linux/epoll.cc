@@ -37,13 +37,14 @@
 #include <lixs/os_linux/epoll.hh>
 
 #include <cstddef>
+#include <memory>
 #include <sys/epoll.h>
 
 
-lixs::os_linux::epoll::epoll(event_mgr& emgr)
-    : iomux(emgr), epfd(epoll_create(0x7E57))
+lixs::os_linux::epoll::epoll(const std::shared_ptr<event_mgr>& emgr)
+    : iomux(*emgr), epfd(epoll_create(0x7E57))
 {
-    emgr.enqueue_event(std::bind(&epoll::handle, this));
+    emgr->enqueue_event(std::bind(&epoll::handle, this));
 }
 
 lixs::os_linux::epoll::~epoll()
