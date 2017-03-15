@@ -48,7 +48,7 @@
 #include <unistd.h>
 
 
-lixs::sock_conn::sock_conn(iomux& io, int fd)
+lixs::sock_conn::sock_conn(const std::shared_ptr<iomux>& io, int fd)
     : io(io), fd(fd), ev_read(false), ev_write(false), alive(true)
 {
     if (fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK) == -1) {
@@ -58,7 +58,7 @@ lixs::sock_conn::sock_conn(iomux& io, int fd)
 
     cb = std::shared_ptr<sock_conn_cb>(new sock_conn_cb(*this));
 
-    io.add(fd, ev_read, ev_write, std::bind(sock_conn_cb::callback,
+    io->add(fd, ev_read, ev_write, std::bind(sock_conn_cb::callback,
                 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
                 std::weak_ptr<sock_conn_cb>(cb)));
 }
@@ -66,7 +66,7 @@ lixs::sock_conn::sock_conn(iomux& io, int fd)
 lixs::sock_conn::~sock_conn()
 {
     if (alive) {
-        io.rem(fd);
+        io->rem(fd);
     }
     close(fd);
 }
@@ -96,7 +96,7 @@ bool lixs::sock_conn::read(char*& buff, int& bytes)
             /* need to wait */
             if (!ev_read) {
                 ev_read = true;
-                io.set(fd, ev_read, ev_write);
+                io->set(fd, ev_read, ev_write);
             }
         } else {
             /* error condition */
@@ -112,19 +112,19 @@ bool lixs::sock_conn::read(char*& buff, int& bytes)
 
             if (ev_read) {
                 ev_read = false;
-                io.set(fd, ev_read, ev_write);
+                io->set(fd, ev_read, ev_write);
             }
         } else {
             /* need to wait */
             if (!ev_read) {
                 ev_read = true;
-                io.set(fd, ev_read, ev_write);
+                io->set(fd, ev_read, ev_write);
             }
         }
     }
 
     if (!alive) {
-        io.rem(fd);
+        io->rem(fd);
         conn_dead();
     }
 
@@ -156,7 +156,7 @@ bool lixs::sock_conn::write(char*& buff, int& bytes)
             /* need to wait */
             if (!ev_write) {
                 ev_write = true;
-                io.set(fd, ev_read, ev_write);
+                io->set(fd, ev_read, ev_write);
             }
         } else {
             /* error condition */
@@ -172,19 +172,19 @@ bool lixs::sock_conn::write(char*& buff, int& bytes)
 
             if (ev_write) {
                 ev_write = false;
-                io.set(fd, ev_read, ev_write);
+                io->set(fd, ev_read, ev_write);
             }
         } else {
             /* need to wait */
             if (!ev_write) {
                 ev_write = true;
-                io.set(fd, ev_read, ev_write);
+                io->set(fd, ev_read, ev_write);
             }
         }
     }
 
     if (!alive) {
-        io.rem(fd);
+        io->rem(fd);
         conn_dead();
     }
 
@@ -199,7 +199,7 @@ void lixs::sock_conn::need_rx(void)
 
     if (!ev_read) {
         ev_read = true;
-        io.set(fd, ev_read, ev_write);
+        io->set(fd, ev_read, ev_write);
     }
 }
 
@@ -211,7 +211,7 @@ void lixs::sock_conn::need_tx(void)
 
     if (!ev_write) {
         ev_write = true;
-        io.set(fd, ev_read, ev_write);
+        io->set(fd, ev_read, ev_write);
     }
 }
 
@@ -234,7 +234,7 @@ void lixs::sock_conn_cb::callback(bool read, bool write, bool error,
     }
 
     if (error) {
-        cb->conn.io.rem(cb->conn.fd);
+        cb->conn.io->rem(cb->conn.fd);
         cb->conn.alive = false;
         cb->conn.conn_dead();
         return;

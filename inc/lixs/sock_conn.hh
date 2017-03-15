@@ -56,7 +56,7 @@ private:
     friend sock_conn_cb;
 
 protected:
-    sock_conn(iomux& io, int fd);
+    sock_conn(const std::shared_ptr<iomux>& io, int fd);
     virtual ~sock_conn();
 
 protected:
@@ -71,7 +71,7 @@ protected:
     virtual void conn_dead(void) = 0;
 
 private:
-    iomux& io;
+    std::shared_ptr<iomux> io;
 
     int fd;
     bool ev_read;

@@ -58,7 +58,7 @@ lixs::sock_client::sock_client(long unsigned int id, std::function<void(void)> d
         const std::shared_ptr<iomux>& io,
         const std::shared_ptr<log::logger>& log,
         int fd)
-    : client(get_id(id), log, 0, xs, dmgr, log, *io, fd), id(id), emgr(emgr), dead_cb(dead_cb)
+    : client(get_id(id), log, 0, xs, dmgr, log, io, fd), id(id), emgr(emgr), dead_cb(dead_cb)
 {
 }
 
