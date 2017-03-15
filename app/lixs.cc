@@ -196,7 +196,7 @@ int main(int argc, char** argv)
     if (conf.unix_sockets) {
         try {
             nix = std::shared_ptr<lixs::unix_sock_server>(
-                    new lixs::unix_sock_server(*xs, *dmgr, *emgr, *epoll, *log,
+                    new lixs::unix_sock_server(xs, dmgr, emgr, epoll, log,
                         conf.unix_socket_path, conf.unix_socket_ro_path));
         } catch (lixs::unix_sock_server_error& e) {
             LOG<level::ERROR>::logf(*log, "Failed to enable unix sockets: %s", e.what());

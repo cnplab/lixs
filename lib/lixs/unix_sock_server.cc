@@ -44,6 +44,7 @@
 
 #include <cstddef>
 #include <functional>
+#include <memory>
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -51,8 +52,12 @@
 #include <unistd.h>
 
 
-lixs::unix_sock_server::unix_sock_server(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr,
-        iomux& io, log::logger& log, const std::string& rw_path, const std::string& ro_path)
+lixs::unix_sock_server::unix_sock_server(const std::shared_ptr<xenstore>& xs,
+        const std::shared_ptr<domain_mgr>& dmgr,
+        const std::shared_ptr<event_mgr>& emgr,
+        const std::shared_ptr<iomux>& io,
+        const std::shared_ptr<log::logger>& log,
+        const std::string& rw_path, const std::string& ro_path)
     : xs(xs), dmgr(dmgr), emgr(emgr), io(io), log(log), rw_path(rw_path), ro_path(ro_path),
     next_id(0)
 {
@@ -71,9 +76,9 @@ lixs::unix_sock_server::unix_sock_server(xenstore& xs, domain_mgr& dmgr, event_m
         goto out_err;
     }
 
-    io.add(rw_fd, true, false, std::bind(&unix_sock_server::callback, this,
+    io->add(rw_fd, true, false, std::bind(&unix_sock_server::callback, this,
                 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, rw_fd));
-    io.add(ro_fd, true, false, std::bind(&unix_sock_server::callback, this,
+    io->add(ro_fd, true, false, std::bind(&unix_sock_server::callback, this,
                 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, ro_fd));
 
     return;
@@ -99,11 +104,11 @@ lixs::unix_sock_server::~unix_sock_server(void)
     }
     clients.clear();
 
-    io.rem(rw_fd);
+    io->rem(rw_fd);
     close(rw_fd);
     unlink(rw_path.c_str());
 
-    io.rem(ro_fd);
+    io->rem(ro_fd);
     close(ro_fd);
     unlink(ro_path.c_str());
 }
@@ -161,28 +166,28 @@ void lixs::unix_sock_server::callback(bool read, bool write, bool error, int fd)
     int client_fd;
 
     if (error) {
-        log::LOG<log::level::WARN>::logf(log,
+        log::LOG<log::level::WARN>::logf(*log,
                 "[unix_socket_server] Got error from iomux");
-        log::LOG<log::level::WARN>::logf(log,
+        log::LOG<log::level::WARN>::logf(*log,
                 "[unix_socket_server] Disabling socket (fd = %d)", fd);
-        io.rem(fd);
+        io->rem(fd);
         return;
     }
 
     client_fd = accept(fd, NULL, NULL);
     if (client_fd == -1) {
-        log::LOG<log::level::ERROR>::logf(log,
+        log::LOG<log::level::ERROR>::logf(*log,
                 "[unix_socket_server] Calling accept on socket failed: %s", std::strerror(errno));
-        log::LOG<log::level::WARN>::logf(log,
+        log::LOG<log::level::WARN>::logf(*log,
                 "[unix_socket_server] Disabling socket (fd = %d)", fd);
-        io.rem(fd);
+        io->rem(fd);
         return;
     }
 
     long unsigned int id = next_id++;
     std::function<void(void)> cb = std::bind(&unix_sock_server::client_dead, this, id);
 
-    sock_client* client = new sock_client(id, cb, xs, dmgr, emgr, io, log, client_fd);
+    sock_client* client = new sock_client(id, cb, *xs, *dmgr, *emgr, *io, *log, client_fd);
 
     clients.insert({id, client});
 }

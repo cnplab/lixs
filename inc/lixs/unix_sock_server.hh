@@ -44,6 +44,7 @@
 #include <lixs/sock_client.hh>
 #include <lixs/xenstore.hh>
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -56,7 +57,11 @@ class unix_sock_server_error : public std::runtime_error {
 
 class unix_sock_server {
 public:
-    unix_sock_server(xenstore& xs, domain_mgr& dmgr, event_mgr& emgr, iomux& io, log::logger& log,
+    unix_sock_server(const std::shared_ptr<xenstore>& xs,
+            const std::shared_ptr<domain_mgr>& dmgr,
+            const std::shared_ptr<event_mgr>& emgr,
+            const std::shared_ptr<iomux>& io,
+            const std::shared_ptr<log::logger>& log,
             const std::string& rw_path, const std::string& ro_path);
     ~unix_sock_server();
 
@@ -71,11 +76,11 @@ private:
     typedef std::map<long unsigned int, sock_client*> client_map;
 
 private:
-    xenstore& xs;
-    domain_mgr& dmgr;
-    event_mgr& emgr;
-    iomux& io;
-    log::logger& log;
+    std::shared_ptr<xenstore> xs;
+    std::shared_ptr<domain_mgr> dmgr;
+    std::shared_ptr<event_mgr> emgr;
+    std::shared_ptr<iomux> io;
+    std::shared_ptr<log::logger> log;
 
     std::string rw_path;
     int rw_fd;
