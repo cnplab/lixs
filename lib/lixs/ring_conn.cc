@@ -48,7 +48,7 @@ extern "C" {
 }
 
 
-lixs::ring_conn_base::ring_conn_base(iomux& io, domid_t domid,
+lixs::ring_conn_base::ring_conn_base(const std::shared_ptr<iomux>& io, domid_t domid,
         evtchn_port_t port, xenstore_domain_interface* interface)
     : io(io), ev_read(false), ev_write(false), alive(true),
     domid(domid), remote_port(port), interface(interface)
@@ -86,7 +86,7 @@ lixs::ring_conn_base::ring_conn_base(iomux& io, domid_t domid,
 
     cb = std::shared_ptr<ring_conn_cb>(new ring_conn_cb(*this));
 
-    io.add(fd, ev_read, ev_write, std::bind(ring_conn_cb::callback,
+    io->add(fd, ev_read, ev_write, std::bind(ring_conn_cb::callback,
                 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
                 std::weak_ptr<ring_conn_cb>(cb)));
 }
@@ -94,7 +94,7 @@ lixs::ring_conn_base::ring_conn_base(iomux& io, domid_t domid,
 lixs::ring_conn_base::~ring_conn_base()
 {
     if (alive) {
-        io.rem(fd);
+        io->rem(fd);
     }
     xc_evtchn_close(xce_handle);
 }
@@ -119,19 +119,19 @@ bool lixs::ring_conn_base::read(char*& buff, int& bytes)
 
     if (bytes > 0 && !ev_read) {
         ev_read = true;
-        io.set(fd, ev_read, ev_write);
+        io->set(fd, ev_read, ev_write);
     }
 
     if (bytes == 0 && ev_read) {
         ev_read = false;
-        io.set(fd, ev_read, ev_write);
+        io->set(fd, ev_read, ev_write);
     }
 
     if (notify) {
         ret = xc_evtchn_notify(xce_handle, local_port);
         if (ret == -1) {
             alive = false;
-            io.rem(fd);
+            io->rem(fd);
             conn_dead();
         }
     }
@@ -159,19 +159,19 @@ bool lixs::ring_conn_base::write(char*& buff, int& bytes)
 
     if (bytes > 0 && !ev_write) {
         ev_write = true;
-        io.set(fd, ev_read, ev_write);
+        io->set(fd, ev_read, ev_write);
     }
 
     if (bytes == 0 && ev_write) {
         ev_write = false;
-        io.set(fd, ev_read, ev_write);
+        io->set(fd, ev_read, ev_write);
     }
 
     if (notify) {
         ret = xc_evtchn_notify(xce_handle, local_port);
         if (ret == -1) {
             alive = false;
-            io.rem(fd);
+            io->rem(fd);
             conn_dead();
         }
     }
@@ -187,7 +187,7 @@ void lixs::ring_conn_base::need_rx(void)
 
     if (!ev_read) {
         ev_read = true;
-        io.set(fd, ev_read, ev_write);
+        io->set(fd, ev_read, ev_write);
     }
 }
 
@@ -199,7 +199,7 @@ void lixs::ring_conn_base::need_tx(void)
 
     if (!ev_write) {
         ev_write = true;
-        io.set(fd, ev_read, ev_write);
+        io->set(fd, ev_read, ev_write);
     }
 }
 
@@ -254,7 +254,7 @@ void lixs::ring_conn_cb::callback(bool read, bool write, bool error,
 
 out_err:
     cb->conn.alive = false;
-    cb->conn.io.rem(cb->conn.fd);
+    cb->conn.io->rem(cb->conn.fd);
     cb->conn.conn_dead();
 }
 

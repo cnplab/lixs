@@ -63,7 +63,7 @@ private:
     friend ring_conn_cb;
 
 protected:
-    ring_conn_base(iomux& io, domid_t domid,
+    ring_conn_base(const std::shared_ptr<iomux>& io, domid_t domid,
             evtchn_port_t port, xenstore_domain_interface* interface);
     virtual ~ring_conn_base();
 
@@ -83,7 +83,7 @@ private:
     bool write_chunk(char*& buff, int& bytes);
 
 private:
-    iomux& io;
+    std::shared_ptr<iomux> io;
 
     int fd;
     bool ev_read;
@@ -117,14 +117,15 @@ template < typename MAPPER >
 class ring_conn : public MAPPER, public ring_conn_base {
 protected:
     template < typename... ARGS >
-    ring_conn(iomux& io, domid_t domid, evtchn_port_t port, ARGS&&... args);
+    ring_conn(const std::shared_ptr<iomux>& io, domid_t domid, evtchn_port_t port, ARGS&&... args);
     virtual ~ring_conn();
 };
 
 
 template < typename MAPPER >
 template < typename... ARGS >
-ring_conn<MAPPER>::ring_conn(iomux& io, domid_t domid, evtchn_port_t port, ARGS&&... args)
+ring_conn<MAPPER>::ring_conn(const std::shared_ptr<iomux>& io,
+        domid_t domid, evtchn_port_t port, ARGS&&... args)
     : MAPPER(domid, std::forward<ARGS>(args)...),
     ring_conn_base(io, domid, port, MAPPER::interface)
 {
