@@ -95,7 +95,7 @@ lixs::xenbus::xenbus(const std::shared_ptr<xenstore>& xs,
         const std::shared_ptr<event_mgr>& emgr,
         const std::shared_ptr<iomux>& io,
         const std::shared_ptr<log::logger>& log)
-    : client("XB", log, 0, *xs, *dmgr, *log, *io, 0, xenbus_evtchn())
+    : client("XB", log, 0, xs, dmgr, log, *io, 0, xenbus_evtchn())
 {
 }
 

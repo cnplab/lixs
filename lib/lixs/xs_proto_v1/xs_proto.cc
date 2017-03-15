@@ -39,6 +39,7 @@
 #include <cstdio>
 #include <cstring>
 #include <limits>
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -46,7 +47,10 @@
 namespace lixs {
 namespace xs_proto_v1 {
 
-xs_proto_base::xs_proto_base(domid_t domid, xenstore& xs, domain_mgr& dmgr, log::logger& log)
+xs_proto_base::xs_proto_base(domid_t domid,
+        const std::shared_ptr<xenstore>& xs,
+        const std::shared_ptr<domain_mgr>& dmgr,
+        const std::shared_ptr<log::logger>& log)
     : domid(domid), dom_path(get_dom_path(domid, xs)),
     rx_msg(dom_path), tx_msg(dom_path), xs(xs), dmgr(dmgr), log(log)
 {
@@ -156,7 +160,7 @@ void xs_proto_base::op_directory(void)
     int ret;
     std::set<std::string> result;
 
-    ret = xs.store_dir(domid, rx_msg.hdr.tx_id, get_path(), result);
+    ret = xs->store_dir(domid, rx_msg.hdr.tx_id, get_path(), result);
 
     if (ret == 0) {
         tx_queue.push_back({XS_DIRECTORY, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
@@ -172,7 +176,7 @@ void xs_proto_base::op_read(void)
     int ret;
     std::string result;
 
-    ret = xs.store_read(domid, rx_msg.hdr.tx_id, get_path(), result);
+    ret = xs->store_read(domid, rx_msg.hdr.tx_id, get_path(), result);
 
     if (ret == 0) {
         tx_queue.push_back({XS_READ, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
@@ -187,7 +191,7 @@ void xs_proto_base::op_write(void)
 {
     int ret;
 
-    ret = xs.store_write(domid, rx_msg.hdr.tx_id, get_path(), get_arg2());
+    ret = xs->store_write(domid, rx_msg.hdr.tx_id, get_path(), get_arg2());
 
     if (ret == 0) {
         tx_queue.push_back({XS_WRITE, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
@@ -202,7 +206,7 @@ void xs_proto_base::op_mkdir(void)
 {
     int ret;
 
-    ret = xs.store_mkdir(domid, rx_msg.hdr.tx_id, get_path());
+    ret = xs->store_mkdir(domid, rx_msg.hdr.tx_id, get_path());
 
     if (ret == 0) {
         tx_queue.push_back({XS_MKDIR, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
@@ -217,7 +221,7 @@ void xs_proto_base::op_rm(void)
 {
     int ret;
 
-    ret = xs.store_rm(domid, rx_msg.hdr.tx_id, get_path());
+    ret = xs->store_rm(domid, rx_msg.hdr.tx_id, get_path());
 
     if (ret == 0) {
         tx_queue.push_back({XS_RM, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
@@ -237,7 +241,7 @@ void xs_proto_base::op_get_perms(void)
     std::string perm_str;
     std::list<std::string> result_str;
 
-    ret = xs.store_get_perms(domid, rx_msg.hdr.tx_id, get_path(), result);
+    ret = xs->store_get_perms(domid, rx_msg.hdr.tx_id, get_path(), result);
 
     if (ret == 0) {
         for (auto& r : result) {
@@ -276,7 +280,7 @@ void xs_proto_base::op_set_perms(void)
         return;
     }
 
-    ret = xs.store_set_perms(domid, rx_msg.hdr.tx_id, path, perms);
+    ret = xs->store_set_perms(domid, rx_msg.hdr.tx_id, path, perms);
 
     if (ret == 0) {
         tx_queue.push_back({XS_SET_PERMS, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
@@ -302,7 +306,7 @@ void xs_proto_base::op_watch(void)
     if (it == watches.end()) {
         it = watches.insert({{path, token}, {*this, path, token, relative}}).first;
 
-        xs.watch_add(it->second);
+        xs->watch_add(it->second);
 
         tx_queue.push_back({XS_WATCH, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
                 {err2str(0)}, false});
@@ -326,7 +330,7 @@ void xs_proto_base::op_unwatch(void)
         tx_queue.push_back({XS_ERROR, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
                 {err2str(ENOENT)}, false});
     } else {
-        xs.watch_del(it->second);
+        xs->watch_del(it->second);
 
         watches.erase(it);
 
@@ -339,7 +343,7 @@ void xs_proto_base::op_transaction_start(void)
 {
     unsigned int tid;
 
-    xs.transaction_start(domid, &tid);
+    xs->transaction_start(domid, &tid);
 
     tx_queue.push_back({XS_TRANSACTION_START, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
             {std::to_string(tid)}, true});
@@ -363,7 +367,7 @@ void xs_proto_base::op_transaction_end(void)
         return;
     }
 
-    ret = xs.transaction_end(domid, rx_msg.hdr.tx_id, commit);
+    ret = xs->transaction_end(domid, rx_msg.hdr.tx_id, commit);
 
     if (ret == 0) {
         tx_queue.push_back({XS_TRANSACTION_END, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
@@ -402,10 +406,10 @@ void xs_proto_base::op_introduce(void)
         return;
     }
 
-    ret = dmgr.create(domid, port, mfn);
+    ret = dmgr->create(domid, port, mfn);
 
     if (ret == 0) {
-        xs.domain_introduce(domid);
+        xs->domain_introduce(domid);
 
         tx_queue.push_back({XS_INTRODUCE, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
                 {err2str(ret)}, false});
@@ -427,10 +431,10 @@ void xs_proto_base::op_release(void)
         return;
     }
 
-    ret = dmgr.destroy(domid);
+    ret = dmgr->destroy(domid);
 
     if (ret == 0) {
-        xs.domain_release(domid);
+        xs->domain_release(domid);
 
         tx_queue.push_back({XS_RELEASE, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
                 {err2str(ret)}, false});
@@ -454,7 +458,7 @@ void xs_proto_base::op_is_domain_introduced(void)
         return;
     }
 
-    dmgr.exists(domid, exists);
+    dmgr->exists(domid, exists);
 
     exists_str = exists ? "T" : "F";
 
@@ -475,7 +479,7 @@ void xs_proto_base::op_get_domain_path(void)
     }
 
     std::string path;
-    xs.domain_path(domid, path);
+    xs->domain_path(domid, path);
 
     tx_queue.push_back({XS_GET_DOMAIN_PATH, rx_msg.hdr.req_id, rx_msg.hdr.tx_id,
             {path}, false});
@@ -718,11 +722,11 @@ bool xs_proto_base::build_body(std::list<std::string> elems, bool terminator)
     return true;
 }
 
-std::string xs_proto_base::get_dom_path(domid_t domid, xenstore& xs)
+std::string xs_proto_base::get_dom_path(domid_t domid, std::shared_ptr<xenstore> xs)
 {
     std::string path;
 
-    xs.domain_path(domid, path);
+    xs->domain_path(domid, path);
 
     return path;
 }
