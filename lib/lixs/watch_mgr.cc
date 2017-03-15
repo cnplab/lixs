@@ -41,7 +41,7 @@
 #include <memory>
 
 
-lixs::watch_mgr::watch_mgr(event_mgr& emgr)
+lixs::watch_mgr::watch_mgr(const std::shared_ptr<event_mgr>& emgr)
     : emgr(emgr)
 {
 }
@@ -56,7 +56,7 @@ void lixs::watch_mgr::add(watch_cb& cb)
 
     register_with_parents(cb.path, cb);
 
-    emgr.enqueue_event(std::bind(&watch_mgr::callback, this, cb.path, &cb, cb.path));
+    emgr->enqueue_event(std::bind(&watch_mgr::callback, this, cb.path, &cb, cb.path));
 }
 
 void lixs::watch_mgr::del(watch_cb& cb)
@@ -100,7 +100,7 @@ void lixs::watch_mgr::fire_children(unsigned int tid, const std::string& path)
 void lixs::watch_mgr::fire_transaction(unsigned int tid)
 {
     for (auto& t : tdb[tid]) {
-        emgr.enqueue_event(t);
+        emgr->enqueue_event(t);
     }
 
     tdb.erase(tid);
@@ -128,7 +128,7 @@ void lixs::watch_mgr::callback(const std::string& key, watch_cb* cb, const std::
 void lixs::watch_mgr::_fire(const std::string& path, const std::string& fire_path)
 {
     for (auto& r : db[path].path) {
-        emgr.enqueue_event(std::bind(&watch_mgr::callback, this, path, r, fire_path));
+        emgr->enqueue_event(std::bind(&watch_mgr::callback, this, path, r, fire_path));
     }
 }
 
@@ -168,7 +168,7 @@ void lixs::watch_mgr::_tfire_parents(unsigned int tid, const std::string& path,
 void lixs::watch_mgr::_fire_children(const std::string& path)
 {
     for (auto& c : db[path].children) {
-        emgr.enqueue_event(std::bind(&watch_mgr::callback, this, path, c, c->path));
+        emgr->enqueue_event(std::bind(&watch_mgr::callback, this, path, c, c->path));
     }
 }
 

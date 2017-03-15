@@ -51,7 +51,7 @@ namespace lixs {
 
 class watch_mgr {
 public:
-    watch_mgr(event_mgr& emgr);
+    watch_mgr(const std::shared_ptr<event_mgr>& emgr);
     ~watch_mgr();
 
     void add(watch_cb& cb);
@@ -89,7 +89,7 @@ private:
     void unregister_from_parents(const std::string& path, watch_cb& cb);
 
 private:
-    event_mgr& emgr;
+    std::shared_ptr<event_mgr> emgr;
 
     database db;
     transaction_database tdb;

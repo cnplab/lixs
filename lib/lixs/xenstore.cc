@@ -45,7 +45,7 @@
 lixs::xenstore::xenstore(const std::shared_ptr<store>& st,
         const std::shared_ptr<event_mgr>& emgr,
         const std::shared_ptr<iomux>& io)
-    : st(st), wmgr(*emgr)
+    : st(st), wmgr(emgr)
 {
     bool created;
 
