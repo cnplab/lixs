@@ -41,6 +41,7 @@
 #include <lixs/permissions.hh>
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 
@@ -114,7 +115,7 @@ typedef std::map<std::string, record> database;
 
 class db_access {
 public:
-    db_access(database& db, log::logger& log)
+    db_access(const std::shared_ptr<database>& db, const std::shared_ptr<log::logger>& log)
         : db(db), log(log)
     { }
 
@@ -129,9 +130,9 @@ public:
     virtual int set_perms(cid_t cid, const std::string& path, const permission_list& perms) = 0;
 
 protected:
-    database& db;
+    std::shared_ptr<database> db;
 
-    log::logger& log;
+    std::shared_ptr<log::logger> log;
 };
 
 

@@ -43,14 +43,16 @@
 #include <string>
 
 
-lixs::mstore::transaction::transaction(unsigned int id, database& db, log::logger& log)
+lixs::mstore::transaction::transaction(unsigned int id,
+        const std::shared_ptr<database>& db,
+        const std::shared_ptr<log::logger>& log)
     : db_access(db, log), id(id)
 {
 }
 
 int lixs::mstore::transaction::create(cid_t cid, const std::string& path, bool& created)
 {
-    record& rec = db[path];
+    record& rec = (*db)[path];
     tentry& te = get_tentry(path, rec);
 
     if (te.write_seq > te.delete_seq) {
@@ -78,7 +80,7 @@ int lixs::mstore::transaction::create(cid_t cid, const std::string& path, bool& 
 
 int lixs::mstore::transaction::read(cid_t cid, const std::string& path, std::string& val)
 {
-    record& rec = db[path];
+    record& rec = (*db)[path];
     tentry& te = get_tentry(path, rec);
 
     if (te.write_seq > te.delete_seq) {
@@ -99,7 +101,7 @@ int lixs::mstore::transaction::read(cid_t cid, const std::string& path, std::str
 
 int lixs::mstore::transaction::update(cid_t cid, const std::string& path, const std::string& val)
 {
-    record& rec = db[path];
+    record& rec = (*db)[path];
     tentry& te = get_tentry(path, rec);
 
     if (te.write_seq > te.delete_seq) {
@@ -134,7 +136,7 @@ int lixs::mstore::transaction::update(cid_t cid, const std::string& path, const 
 
 int lixs::mstore::transaction::del(cid_t cid, const std::string& path)
 {
-    record& rec = db[path];
+    record& rec = (*db)[path];
     tentry& te = get_tentry(path, rec);
 
     if (te.write_seq > te.delete_seq) {
@@ -167,7 +169,7 @@ int lixs::mstore::transaction::del(cid_t cid, const std::string& path)
 
 int lixs::mstore::transaction::get_children(cid_t cid, const std::string& path, std::set<std::string>& resp)
 {
-    record& rec = db[path];
+    record& rec = (*db)[path];
     tentry& te = get_tentry(path, rec);
 
     if (te.write_seq > te.delete_seq) {
@@ -199,7 +201,7 @@ int lixs::mstore::transaction::get_children(cid_t cid, const std::string& path, 
 int lixs::mstore::transaction::get_perms(cid_t cid,
         const std::string& path, permission_list& perms)
 {
-    record& rec = db[path];
+    record& rec = (*db)[path];
     tentry& te = get_tentry(path, rec);
 
     if (te.write_seq > te.delete_seq) {
@@ -221,7 +223,7 @@ int lixs::mstore::transaction::get_perms(cid_t cid,
 int lixs::mstore::transaction::set_perms(cid_t cid,
         const std::string& path, const permission_list& perms)
 {
-    record& rec = db[path];
+    record& rec = (*db)[path];
     tentry& te = get_tentry(path, rec);
 
     if (te.write_seq > te.delete_seq) {
@@ -248,14 +250,14 @@ int lixs::mstore::transaction::set_perms(cid_t cid,
 void lixs::mstore::transaction::abort()
 {
     for (auto& r : records) {
-        record& rec = db[r];
+        record& rec = (*db)[r];
 
         /* Remove transaction information from the entry. */
         rec.te.erase(id);
 
         /* If the entry is invalid and has no more active transactions we clean it from the DB. */
         if ((rec.e.delete_seq > rec.e.write_seq) && rec.te.empty()) {
-            db.erase(r);
+            db->erase(r);
         }
     }
 
@@ -276,14 +278,14 @@ void lixs::mstore::transaction::merge(bool& success)
 
 bool lixs::mstore::transaction::can_merge()
 {
-    log::LOG<log::level::TRACE>::logf(log, "mstore::transaction::can_merge %d", id);
+    log::LOG<log::level::TRACE>::logf(*log, "mstore::transaction::can_merge %d", id);
 
     /* The transaction should only succeed if, for each of the records referenced during the
      * transaction, three conditions are meet:
      */
-    log::LOG<log::level::TRACE>::logf(log, "  RECORDS");
+    log::LOG<log::level::TRACE>::logf(*log, "  RECORDS");
     for (auto& r : records) {
-        record& rec = db[r];
+        record& rec = (*db)[r];
         tentry& te = rec.te[id];
 
         /* 1. A valid entry at initialization time was deleted or an invalid entry at
@@ -291,13 +293,13 @@ bool lixs::mstore::transaction::can_merge()
          */
         if (te.init_valid) {
             if (rec.e.delete_seq > te.init_seq) {
-                log::LOG<log::level::TRACE>::logf(log,
+                log::LOG<log::level::TRACE>::logf(*log,
                         "    '%s' ABORT (rec.e.delete_seq > te.init_seq)", r.c_str());
                 return false;
             }
         } else {
             if (rec.e.write_seq > te.init_seq) {
-                log::LOG<log::level::TRACE>::logf(log,
+                log::LOG<log::level::TRACE>::logf(*log,
                         "    '%s' ABORT (rec.e.write_seq > te.init_seq)", r.c_str());
                 return false;
             }
@@ -307,7 +309,7 @@ bool lixs::mstore::transaction::can_merge()
          * inside the transaction;
          */
         if (te.read_seq && rec.e.write_seq > te.read_seq) {
-            log::LOG<log::level::TRACE>::logf(log,
+            log::LOG<log::level::TRACE>::logf(*log,
                     "    '%s' ABORT (te.read_seq && rec.e.write_seq > te.read_seq)", r.c_str());
             return false;
         }
@@ -316,14 +318,14 @@ bool lixs::mstore::transaction::can_merge()
          * it was read inside the transaction.
          */
         if (te.read_children_seq && rec.e.write_children_seq > te.read_children_seq) {
-            log::LOG<log::level::TRACE>::logf(log,
+            log::LOG<log::level::TRACE>::logf(*log,
                     "    '%s' ABORT "
                     "(te.read_children_seq && rec.e.write_children_seq > te.read_children_seq)",
                     r.c_str());
             return false;
         }
 
-        log::LOG<log::level::TRACE>::logf(log, "    '%s' MERGE", r.c_str());
+        log::LOG<log::level::TRACE>::logf(*log, "    '%s' MERGE", r.c_str());
     }
 
     return true;
@@ -332,7 +334,7 @@ bool lixs::mstore::transaction::can_merge()
 void lixs::mstore::transaction::do_merge()
 {
     for (auto& r : records) {
-        record& rec = db[r];
+        record& rec = (*db)[r];
         tentry& te = rec.te[id];
 
         if (te.write_seq > te.delete_seq) {
@@ -387,7 +389,7 @@ void lixs::mstore::transaction::do_merge()
                 rec.e.write_children_seq = 0;
             } else {
                 /* If the entry is invalid we should remove it from the database. */
-                db.erase(r);
+                db->erase(r);
             }
         }
     }
@@ -403,7 +405,7 @@ void lixs::mstore::transaction::register_with_parent(const std::string& path)
 
     /* The root node can't be registered. */
     if (basename(path, parent, name)) {
-        record& rec = db[parent];
+        record& rec = (*db)[parent];
         tentry& te = get_tentry(parent, rec);
 
         te.children_add.insert(name);
@@ -418,7 +420,7 @@ void lixs::mstore::transaction::unregister_from_parent(const std::string& path)
 
     /* Check whether we're registering the root node, that is not registered anywhere. */
     if (basename(path, parent, name)) {
-        record& rec = db[parent];
+        record& rec = (*db)[parent];
         tentry& te = get_tentry(parent, rec);
 
         te.children_rem.insert(name);
@@ -481,7 +483,7 @@ void lixs::mstore::transaction::get_parent_perms(const std::string& path, permis
          * therefore we can just get the entry without checking for its validity. However we need
          * to make sure to fetch entry data so that we can read its permission list.
          */
-        record& rec = db[parent];
+        record& rec = (*db)[parent];
         tentry& te = get_tentry(parent, rec);
         fetch_tentry_data(te, rec);
 

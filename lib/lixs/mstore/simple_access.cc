@@ -40,11 +40,13 @@
 #include <lixs/mstore/simple_access.hh>
 #include <lixs/util.hh>
 
+#include <memory>
 #include <set>
 #include <string>
 
 
-lixs::mstore::simple_access::simple_access(database& db, log::logger& log)
+lixs::mstore::simple_access::simple_access(const std::shared_ptr<database>& db,
+        const std::shared_ptr<log::logger>& log)
     : db_access(db, log)
 {
 }
@@ -52,7 +54,7 @@ lixs::mstore::simple_access::simple_access(database& db, log::logger& log)
 int lixs::mstore::simple_access::create(cid_t cid, const std::string& path, bool& created)
 {
     /* Here we can use the array operator since the entry either exists or will be created. */
-    record& rec = db[path];
+    record& rec = (*db)[path];
 
     if (rec.e.write_seq > rec.e.delete_seq) {
         created = false;
@@ -82,8 +84,8 @@ int lixs::mstore::simple_access::read(cid_t cid, const std::string& path, std::s
     /* On reading we can't create a new entry, so don't use the array operator. */
     database::iterator it;
 
-    it = db.find(path);
-    if (it == db.end()) {
+    it = db->find(path);
+    if (it == db->end()) {
         return ENOENT;
     }
 
@@ -107,7 +109,7 @@ int lixs::mstore::simple_access::read(cid_t cid, const std::string& path, std::s
 int lixs::mstore::simple_access::update(cid_t cid, const std::string& path, const std::string& val)
 {
     /* Here we can use the array operator since the entry either exists or will be created. */
-    record& rec = db[path];
+    record& rec = (*db)[path];
 
     if (rec.e.write_seq > rec.e.delete_seq) {
         if (!has_write_access(cid, rec.e.perms)) {
@@ -138,8 +140,8 @@ int lixs::mstore::simple_access::del(cid_t cid, const std::string& path)
     /* On deleting we can't create a new entry, so don't use the array operator. */
     database::iterator it;
 
-    it = db.find(path);
-    if (it == db.end()) {
+    it = db->find(path);
+    if (it == db->end()) {
         return ENOENT;
     }
 
@@ -160,7 +162,7 @@ int lixs::mstore::simple_access::del(cid_t cid, const std::string& path)
          * entry, we can remove it from the database. Otherwise just mark as deleted.
          */
         if (rec.te.empty()) {
-            db.erase(it);
+            db->erase(it);
         } else {
             rec.e.delete_seq = rec.next_seq++;
         }
@@ -177,8 +179,8 @@ int lixs::mstore::simple_access::get_children(cid_t cid,
     /* On reading we can't create a new entry, so don't use the array operator. */
     database::iterator it;
 
-    it = db.find(path);
-    if (it == db.end()) {
+    it = db->find(path);
+    if (it == db->end()) {
         return ENOENT;
     }
 
@@ -205,8 +207,8 @@ int lixs::mstore::simple_access::get_perms(cid_t cid,
     /* On reading we can't create a new entry, so don't use the array operator. */
     database::iterator it;
 
-    it = db.find(path);
-    if (it == db.end()) {
+    it = db->find(path);
+    if (it == db->end()) {
         return ENOENT;
     }
 
@@ -233,8 +235,8 @@ int lixs::mstore::simple_access::set_perms(cid_t cid,
     /* On setting permissions we can't create a new entry, so don't use the array operator. */
     database::iterator it;
 
-    it = db.find(path);
-    if (it == db.end()) {
+    it = db->find(path);
+    if (it == db->end()) {
         return ENOENT;
     }
 
@@ -268,7 +270,7 @@ void lixs::mstore::simple_access::register_with_parent(const std::string& path)
         /* This method should only be called after ensuring the parent branch exists and is valid,
          * therefore we can just get the entry without checking for its validity.
          */
-        record& rec = db[parent];
+        record& rec = (*db)[parent];
 
         rec.e.children.insert(name);
 
@@ -286,7 +288,7 @@ void lixs::mstore::simple_access::unregister_from_parent(const std::string& path
         /* This method should only be called after ensuring the parent branch exists and is valid,
          * therefore we can just get the entry without checking for its validity.
          */
-        record& rec = db[parent];
+        record& rec = (*db)[parent];
 
         rec.e.children.erase(name);
 
@@ -332,7 +334,7 @@ void lixs::mstore::simple_access::get_parent_perms(const std::string& path, perm
         /* This method should only be called after ensuring the parent branch exists and is valid,
          * therefore we can just get the entry without checking for its validity.
          */
-        perms = db[parent].e.perms;
+        perms = (*db)[parent].e.perms;
     } else {
         /* Getting permissions for the root node yield the default of n0 */
         perms.clear();

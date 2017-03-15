@@ -44,6 +44,7 @@
 #include <lixs/mstore/transaction.hh>
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 
@@ -53,7 +54,7 @@ namespace mstore {
 
 class store : public lixs::store {
 public:
-    store(log::logger& log);
+    store(const std::shared_ptr<log::logger>& log);
     ~store();
 
     void branch(unsigned int& tid);
@@ -81,14 +82,14 @@ private:
     typedef std::map<unsigned int, transaction> transaction_db;
 
 
-    database db;
+    std::shared_ptr<database> db;
 
     simple_access access;
 
     unsigned int next_tid;
     transaction_db trans;
 
-    log::logger& log;
+    std::shared_ptr<log::logger> log;
 };
 
 } /* namespace mstore */

@@ -40,6 +40,7 @@
 #include <lixs/log/logger.hh>
 #include <lixs/mstore/database.hh>
 
+#include <memory>
 #include <set>
 #include <string>
 
@@ -49,7 +50,9 @@ namespace mstore {
 
 class transaction : public db_access {
 public:
-    transaction(unsigned int id, database& db, log::logger& log);
+    transaction(unsigned int id,
+            const std::shared_ptr<database>& db,
+            const std::shared_ptr<log::logger>& log);
 
     void abort();
     void merge(bool& success);

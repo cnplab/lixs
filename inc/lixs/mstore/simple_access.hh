@@ -40,6 +40,7 @@
 #include <lixs/log/logger.hh>
 #include <lixs/mstore/database.hh>
 
+#include <memory>
 #include <set>
 #include <string>
 
@@ -49,7 +50,7 @@ namespace mstore {
 
 class simple_access : public db_access {
 public:
-    simple_access(database& db, log::logger& log);
+    simple_access(const std::shared_ptr<database>& db, const std::shared_ptr<log::logger>& log);
 
     int create(cid_t cid, const std::string& path, bool& created);
     int read(cid_t cid, const std::string& path, std::string& val);

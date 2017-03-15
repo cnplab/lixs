@@ -36,9 +36,11 @@
 
 #include <lixs/mstore/store.hh>
 
+#include <memory>
 
-lixs::mstore::store::store(log::logger& log)
-    : access(db, log), next_tid(1), log(log)
+
+lixs::mstore::store::store(const std::shared_ptr<log::logger>& log)
+    : db(new database()), access(db, log), next_tid(1), log(log)
 {
 }
 
