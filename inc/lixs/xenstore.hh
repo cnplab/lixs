@@ -38,7 +38,6 @@
 #define __LIXS_XENSTORE_HH__
 
 #include <lixs/event_mgr.hh>
-#include <lixs/iomux.hh>
 #include <lixs/permissions.hh>
 #include <lixs/store.hh>
 #include <lixs/watch_mgr.hh>
@@ -58,8 +57,7 @@ namespace lixs {
 class xenstore {
 public:
     xenstore(const std::shared_ptr<store>& st,
-            const std::shared_ptr<event_mgr>& emgr,
-            const std::shared_ptr<iomux>& io);
+            const std::shared_ptr<event_mgr>& emgr);
     ~xenstore();
 
     int store_read(cid_t cid, unsigned int tid,

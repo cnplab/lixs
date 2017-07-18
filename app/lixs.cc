@@ -189,7 +189,7 @@ int main(int argc, char** argv)
     emgr = std::shared_ptr<lixs::event_mgr>(new lixs::event_mgr());
     epoll = std::shared_ptr<lixs::os_linux::epoll>(new lixs::os_linux::epoll(emgr));
     store = std::shared_ptr<lixs::mstore::store>(new lixs::mstore::store(log));
-    xs = std::shared_ptr<lixs::xenstore>(new lixs::xenstore(store, emgr, epoll));
+    xs = std::shared_ptr<lixs::xenstore>(new lixs::xenstore(store, emgr));
 
     dmgr = std::shared_ptr<lixs::domain_mgr>(new lixs::domain_mgr(xs, emgr, epoll, log));
 
