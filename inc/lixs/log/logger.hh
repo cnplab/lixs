@@ -142,63 +142,70 @@ template < level LEVEL >
 class LOG {
 public:
     template < typename... ARGS >
-    static void logf(logger& log, const std::string& format, ARGS&&... args);
+    static void logf(logger& log, const std::string& format, ARGS&&... args) {
+        /* Empty implementation for disabled levels.
+         *
+         * LOGGER_MAX_LEVEL will hide the implementation for levels above its
+         * definition, in which case this implementation will be used and
+         * hopefully the compiler will optimize out this empty method.
+         */
+    }
 };
 
+#if LOGGER_MAX_LEVEL >= LOGGER_MAX_LEVEL_ERROR
 template < >
 class LOG<level::ERROR> {
 public:
     template < typename... ARGS >
     static inline void logf(logger& log, const std::string& format, ARGS&&... args) {
-#if LOGGER_MAX_LEVEL >= LOGGER_MAX_LEVEL_ERROR
         log.logf(level::ERROR, format, std::forward<ARGS>(args)...);
-#endif
     }
 };
+#endif
 
+#if LOGGER_MAX_LEVEL >= LOGGER_MAX_LEVEL_WARN
 template < >
 class LOG<level::WARN> {
 public:
     template < typename... ARGS >
     static inline void logf(logger& log, const std::string& format, ARGS&&... args) {
-#if LOGGER_MAX_LEVEL >= LOGGER_MAX_LEVEL_WARN
         log.logf(level::WARN, format, std::forward<ARGS>(args)...);
-#endif
     }
 };
+#endif
 
+#if LOGGER_MAX_LEVEL >= LOGGER_MAX_LEVEL_INFO
 template < >
 class LOG<level::INFO> {
 public:
     template < typename... ARGS >
     static inline void logf(logger& log, const std::string& format, ARGS&&... args) {
-#if LOGGER_MAX_LEVEL >= LOGGER_MAX_LEVEL_INFO
         log.logf(level::INFO, format, std::forward<ARGS>(args)...);
-#endif
     }
 };
+#endif
 
+#if LOGGER_MAX_LEVEL >= LOGGER_MAX_LEVEL_DEBUG
 template < >
 class LOG<level::DEBUG> {
 public:
     template < typename... ARGS >
     static inline void logf(logger& log, const std::string& format, ARGS&&... args) {
-#if LOGGER_MAX_LEVEL >= LOGGER_MAX_LEVEL_DEBUG
         log.logf(level::DEBUG, format, std::forward<ARGS>(args)...);
-#endif
     }
 };
+#endif
 
+#if LOGGER_MAX_LEVEL >= LOGGER_MAX_LEVEL_TRACE
 template < >
 class LOG<level::TRACE> {
 public:
     template < typename... ARGS >
     static inline void logf(logger& log, const std::string& format, ARGS&&... args) {
-#if LOGGER_MAX_LEVEL >= LOGGER_MAX_LEVEL_TRACE
         log.logf(level::TRACE, format, std::forward<ARGS>(args)...);
-#endif
     }
 };
+#endif
 
 } /* namespace log */
 } /* namespace lixs */
