@@ -44,8 +44,8 @@
 
 #include <cerrno>
 #include <memory>
-#include <string>
 #include <set>
+#include <string>
 
 extern "C" {
 #include <xenctrl.h>
